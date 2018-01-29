@@ -1,0 +1,64 @@
+{
+  "name": "nova",
+  "version": "0.88.0",
+  "description": "JavaScript 3D library",
+  "main": "build/nova.js",
+  "repository": "mrdoob/nova.js",
+  "jsnext:main": "build/nova.module.js",
+  "module": "build/nova.module.js",
+  "files": [
+    "package.json",
+    "bower.json",
+    "LICENSE",
+    "README.md",
+    "build/nova.js",
+    "build/nova.min.js",
+    "build/nova.module.js",
+    "src",
+    "examples/js",
+    "examples/fonts"
+  ],
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "eslintConfig": {
+    "extends": "google"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "build-uglify": "rollup -c && uglifyjs build/three.js -cm --preamble \"// threejs.org/license\" > build/three.min.js",
+    "dev": "concurrently --names \"ROLLUP,HTTP\" -c \"bgBlue.bold,bgGreen.bold\" \"rollup -c -w -m inline\" \"serve --port 8080\"",
+    "start": "npm run dev",
+    "lint": "eslint src"
+  },
+  "keywords": [
+    "three",
+    "three.js",
+    "3d",
+    "webgl"
+  ],
+  "author": "HypnosNova",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/hammerjs": "^2.0.35",
+    "concurrently": "^3.5.0",
+    "electron": "1.7.8",
+    "eslint": "^4.14.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-config-mdcs": "^4.2.2",
+    "google-closure-compiler": "^20170521.0.0",
+    "hammer": "^0.0.5",
+    "hammerjs": "^2.0.8",
+    "lodash": "^4.17.4",
+    "qunitjs": "^2.4.0",
+    "rollup": "^0.51.0",
+    "rollup-watch": "^4.0.0",
+    "serve": "^6.3.1",
+    "uglify-js": "^3.0.23"
+  },
+  "dependencies": {
+    "hammerjs": "^2.0.8"
+  }
+}

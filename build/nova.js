@@ -1,0 +1,641 @@
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.NOVA = {})));
+}(this, (function (exports) { 'use strict';
+
+	let NotFunctionError$1 = class extends Error {
+	  constructor( message ) {
+	    super( message );
+	    this.name = 'NotFunctionError';
+	    this.message = message || 'The object is not a function.';
+	  }
+	};
+
+	class LoopManager {
+	  constructor(cycleLevel = 1) {
+	    //记录循环次数
+	    this.times = 0;
+	    //每隔多少循环执行一次update，用于调整fps。数字越大，fps越低
+	    this.cycleLevel = cycleLevel <= 0 ? 1 : cycleLevel;
+	    this.functionMap = new Map();
+	  }
+
+	  update(time) {
+	    if (this.times % this.cycleLevel !== 0) {
+	      return;
+	    }
+	    this.functionMap.forEach((value) => {
+	      value();
+	    });
+	  }
+
+	  add(func, key) {
+	    if (typeof func !== 'function') {
+	      throw new NotFunctionError$1();
+	    } else {
+	      if (key) {
+	        this.functionMap.set(key, func);
+	      } else {
+	        key = Symbol();
+	        this.functionMap.set(key, func);
+	        return key;
+	      }
+	    }
+	  }
+
+	  remove(funcOrKey) {
+	    if (typeof funcOrKey === 'function') {
+	      this.functionMap.forEach((value, key) => {
+	        if (value === funcOrKey) {
+	          return this.functionMap.delete(key);
+	        }
+	      });
+	      return false;
+	    } else {
+	      return this.functionMap.delete(funcOrKey);
+	    }
+	  }
+	}
+
+	class EventManager {
+	  constructor(world) {
+	    try {
+	    	if(Hammer===undefined){
+	    		return;
+	    	}
+	    } catch (e) {
+	      console.warn('Hammer没有引入导致鼠标或触屏事件功能无法使用。Nova的事件引擎依赖Hammer。');
+	      return;
+	    }
+	    
+	    world.eventManager = this;
+	    this.world = world;
+	    this.isDeep = true;
+	    this.receivers = world.receivers;
+	    this.raycaster = new THREE.Raycaster();
+	    this.centerRaycaster = new THREE.Raycaster();
+	    this.selectedObj = null;
+	    this.centerSelectedObj = null;
+	    this.isDetectingEnter = true;
+	    this.hammer = new Hammer(world.app.renderer.domElement);
+	    this.hammer.on('pan press tap pressup', (event) => {
+	      this.raycastCheck(event);
+	    });
+	  }
+
+	  raycastCheck(event) {
+	    let vec2 = new THREE.Vector2(event.center.x / this.world.app.getWorldWidth() *
+	      2 - 1, event.center.y / this.world.app.getWorldHeight() * 2 - 1);
+	    this.raycaster.setFromCamera(vec2, this.world.camera);
+	    let intersects = this.raycaster.intersectObjects(this.world.receivers,
+	      this.isDeep);
+
+	    let intersect;
+	    for (let i = 0; i < intersects.length; i++) {
+	      if (intersects[i].object.isPenetrated) {
+	        continue;
+	      } else {
+	        intersect = intersects[i];
+	        break;
+	      }
+	    }
+	    if (intersect) {
+	      intersect.object.events[event.type].run(event, intersect);
+	    }
+
+	  }
+	}
+
+	class World {
+	  constructor(app, camera, clearColor) {
+	    this.app = app;
+	    this.scene = new THREE.Scene();
+	    this.logicLoop = new LoopManager();
+	    this.renderLoop = new LoopManager();
+	    this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
+	      app.getWorldHeight(), 0.01, 1000);
+	    this.receivers = this.scene.children;
+	    this.eventManager = new EventManager(this);
+	    this.renderTargetParameters = {
+	      minFilter: THREE.LinearFilter,
+	      magFilter: THREE.LinearFilter,
+	      format: THREE.RGBFormat,
+	      stencilBuffer: false
+	    };
+	    this.isRTT = false;
+	    this.clearColor = clearColor || 0;
+	    this.fbo = new THREE.WebGLRenderTarget(this.app.getWorldWidth(),
+	      this.app.getWorldHeight(), this.renderTargetParameters);
+	  }
+
+	  update(time) {
+	    this.logicLoop.update(time);
+	    this.renderLoop.update(time);
+	  }
+
+	  resize(width, height) {
+	    if (this.camera.type === 'PerspectiveCamera') {
+	      this.camera.aspect = width / height;
+	      this.camera.updateProjectionMatrix();
+	    } else {
+	      this.camera.left = -width / 2;
+	      this.camera.right = width / 2;
+	      this.camera.top = height / 2;
+	      this.camera.bottom = -height / 2;
+	      this.camera.updateProjectionMatrix();
+	    }
+	  }
+	}
+
+	const APP_STOP = 0;
+	const APP_RUNNING = 1;
+	const APP_PAUSE = 2;
+	const VERSION = '0.0.1';
+
+	console.log("Nova framework for Three.js, version: %c " + VERSION, "color:blue");
+
+	class VR {
+	  constructor(app) {
+	    this.app = app;
+	    this.display = undefined;
+	    this.polyfill = undefined;
+	    this.isOpenVR = false;
+	    this.vrEffect = undefined;
+	    this.getVRDisplay();
+	    this.createVREffect();
+	  }
+
+	  createVREffect() {
+	    if (this.vrEffect) {
+	      return;
+	    }
+	    if (!THREE.VREffect) {
+	      console.warn("未引入VREffect.js，无法创建VR模式。");
+	      return;
+	    }
+	    this.vrEffect = new THREE.VREffect(this.app.renderer);
+	    this.vrEffect.setSize(this.app.renderer.domElement.clientWidth,
+	      this.app.renderer.domElement.clientHeight, false);
+	    this.vrEffect.isOpened = false;
+	    this.vrEffect.updateId = Symbol();
+	  }
+
+	  setPolyfill() {
+	    if (this.polyfill) {
+	      return;
+	    }
+	    if (!WebVRPolyfill) {
+	      console.warn("未引入WebVRPolyfill.js，无法创建VR兼容模式。");
+	      return;
+	    }
+	    let config = (function() {
+	      let config = {};
+	      let q = window.location.search.substring(1);
+	      if (q === '') {
+	        return config;
+	      }
+	      let params = q.split('&');
+	      let param, name, value;
+	      for (let i = 0; i < params.length; i++) {
+	        param = params[i].split('=');
+	        name = param[0];
+	        value = param[1];
+
+	        // All config values are either boolean or float
+	        config[name] = value === 'true' ? true :
+	          value === 'false' ? false :
+	          parseFloat(value);
+	      }
+	      return config;
+	    })();
+	    this.polyfill = new WebVRPolyfill(config);
+	  }
+
+	  getVRDisplay() {
+	    if (!navigator.getVRDisplays) {
+	      this.setPolyfill();
+	    }
+	    return navigator.getVRDisplays()
+	      .then((vrDisplays) => {
+	        if (vrDisplays.length) {
+	          this.display = vrDisplays[0];
+	          return this.display;
+	        }
+	        return "no";
+	      }, (vrDisplays) => {
+	        return "no";
+	      });
+	  }
+
+	  open() {
+	    if (!this.display || !this.vrEffect) {
+	      console.warn("未发现VR设备或浏览器不兼容，无法进入VR模式。");
+	      return;
+	    }
+	    this.app.renderLoop.add(() => {
+	      this.vrEffect.render(this.app.world.scene, this.app.world.camera);
+	    }, this.vrEffect.updateId);
+	    this.display.requestPresent([{ source: this.app.renderer.domElement }]);
+	  }
+
+	  close() {
+	    this.app.renderLoop.remove(this.vrEffect.updateId);
+	  }
+	}
+
+	class EffectFactory {
+	  constructor(app) {
+	    this.app = app;
+	    this.canvas = this.app.renderer.domElement;
+	    this.vrEffect;
+	  }
+
+	  openVREffect() {
+	    if (!this.vrEffect) {
+	      this.vrEffect = new THREE.VREffect(this.app.renderer);
+	      this.vrEffect.setSize(this.canvas.clientWidth, this.canvas.clientHeight,
+	        false);
+	      this.vrEffect.isOpened = false;
+	      this.vrEffect.updateId = Symbol();
+	    }
+	    if (this.vrEffect.isOpened) {
+	      return;
+	    }
+	    this.vrEffect.isOpened = true;
+	    this.app.renderLoop.add(() => {
+	      this.vrEffect.render(this.app.world.scene, this.app.world.camera);
+	    }, this.vrEffect.updateId);
+	  }
+	}
+
+	class App {
+	  constructor(parent, options = {}) {
+	    this.options = _.defaults(options, {
+	      setCommonCSS: true,
+	      autoStart: true
+	    });
+	    if (this.options.setCommonCSS) {
+	      this.setCommonCSS();
+	    }
+	    this.parent = parent || document.body;
+	    this.renderer = new THREE.WebGLRenderer();
+	    this.world = new World(this);
+	    this.animationFrame;
+	    this.state = APP_STOP;
+	    this.logicLoop = new LoopManager();
+	    this.renderLoop = new LoopManager();
+	    this.update = (time) => {
+	      if (this.state === APP_RUNNING) {
+	        this.logicLoop.update(time);
+	        this.world.update(time);
+	        this.renderLoop.update(time);
+	      }
+	      this.animationFrame = requestAnimationFrame(this.update);
+	    };
+	    this.renderLoop.add(() => {
+	      this.renderer.render(this.world.scene, this.world.camera);
+	    });
+
+	    this.resize = () => {
+	      let width = this.getWorldWidth();
+	      let height = this.getWorldHeight();
+
+	      this.world.resize(width, height);
+
+	      this.renderer.setSize(width, height);
+	      this.renderer.setPixelRatio(1);
+	    };
+	    window.addEventListener('resize', this.resize);
+	    if (this.options.autoStart) {
+	      this.start();
+	    }
+	    this.effectFactory = new EffectFactory(this);
+	    this.VR = new VR(this);
+	  }
+
+	  setCommonCSS() {
+	    document.write(
+	      '<style>*{margin:0;padding:0} body{overflow:hidden}</style>');
+	  }
+
+	  getWorldWidth() {
+	    return this.parent === document.body ? window.innerWidth :
+	      this.parent.offsetWidth;
+	  }
+
+	  getWorldHeight() {
+	    return this.parent === document.body ? window.innerHeight :
+	      this.parent.offsetHeight;
+	  }
+
+	  start() {
+	    if (this.state === APP_STOP) {
+	      this.state = APP_RUNNING;
+	      this.parent.appendChild(this.renderer.domElement);
+	      this.resize();
+	      this.update();
+	    }
+	  }
+
+	  resume() {
+	    if (this.state === APP_PAUSE) {
+	      this.state = APP_RUNNING;
+	    }
+	  }
+
+	  pause() {
+	    if (this.state === APP_RUNNING) {
+	      this.state = APP_PAUSE;
+	    }
+	  }
+
+	  destroy() {
+	    this.world.destroy();
+	  }
+
+	  openFullScreen() {
+	    let container = this.parent;
+	    this.isFullScreen = true;
+	    if (container.requestFullscreen) {
+	      container.requestFullscreen();
+	    } else if (container.msRequestFullscreen) {
+	      container.msRequestFullscreen();
+	    } else if (container.mozRequestFullScreen) {
+	      container.mozRequestFullScreen();
+	    } else if (container.webkitRequestFullscreen) {
+	      container.webkitRequestFullscreen();
+	    } else {
+	      this.isFullScreen = false;
+	    }
+	    return this.isFullScreen;
+	  }
+
+	  closeFullScreen() {
+	    let container = this.parent;
+	    this.isFullScreen = false;
+	    if (container.exitFullscreen) {
+	      container.exitFullscreen();
+	    } else if (container.mozCancelFullScreen) {
+	      container.mozCancelFullScreen();
+	    } else if (container.webkitExitFullScreen) {
+	      container.webkitExitFullScreen();
+	    } else if (container.msExitFullscreen) {
+	      container.msExitFullscreen();
+	    } else if (container.webkitCancelFullScreen) {
+	      container.webkitCancelFullScreen();
+	    }
+	    if (container.webkitExitFullScreen) {
+	      container.webkitCancelFullScreen();
+	    }
+	    return this.isFullScreen;
+	  }
+
+	  toggleFullScreen() {
+	    if (this.isFullScreen) {
+	      this.closeFullScreen();
+	    } else {
+	      this.openFullScreen();
+	    }
+	  }
+	}
+
+	class Transitioner {
+	  constructor(app, world, texture, options = {}) {
+	    this.options = _.defaults(options, {
+	      'useTexture': true,
+	      'transition': 0,
+	      'speed': 10,
+	      'texture': 5,
+	      'loopTexture': true,
+	      'isAnimate': true,
+	      'threshold': 0.3
+	    });
+	    this.app = app;
+	    this.targetWorld = world;
+	    this.maskTexture = texture;
+	    this.material = new THREE.ShaderMaterial({
+	      uniforms: {
+	        tDiffuse1: {
+	          value: null
+	        },
+	        tDiffuse2: {
+	          value: null
+	        },
+	        mixRatio: {
+	          value: 0.0
+	        },
+	        threshold: {
+	          value: 0.1
+	        },
+	        useTexture: {
+	          value: 1
+	        },
+	        tMixTexture: {
+	          value: this.maskTexture
+	        }
+	      },
+	      vertexShader: `varying vec2 vUv;
+        void main() {
+        vUv = vec2( uv.x, uv.y );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }`,
+	      fragmentShader: `uniform float mixRatio;
+        uniform sampler2D tDiffuse1;
+        uniform sampler2D tDiffuse2;
+        uniform sampler2D tMixTexture;
+        uniform int useTexture;
+        uniform float threshold;
+        varying vec2 vUv;
+        
+        void main() {
+
+        vec4 texel1 = texture2D( tDiffuse1, vUv );
+        vec4 texel2 = texture2D( tDiffuse2, vUv );
+
+        if (useTexture==1) {
+
+        vec4 transitionTexel = texture2D( tMixTexture, vUv );
+        float r = mixRatio * (1.0 + threshold * 2.0) - threshold;
+        float mixf=clamp((transitionTexel.r - r)*(1.0/threshold), 0.0, 1.0);
+
+        gl_FragColor = mix( texel1, texel2, mixf );
+        } else {
+
+        gl_FragColor = mix( texel2, texel1, mixRatio );
+
+        }
+        }`
+	    });
+	    let halfWidth = app.getWorldWidth() / 2;
+	    let halfHeight = app.getWorldHeight() / 2;
+	    this.world = new World(app, new THREE.OrthographicCamera(-halfWidth,
+	      halfWidth, halfHeight, -halfHeight, -10, 10));
+
+	    let geometry = new THREE.PlaneBufferGeometry(halfWidth * 2,
+	      halfHeight * 2);
+
+	    let quad = new THREE.Mesh(geometry, this.material);
+	    this.world.scene.add(quad);
+
+	    this.sceneA = world;
+	    this.sceneB = app.world;
+
+	    this.material.uniforms.tDiffuse1.value = this.sceneA.fbo.texture;
+	    this.material.uniforms.tDiffuse2.value = this.sceneB.fbo.texture;
+
+	    this.needChange = false;
+	  }
+
+	  setThreshold(value) {
+	    this.material.uniforms.threshold.value = value;
+	  }
+
+	  useTexture(value) {
+	    this.material.uniforms.useTexture.value = value ? 1 : 0;
+	  }
+
+	  setTexture(i) {
+	    this.material.uniforms.tMixTexture.value = this.texture;
+	  }
+
+	  update() {
+	    let value = Math.min(this.options.transition, 1);
+	    value = Math.max(value, 0);
+	    this.material.uniforms.mixRatio.value = value;
+	    this.app.renderer.setClearColor(this.sceneB.clearColor || 0);
+	    this.sceneB.update();
+	    this.app.renderer.render(this.sceneB.scene, this.sceneB.camera, this.sceneB
+	      .fbo, true);
+	    this.app.renderer.setClearColor(this.sceneA.clearColor || 0);
+	    this.sceneA.update();
+	    this.app.renderer.render(this.sceneA.scene, this.sceneA.camera, this.sceneA
+	      .fbo, true);
+	    this.app.renderer.render(this.world.scene, this.world.camera, null, true);
+	  }
+	}
+
+	/**
+	 * 用于事件处理
+	 * 
+	 * */
+	class Signal {
+	  constructor(type) {
+	    this.type = type;
+	    this.functionArr = [];
+	  }
+
+	  add(func) {
+	    if (typeof func !== 'function') {
+	      throw new NotFunctionError();
+	    } else {
+	      this.functionArr.push(func);
+	    }
+	  }
+
+	  remove(func) {
+	    return _.remove(this.functionArr, function(n) {
+	      return n === func;
+	    });
+	  }
+
+	  run(event, intersect) {
+	    this.functionArr.forEach(
+	      (func) => {
+	        func(event, intersect);
+	      });
+	  }
+	}
+
+	/**
+	 * 由于事件处理
+	 * 
+	 * */
+	class Events {
+	  constructor() {
+	    this.press = new Signal('press');
+	    this.pressup = new Signal('pressup');
+	    this.tap = new Signal('tap');
+	    this.enter = new Signal('enter');
+	    this.leave = new Signal('leave');
+	    this.pan = new Signal('pan');
+	    this.panleft = new Signal('panleft');
+	    this.panright = new Signal('panright');
+	    this.panstart = new Signal('panstart');
+	    this.pandown = new Signal('pandown');
+	    this.panup = new Signal('panup');
+	  }
+	}
+
+	THREE.Mesh.prototype.events = new Events();
+
+	let _extends = ( des, src, over ) => {
+	  let res = _extend( des, src, over );
+
+	  function _extend( des, src, over ) {
+	    let override = true;
+	    if( over === false ) {
+	      override = false;
+	    }
+	    if( src instanceof Array ) {
+	      for( let i = 0, len = src.length; i < len; i++ )
+	        _extend( des, src[ i ], override );
+	    }
+	    for( let i in src ) {
+	      if( override || !( i in des ) ) {
+	        des[ i ] = src[ i ];
+	      }
+	    }
+	    return des;
+	  }
+	  for( let i in src ) {
+	    delete res[ i ];
+	  }
+	  return res;
+	};
+
+	let rndInt = ( max ) => {
+	  return Math.floor( Math.random() * max );
+	};
+
+	let rndString = ( len ) => {
+	  if( len <= 0 ) {
+	    return '';
+	  }
+	  len = len - 1 || 31;
+	  let $chars =
+	    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	  let maxPos = $chars.length + 1;
+	  let pwd = $chars.charAt( Math.floor( Math.random() * ( maxPos - 10 ) ) );
+	  for( let i = 0; i < len; i++ ) {
+	    pwd += $chars.charAt( Math.floor( Math.random() * maxPos ) );
+	  }
+	  return pwd;
+	};
+
+	let Util = {
+	  extend: _extends,
+	  rndInt,
+	  rndString
+	};
+
+	/* eslint-disable */
+
+	//export * from './thirdparty/three.module.js';
+
+	exports.World = World;
+	exports.App = App;
+	exports.LoopManager = LoopManager;
+	exports.Transitioner = Transitioner;
+	exports.VR = VR;
+	exports.EffectFactory = EffectFactory;
+	exports.NotFunctionError = NotFunctionError$1;
+	exports.EventManager = EventManager;
+	exports.Events = Events;
+	exports.Signal = Signal;
+	exports.Util = Util;
+
+	Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+//# sourceMappingURL=nova.js.map

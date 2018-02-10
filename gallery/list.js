@@ -1,14 +1,14 @@
 var list = {
   "beginner": {
     "tutorial": [
-      ["空的框架", "framework/emptyFramework"],
-      ["添加立方体", "framework/002在指定的div里渲染"],
+      ["empty", "framework/emptyFramework"],
+      ["add cube", "framework/002在指定的div里渲染"],
     ]
   },
   "about framework": {
     "app": [
-      ["空的框架", "framework/emptyFramework"],
-      ["添加立方体", "framework/addABox"],
+      ["empty", "framework/emptyFramework"],
+      ["add cube", "framework/addABox"],
     ],
     "events": [
       ["万圣节效果的时间特效", "shader/clock"],

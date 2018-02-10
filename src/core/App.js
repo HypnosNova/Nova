@@ -28,9 +28,6 @@ class App {
       }
       this.animationFrame = requestAnimationFrame(this.update);
     };
-    this.renderLoop.add(() => {
-      this.renderer.render(this.world.scene, this.world.camera);
-    });
 
     this.resize = () => {
       let width = this.getWorldWidth();

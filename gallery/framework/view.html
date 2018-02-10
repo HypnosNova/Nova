@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+	</head>
+
+	<body>
+		<script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+		<script src="../../build/three.min.js"></script>
+		<script src="../../build/nova.js"></script>
+		<script>
+			var app = new NOVA.App();
+
+			var scene = app.world.scene;
+			var camera = app.world.camera;
+			camera.position.z = 2;
+			app.world.renderLoop.disable = true;
+
+			geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+			material = new THREE.MeshNormalMaterial();
+			mesh = new THREE.Mesh(geometry, material);
+			scene.add(mesh);
+
+			app.logicLoop.add(function() {
+				mesh.rotation.x += 0.01;
+				mesh.rotation.y += 0.02;
+			});
+
+			let view = new NOVA.View(app.world, undefined, {
+				left: 0,
+				top: 0,
+				width: 0.5,
+				height: 1.0,
+				clearColor: new THREE.Color(0.5, 0.5, 0.7),
+			});
+			view.camera.position.set(0, 0, 1);
+			view.camera.lookAt(mesh.position);
+			app.renderLoop.add(() => {
+				view.render();
+			});
+			
+			let view2 = new NOVA.View(app.world, undefined, {
+				left: 0.5,
+				top: 0,
+				width: 0.5,
+				height: 0.5,
+				clearColor: new THREE.Color(0, 0.5, 0.7),
+			});
+			view2.camera.position.set(0, 1, 1);
+			view2.camera.lookAt(mesh.position);
+			app.renderLoop.add(() => {
+				view2.render();
+			});
+			
+			let view3 = new NOVA.View(app.world, undefined, {
+				left: 0.5,
+				top: 0.5,
+				width: 0.25,
+				height: 0.5,
+				clearColor: new THREE.Color(0.8, 0.5, 0),
+			});
+			view3.camera.position.set(1, 1, 1);
+			view3.camera.lookAt(mesh.position);
+			app.renderLoop.add(() => {
+				view3.render();
+			});
+			
+			let view4 = new NOVA.View(app.world, undefined, {
+				left: 0.75,
+				top: 0.5,
+				width: 0.25,
+				height: 0.5,
+				clearColor: new THREE.Color(0.5, 0.9, 0.7),
+			});
+			view4.camera.position.set(1, 1, 0);
+			view4.camera.lookAt(mesh.position);
+			app.renderLoop.add(() => {
+				view4.render();
+			});
+		</script>
+	</body>
+
+</html>

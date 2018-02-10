@@ -1,9 +1,11 @@
 /* eslint-disable */
-export { World } from './core/World.js';
 export { App } from './core/App.js';
 export { LoopManager } from './core/LoopManager.js';
+export { Monitor } from './core/Monitor.js';
 export { Transitioner } from './core/Transitioner.js';
+export { View } from './core/View.js';
 export { VR } from './core/VR.js';
+export { World } from './core/World.js';
 
 export { EffectFactory } from './effect/EffectFactory.js';
 

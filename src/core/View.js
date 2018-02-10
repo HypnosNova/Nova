@@ -4,17 +4,18 @@ import { EventManager } from './../events/EventManager';
 class View {
   constructor(world, camera, {
     clearColor = 0x000000,
-    top: 0,
-    left: 0,
-    width: 1,
-    height: 1
+    top = 0,
+    left = 0,
+    width = 1,
+    height = 1
   }) {
     this.world = world;
     this.scene = world.scene;
-    this.logicLoop = new LoopManager();
-    this.renderLoop = new LoopManager();
-    this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
-      app.getWorldHeight(), 0.01, 1000);
+    this.worldWidth = world.app.getWorldWidth();
+    this.worldHeight = world.app.getWorldHeight();
+    this.renderer = world.app.renderer;
+    this.camera = camera || new THREE.PerspectiveCamera(45, this.worldWidth /
+      this.worldHeight, 0.01, 1000);
     this.renderTargetParameters = {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
@@ -27,18 +28,32 @@ class View {
     this.top = top;
     this.width = width;
     this.height = height;
+
     this.fbo = new THREE.WebGLRenderTarget(
-    	this.world.app.getWorldWidth() * this.width,
-      this.world.app.getWorldHeight() * this.width, this.renderTargetParameters
+      this.worldWidth * this.width,
+      this.worldHeight * this.height, this.renderTargetParameters
     );
+
+    this.resize();
   }
 
-  update(time) {
-    this.logicLoop.update(time);
-    this.renderLoop.update(time);
+  render(time) {
+    var left = Math.floor(this.worldWidth * this.left);
+    var top = Math.floor(this.worldHeight * this.top);
+    var width = Math.floor(this.worldWidth * this.width);
+    var height = Math.floor(this.worldHeight * this.height);
+    this.renderer.setViewport(left, top, width, height);
+    this.renderer.setScissor(left, top, width, height);
+    this.renderer.setScissorTest(true);
+    this.renderer.setClearColor(this.clearColor);
+    this.renderer.render(this.scene, this.camera);
   }
 
-  resize(width, height) {
+  resize() {
+    this.worldWidth = this.world.app.getWorldWidth();
+    this.worldHeight = this.world.app.getWorldHeight();
+    let width = Math.floor(this.worldWidth * this.width);
+    let height = Math.floor(this.worldHeight * this.height);
     if (this.camera.type === 'PerspectiveCamera') {
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();

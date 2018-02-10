@@ -21,6 +21,10 @@ class World {
     this.clearColor = clearColor || 0;
     this.fbo = new THREE.WebGLRenderTarget(this.app.getWorldWidth(),
       this.app.getWorldHeight(), this.renderTargetParameters);
+      
+    this.renderLoop.add(() => {
+      this.app.renderer.render(this.scene, this.camera);
+    });
   }
 
   update(time) {

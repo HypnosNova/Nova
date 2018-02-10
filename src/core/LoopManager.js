@@ -2,6 +2,8 @@ import { NotFunctionError } from './../error/NotFunctionError.js';
 
 class LoopManager {
   constructor(cycleLevel = 1) {
+    //当它是true，不执行该循环
+    this.disable = false;
     //记录循环次数
     this.times = 0;
     //每隔多少循环执行一次update，用于调整fps。数字越大，fps越低
@@ -10,7 +12,7 @@ class LoopManager {
   }
 
   update(time) {
-    if (this.times % this.cycleLevel !== 0) {
+    if (this.disable || this.times % this.cycleLevel !== 0) {
       return;
     }
     this.functionMap.forEach((value) => {

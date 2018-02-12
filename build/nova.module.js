@@ -110,7 +110,7 @@ class World {
     this.logicLoop = new LoopManager();
     this.renderLoop = new LoopManager();
     this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
-      app.getWorldHeight(), 0.01, 1000);
+      app.getWorldHeight(), 0.01, 5000);
     this.receivers = this.scene.children;
     this.eventManager = new EventManager(this);
     this.renderTargetParameters = {
@@ -185,7 +185,7 @@ class VR {
     if (this.polyfill) {
       return;
     }
-    if (!WebVRPolyfill) {
+    if (!window.WebVRPolyfill) {
       console.warn("未引入WebVRPolyfill.js，无法创建VR兼容模式。");
       return;
     }
@@ -215,6 +215,9 @@ class VR {
   getVRDisplay() {
     if (!navigator.getVRDisplays) {
       this.setPolyfill();
+    }
+    if(!navigator.getVRDisplays){
+    	return;
     }
     return navigator.getVRDisplays()
       .then((vrDisplays) => {
@@ -279,7 +282,9 @@ class App {
       this.setCommonCSS();
     }
     this.parent = parent || document.body;
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     this.world = new World(this);
     this.animationFrame;
     this.state = APP_STOP;

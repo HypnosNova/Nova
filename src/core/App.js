@@ -14,7 +14,9 @@ class App {
       this.setCommonCSS();
     }
     this.parent = parent || document.body;
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     this.world = new World(this);
     this.animationFrame;
     this.state = APP_STOP;

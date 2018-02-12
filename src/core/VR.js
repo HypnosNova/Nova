@@ -28,7 +28,7 @@ class VR {
     if (this.polyfill) {
       return;
     }
-    if (!WebVRPolyfill) {
+    if (!window.WebVRPolyfill) {
       console.warn("未引入WebVRPolyfill.js，无法创建VR兼容模式。");
       return;
     }
@@ -58,6 +58,9 @@ class VR {
   getVRDisplay() {
     if (!navigator.getVRDisplays) {
       this.setPolyfill();
+    }
+    if(!navigator.getVRDisplays){
+    	return;
     }
     return navigator.getVRDisplays()
       .then((vrDisplays) => {

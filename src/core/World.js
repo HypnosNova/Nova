@@ -8,7 +8,7 @@ class World {
     this.logicLoop = new LoopManager();
     this.renderLoop = new LoopManager();
     this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
-      app.getWorldHeight(), 0.01, 1000);
+      app.getWorldHeight(), 0.01, 5000);
     this.receivers = this.scene.children;
     this.eventManager = new EventManager(this);
     this.renderTargetParameters = {

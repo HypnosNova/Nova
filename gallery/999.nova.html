@@ -144,7 +144,7 @@
 					fragmentShader: document.getElementById( 'fragmentShader' ).textContent
 				} );
 				var size = 0.75;
-				mesh = new THREE.Mesh( new THREE.SphereGeometry( size, 64, 32 ), material );
+				mesh = new THREE.Mesh( new THREE.SphereGeometry( size, 64, 64 ), material );
 				scene.add( mesh );
 			}
 			app.logicLoop.add(function(){

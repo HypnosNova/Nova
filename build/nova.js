@@ -14,6 +14,8 @@
 
 	class LoopManager {
 	  constructor(cycleLevel = 1) {
+	    //当它是true，不执行该循环
+	    this.disable = false;
 	    //记录循环次数
 	    this.times = 0;
 	    //每隔多少循环执行一次update，用于调整fps。数字越大，fps越低
@@ -22,7 +24,7 @@
 	  }
 
 	  update(time) {
-	    if (this.times % this.cycleLevel !== 0) {
+	    if (this.disable || this.times % this.cycleLevel !== 0) {
 	      return;
 	    }
 	    this.functionMap.forEach((value) => {
@@ -127,6 +129,10 @@
 	    this.clearColor = clearColor || 0;
 	    this.fbo = new THREE.WebGLRenderTarget(this.app.getWorldWidth(),
 	      this.app.getWorldHeight(), this.renderTargetParameters);
+	      
+	    this.renderLoop.add(() => {
+	      this.app.renderer.render(this.scene, this.camera);
+	    });
 	  }
 
 	  update(time) {
@@ -293,9 +299,6 @@
 	      }
 	      this.animationFrame = requestAnimationFrame(this.update);
 	    };
-	    this.renderLoop.add(() => {
-	      this.renderer.render(this.world.scene, this.world.camera);
-	    });
 
 	    this.resize = () => {
 	      let width = this.getWorldWidth();
@@ -397,6 +400,34 @@
 	    } else {
 	      this.openFullScreen();
 	    }
+	  }
+	}
+
+	class Monitor {
+	  constructor(world, option) {
+	    this.option = option;
+	    this.fullWidth = world.app.getWorldWidth();
+	    this.fullHeight = world.app.getWorldHeight();
+	    this.renderer = new THREE.WebGLRenderer();
+	    this.world = world;
+	    this.canvas = this.renderer.domElement;
+	    this.renderer.setSize(this.fullWidth * option.width, this.fullHeight *
+	      option.height);
+	    this.renderer.setPixelRatio(window.devicePixelRatio);
+	  }
+
+	  setViewOffset() {
+	    let viewX = this.fullWidth * this.option.left;
+	    let viewY = this.fullHeight * this.option.top;
+	    let viewWidth = this.fullWidth * this.option.width;
+	    let viewHeight = this.fullHeight * this.option.height;
+	    this.world.camera.setViewOffset(this.fullWidth, this.fullHeight, viewX,
+	      viewY, viewWidth, viewHeight);
+	  }
+
+	  render() {
+	    this.setViewOffset();
+	    this.renderer.render(this.world.scene, this.world.camera);
 	  }
 	}
 
@@ -515,6 +546,72 @@
 	  }
 	}
 
+	class View {
+	  constructor(world, camera, {
+	    clearColor = 0x000000,
+	    top = 0,
+	    left = 0,
+	    width = 1,
+	    height = 1
+	  }) {
+	    this.world = world;
+	    this.scene = world.scene;
+	    this.worldWidth = world.app.getWorldWidth();
+	    this.worldHeight = world.app.getWorldHeight();
+	    this.renderer = world.app.renderer;
+	    this.camera = camera || new THREE.PerspectiveCamera(45, this.worldWidth /
+	      this.worldHeight, 0.01, 1000);
+	    this.renderTargetParameters = {
+	      minFilter: THREE.LinearFilter,
+	      magFilter: THREE.LinearFilter,
+	      format: THREE.RGBFormat,
+	      stencilBuffer: false
+	    };
+	    this.isRTT = false;
+	    this.clearColor = clearColor;
+	    this.left = left;
+	    this.top = top;
+	    this.width = width;
+	    this.height = height;
+
+	    this.fbo = new THREE.WebGLRenderTarget(
+	      this.worldWidth * this.width,
+	      this.worldHeight * this.height, this.renderTargetParameters
+	    );
+
+	    this.resize();
+	  }
+
+	  render(time) {
+	    var left = Math.floor(this.worldWidth * this.left);
+	    var top = Math.floor(this.worldHeight * this.top);
+	    var width = Math.floor(this.worldWidth * this.width);
+	    var height = Math.floor(this.worldHeight * this.height);
+	    this.renderer.setViewport(left, top, width, height);
+	    this.renderer.setScissor(left, top, width, height);
+	    this.renderer.setScissorTest(true);
+	    this.renderer.setClearColor(this.clearColor);
+	    this.renderer.render(this.scene, this.camera);
+	  }
+
+	  resize() {
+	    this.worldWidth = this.world.app.getWorldWidth();
+	    this.worldHeight = this.world.app.getWorldHeight();
+	    let width = Math.floor(this.worldWidth * this.width);
+	    let height = Math.floor(this.worldHeight * this.height);
+	    if (this.camera.type === 'PerspectiveCamera') {
+	      this.camera.aspect = width / height;
+	      this.camera.updateProjectionMatrix();
+	    } else {
+	      this.camera.left = -width / 2;
+	      this.camera.right = width / 2;
+	      this.camera.top = height / 2;
+	      this.camera.bottom = -height / 2;
+	      this.camera.updateProjectionMatrix();
+	    }
+	  }
+	}
+
 	/**
 	 * 用于事件处理
 	 * 
@@ -568,6 +665,156 @@
 	}
 
 	THREE.Mesh.prototype.events = new Events();
+
+	class GUI extends THREE.Group {
+	  constructor() {
+	    super();
+	    this.css = {
+	      backgroundColor: "rgba(0,0,0,0)",
+	      opacity: 1,
+	      width: 1,
+	      height: 1
+	    };
+	  }
+	}
+
+	class Body extends GUI {
+	  constructor(world, css) {
+	    super();
+	    this.world = world;
+	    this.distanceFromCamera = 50;
+	    this.css = _.defaults(css, [this.css]);
+	    this.canvas = document.createElement("canvas");
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: this.canvas,
+	      color: 0xffffff
+	    });
+	    this.element = new THREE.Sprite(spriteMaterial);
+	    this.vector = new THREE.Vector3();
+	    this.update();
+	    this.add(this.element);
+	  }
+
+	  lockToScreen() {
+	    var c = this.world.camera;
+	    c.getWorldDirection(this.vector);
+	    this.rotation.set(c.rotation.x, c.rotation.y, c.rotation.z);
+	    this.position.set(c.position.x + this.vector.x * this.distanceFromCamera, c.position.y +
+	      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z * this.distanceFromCamera
+	    );
+	  }
+
+	  update() {
+	    this.canvas.width = this.css.width;
+	    this.canvas.height = this.css.height;
+	    let ctx = this.canvas.getContext("2d");
+	    ctx.fillStyle = this.css.backgroundColor;
+	    ctx.fillRect(0, 0, this.css.width, this.css.height);
+	    var texture = new THREE.CanvasTexture(this.canvas);
+	    texture.generateMipmaps = false;
+	    texture.minFilter = THREE.LinearFilter;
+	    texture.magFilter = THREE.LinearFilter;
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: texture,
+	      color: 0xffffff
+	    });
+	    this.element.material.dispose();
+	    this.element.material = spriteMaterial;
+	    this.element.scale.set(this.css.width / 4, this.css.height / 4, 1);
+	  }
+	}
+
+	class Div extends GUI {
+	  constructor(world, css) {
+	    super();
+	    this.world = world;
+	    this.css = _.defaults(css, [this.css]);
+	    this.canvas = document.createElement("canvas");
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: canvas,
+	      color: 0xffffff
+	    });
+	    this.element = new THREE.Sprite(spriteMaterial);
+	    this.vector = new THREE.Vector3();
+	    this.update();
+	    this.add(this.element);
+	  }
+
+	  update() {
+	    this.canvas.width = this.css.width;
+	    this.canvas.height = this.css.height;
+	    let ctx = this.canvas.getContext("2d");
+	    ctx.fillStyle = this.css.backgroundColor;
+	    ctx.fillRect(0, 0, this.css.width, this.css.height);
+	    var texture = new THREE.CanvasTexture(this.canvas);
+	    texture.generateMipmaps = false;
+	    texture.minFilter = THREE.LinearFilter;
+	    texture.magFilter = THREE.LinearFilter;
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: texture,
+	      color: 0xffffff
+	    });
+	    this.element.material.dispose();
+	    this.element.material = spriteMaterial;
+	    this.element.scale.set(this.css.width / 4, this.css.height / 4, 1);
+	  }
+	}
+
+	class Txt extends GUI {
+	  constructor(text, css) {
+	    super();
+	    this.css = _.defaults(css || {}, [{
+	      fontStyle: "normal",
+	      fontVariant: "normal",
+	      fontSize: 12,
+	      fontWeight: "normal",
+	      fontFamily: "微软雅黑",
+	      color: "#ffffff",
+	      textAlign: "center",
+	      opacity: 1
+	    }, this.css]);
+	    this.canvas = document.createElement("canvas");
+	    this.text = text;
+
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: this.canvas,
+	      transparent: true,
+	      needsUpdate: false,
+	      color: 0xffffff
+	    });
+	    this.element = new THREE.Sprite(spriteMaterial);
+	    this.update();
+	    this.add(this.element);
+	  }
+
+	  update() {
+	    this.canvas.width = this.css.width;
+	    this.canvas.height = this.css.height;
+	    let ctx = this.canvas.getContext("2d");
+	    ctx.fillStyle = this.css.backgroundColor;
+	    ctx.fillRect(0, 0, this.css.width, this.css.height);
+	    ctx.textAlign = this.css.textAlign;
+	    ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this.css.fontWeight +
+	      " " + this.css.fontSize + "px " + this.css.fontFamily;
+	    ctx.fillStyle = this.css.color;
+	    let width = ctx.measureText(this.text).width;
+	    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css.fontSize / 4);
+	    var texture = new THREE.CanvasTexture(this.canvas);
+	    texture.generateMipmaps = false;
+	    texture.minFilter = THREE.LinearFilter;
+	    texture.magFilter = THREE.LinearFilter;
+	    var spriteMaterial = new THREE.SpriteMaterial({
+	      map: texture,
+	      transparent: true,
+	      needsUpdate: false,
+	      color: 0xffffff
+	    });
+	    this.element.material.dispose();
+	    this.element.material = spriteMaterial;
+	    this.element.scale.set(this.css.width / 4, this.css.height / 4, 1);
+	    this.element.material.opacity = this.css.opacity;
+	  }
+	}
 
 	let _extends = ( des, src, over ) => {
 	  let res = _extend( des, src, over );
@@ -623,16 +870,22 @@
 
 	//export * from './thirdparty/three.module.js';
 
-	exports.World = World;
 	exports.App = App;
 	exports.LoopManager = LoopManager;
+	exports.Monitor = Monitor;
 	exports.Transitioner = Transitioner;
+	exports.View = View;
 	exports.VR = VR;
+	exports.World = World;
 	exports.EffectFactory = EffectFactory;
 	exports.NotFunctionError = NotFunctionError$1;
 	exports.EventManager = EventManager;
 	exports.Events = Events;
 	exports.Signal = Signal;
+	exports.GUI = GUI;
+	exports.Body = Body;
+	exports.Txt = Txt;
+	exports.Div = Div;
 	exports.Util = Util;
 
 	Object.defineProperty(exports, '__esModule', { value: true });

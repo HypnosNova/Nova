@@ -15,5 +15,13 @@ export { EventManager } from './events/EventManager.js';
 export { Events } from './events/Events.js';
 export { Signal } from './events/Signal.js';
 
+export {
+  GUI,
+  Body,
+  Txt,
+  Div
+}
+from './gui/GUI.js';
+
 export { Util } from './util/Util.js';
 //export * from './thirdparty/three.module.js';

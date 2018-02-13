@@ -32,7 +32,8 @@ var list = {
   },
   "Others": {
     "Shader": [
-      ["Nova", "999.nova"]
+      ["Nova", "999.nova"],
+      ["Halloween clock", "997.halloween_clock"]
     ],
     "Other": [
       ["Periodic table", "998.periodic_table"]

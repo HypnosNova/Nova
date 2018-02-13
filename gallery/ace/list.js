@@ -28,6 +28,9 @@ var list = {
   "Others": {
     "Shader": [
       ["Nova", "999.nova"]
+    ],
+    "Other": [
+      ["Periodic table", "998.periodic_table.html"]
     ]
   }
 };

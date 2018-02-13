@@ -16,20 +16,18 @@
     <script src="js/tween.js"></script>
     <script>
       let app = new NOVA.App();
-//    app.world.receivers = [];
-      let scene = app.world.scene;
-      let camera = app.world.camera;
 
-      var canvasW = 150,
-        canvasH = 200,
-        scale = 0.43,
-        family = "微软雅黑",
-        indexNum = 20,
-        symbolSize = 60,
-        wordColor = "#ffffff",
-        bgColor = "rgba(0,128,156,0.4)";
-      var bodyDom;
-      var table = [
+      const WIDTH = 150,
+        HEIGHT = 200,
+        SCALE = 0.43,
+        FONT_FAMILY = "微软雅黑",
+        NUMBER_SIZE = 20,
+        SYMBOL_SIZE = 60,
+        WORD_COLOR = "#ffffff",
+        BACK_COLOR = "rgba(0,128,156,0.4)";
+
+      let bodyDom;
+      const TBALE_DATA = [
         "H", "Hydrogen", "1.00794", 1, 1,
         "He", "Helium", "4.002602", 18, 1,
         "Li", "Lithium", "6.941", 1, 2,
@@ -150,113 +148,89 @@
         "Uuo", "Ununoctium", "(294)", 18, 7
       ];
 
-      var controls;
-
       var objects = [];
       var targets = {
         table: [],
-        sphere: [],
-        helix: [],
-        grid: []
       };
-
       init();
 
-      function init() {
-        camera.position.z = 1500;
-        camera.lookAt(scene.position);
-        for (let i = 0; i < table.length; i += 5) {
-          let canvas = document.createElement("canvas");
-          canvas.width = canvasW;
-          canvas.height = canvasH;
-          let ctx = canvas.getContext("2d");
-          ctx.imageSmoothingEnabled = true;
-          if (window.devicePixelRatio) {
-            canvas.height = canvasH * window.devicePixelRatio;
-            canvas.width = canvasW * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-          }
-          ctx.fillStyle = bgColor;
-          ctx.fillRect(0, 0, canvasW, canvasH);
-          ctx.textAlign = "center";
-
-          ctx.font = "normal" + " " + indexNum + "px " + family;
-          ctx.fillStyle = wordColor;
-          let width = ctx.measureText(((i / 5) + 1) + "")
-            .width;
-          ctx.fillText(((i / 5) + 1) + "", canvasW * 0.82, 30);
-
-          ctx.font = "bold" + " " + symbolSize + "px " + family;
-          ctx.fillStyle = wordColor;
-          width = ctx.measureText(table[i])
-            .width;
-          ctx.fillText(table[i], canvasW * 0.5, 115);
-
-          ctx.font = "normal" + " " + indexNum + "px " + family;
-          ctx.fillStyle = wordColor;
-          width = ctx.measureText(table[i + 1])
-            .width;
-          ctx.fillText(table[i + 1], canvasW * 0.5, 158);
-
-          ctx.font = "normal" + " " + indexNum + "px " + family;
-          ctx.fillStyle = wordColor;
-          width = ctx.measureText(table[i + 2])
-            .width;
-          ctx.fillText(table[i + 2], canvasW * 0.5, 183);
-
-          let texture = new THREE.CanvasTexture(canvas);
-          texture.generateMipmaps = false;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          let geometry = new THREE.PlaneBufferGeometry(canvasW * scale, canvasH * scale, 1);
-          let material = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide
-          });
-          var object = new THREE.Mesh(geometry, material);
-          object.events = new NOVA.Events();
-          object.events.tap.add(() => {
-            alert(table[i]);
-          });
-
-          object.position.x = Math.random() * 2000 - 1000;
-          object.position.y = Math.random() * 2000 - 1000;
-          object.position.z = Math.random() * 2000 - 1000;
-          scene.add(object);
-          objects.push(object);
-
-          var object = new THREE.Object3D();
-          object.position.x = (table[i + 3] * 70) - 665;
-          object.position.y = -(table[i + 4] * 90) + 485;
-          targets.table.push(object);
+      function drawElement(i) {
+        let canvas = document.createElement("canvas");
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+        let ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        if (window.devicePixelRatio) {
+          canvas.height = HEIGHT * window.devicePixelRatio;
+          canvas.width = WIDTH * window.devicePixelRatio;
+          ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         }
+        ctx.fillStyle = BACK_COLOR;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.textAlign = "center";
+        ctx.font = "normal" + " " + NUMBER_SIZE + "px " + FONT_FAMILY;
+        ctx.fillStyle = WORD_COLOR;
+        let width = ctx.measureText(((i / 5) + 1) + "").width;
+        ctx.fillText(((i / 5) + 1) + "", WIDTH * 0.82, 30);
+        ctx.font = "bold" + " " + SYMBOL_SIZE + "px " + FONT_FAMILY;
+        ctx.fillStyle = WORD_COLOR;
+        width = ctx.measureText(TBALE_DATA[i]).width;
+        ctx.fillText(TBALE_DATA[i], WIDTH * 0.5, 115);
+        ctx.font = "normal" + " " + NUMBER_SIZE + "px " + FONT_FAMILY;
+        ctx.fillStyle = WORD_COLOR;
+        width = ctx.measureText(TBALE_DATA[i + 1]).width;
+        ctx.fillText(TBALE_DATA[i + 1], WIDTH * 0.5, 158);
+        ctx.font = "normal" + " " + NUMBER_SIZE + "px " + FONT_FAMILY;
+        ctx.fillStyle = WORD_COLOR;
+        width = ctx.measureText(TBALE_DATA[i + 2]).width;
+        ctx.fillText(TBALE_DATA[i + 2], WIDTH * 0.5, 183);
 
-        // sphere
+        let texture = new THREE.CanvasTexture(canvas);
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        let geometry = new THREE.PlaneBufferGeometry(WIDTH * SCALE, HEIGHT * SCALE, 1);
+        let material = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+        var object = new THREE.Mesh(geometry, material);
+        object.events = new NOVA.Events();
+        object.events.tap.add(() => {
+          object.hasClick = !object.hasClick;
+          material.color = new THREE.Color(object.hasClick ? 0xffff88 : 0xffffff);
+        });
 
-        var vector = new THREE.Vector3();
-        var spherical = new THREE.Spherical();
+        object.position.x = Math.random() * 2000 - 1000;
+        object.position.y = Math.random() * 2000 - 1000;
+        object.position.z = Math.random() * 2000 - 1000;
+        return object;
+      }
 
-        for (var i = 0, l = objects.length; i < l; i++) {
-          var phi = Math.acos(-1 + (2 * i) / l);
-          var theta = Math.sqrt(l * Math.PI) * phi;
-          var object = new THREE.Object3D();
-
+      function createSphereTargets() {
+        let vector = new THREE.Vector3();
+        let spherical = new THREE.Spherical();
+        let targets = [];
+        for (let i = 0, l = objects.length; i < l; i++) {
+          let phi = Math.acos(-1 + (2 * i) / l);
+          let theta = Math.sqrt(l * Math.PI) * phi;
+          let object = new THREE.Object3D();
           spherical.set(800, phi, theta);
-
           object.position.setFromSpherical(spherical);
           vector.copy(object.position)
             .multiplyScalar(2);
           object.lookAt(vector);
-          targets.sphere.push(object);
+          targets.push(object);
         }
+        return targets;
+      }
 
-        // helix
-
-        var vector = new THREE.Vector3();
+      function createHelixTargets() {
+        let vector = new THREE.Vector3();
         var cylindrical = new THREE.Cylindrical();
-
+        let targets = [];
         for (var i = 0, l = objects.length; i < l; i++) {
           var theta = i * 0.175 + Math.PI;
           var y = -(i * 8) + 450;
@@ -270,92 +244,82 @@
           vector.z = object.position.z * 2;
 
           object.lookAt(vector);
-          targets.helix.push(object);
+          targets.push(object);
         }
+        return targets;
+      }
 
-        // grid
-
-        for (var i = 0; i < objects.length; i++) {
-          var object = new THREE.Object3D();
+      function createGridTargets() {
+        let targets = [];
+        for (let i = 0; i < objects.length; i++) {
+          let object = new THREE.Object3D();
           object.position.x = ((i % 5) * 400) - 800;
           object.position.y = (-(Math.floor(i / 5) % 5) * 400) + 800;
           object.position.z = (Math.floor(i / 25)) * 1000 - 2000;
-          targets.grid.push(object);
+          targets.push(object);
         }
+        return targets;
+      }
 
-        controls = new THREE.TrackballControls(camera);
+      function addTrackball() {
+        let controls = new THREE.TrackballControls(app.world.camera);
         controls.noZoom = false;
         controls.rotateSpeed = 1;
         controls.minDistance = 500;
         controls.maxDistance = 4000;
         controls.update();
+        app.logicLoop.add(() => {
+          controls.update();
+        });
+      }
+
+      function createBottomBtn() {
+        let j = -3;
+        for (let i in targets) {
+          j += 3;
+          let btn = new NOVA.Txt(i, {
+            backgroundColor: "rgba(255,100,0,0.5)",
+            color: "#ffffff",
+            fontSize: 20,
+            width: 100,
+            height: 32
+          });
+          bodyDom.add(btn);
+          btn.scale.set(0.2, 0.2, 1);
+          btn.position.set(-4.5 + j, -7.2, 1);
+          btn.events = new NOVA.Events();
+          btn.events.tap.add(() => {
+            transform(targets[i], 2000);
+          });
+        }
+      }
+
+      function init() {
+        app.world.camera.position.z = 1500;
+        for (let i = 0; i < TBALE_DATA.length; i += 5) {
+          let object = drawElement(i);
+          app.world.scene.add(object);
+          objects.push(object);
+
+          let vector = new THREE.Object3D();
+          vector.position.x = (TBALE_DATA[i + 3] * 70) - 665;
+          vector.position.y = -(TBALE_DATA[i + 4] * 90) + 485;
+          targets.table.push(vector);
+        }
+
+        targets.sphere = createSphereTargets();
+        targets.helix = createHelixTargets();
+        targets.grid = createGridTargets();
+
+        addTrackball();
 
         bodyDom = new NOVA.Body(app.world);
         bodyDom.distanceFromCamera = 20;
-        scene.add(bodyDom);
+        app.world.scene.add(bodyDom);
 
-        var tableBtn = new NOVA.Txt("table", {
-          backgroundColor: "rgba(255,0,0,0.5)",
-          color: "#ffffff",
-          fontSize: 20,
-          width: 100,
-          height: 32
-        });
-        bodyDom.add(tableBtn);
-        tableBtn.scale.set(0.2, 0.2, 1);
-        tableBtn.position.set(-4.5, -7.2, 1);
-        tableBtn.events = new NOVA.Events();
-        tableBtn.events.tap.add(() => {
-          transform(targets.table, 2000);
-        });
-//      app.world.receivers.push(tableBtn)
-
-        var sphereBtn = new NOVA.Txt("sphere", {
-          backgroundColor: "rgba(255,0,0,0.5)",
-          color: "#ffffff",
-          fontSize: 20,
-          width: 100,
-          height: 32
-        });
-        bodyDom.add(sphereBtn);
-        sphereBtn.scale.set(0.2, 0.2, 1);
-        sphereBtn.position.set(-1.5, -7.2, 1);
-        sphereBtn.events = new NOVA.Events();
-        sphereBtn.events.tap.add(() => {
-          transform(targets.sphere, 2000);
-        });
-//      app.world.receivers.push(sphereBtn)
-
-        var helixBtn = new NOVA.Txt("helix", {
-          backgroundColor: "rgba(255,0,0,0.5)",
-          color: "#ffffff",
-          fontSize: 20,
-          width: 100,
-          height: 32
-        });
-        bodyDom.add(helixBtn);
-        helixBtn.events = new NOVA.Events();
-        helixBtn.scale.set(0.2, 0.2, 1);
-        helixBtn.position.set(1.5, -7.2, 1);
-        helixBtn.events.tap.add(() => {
-          transform(targets.helix, 2000);
-        });
-
-        var gridBtn = new NOVA.Txt("grid", {
-          backgroundColor: "rgba(255,0,0,0.5)",
-          color: "#ffffff",
-          fontSize: 20,
-          width: 100,
-          height: 32
-        });
-        bodyDom.add(gridBtn);
-        gridBtn.scale.set(0.2, 0.2, 1);
-        gridBtn.position.set(4.5, -7.2, 1);
-        gridBtn.events = new NOVA.Events();
-        gridBtn.events.tap.add(() => {
-          transform(targets.grid, 2000);
-        });
+        createBottomBtn();
       }
+
       transform(targets.table, 2000);
 
       function transform(targets, duration) {
@@ -389,20 +353,8 @@
       }
 
       app.logicLoop.add(() => {
-        //      controls.update();
         TWEEN.update();
         bodyDom.lockToScreen();
-      });
-
-      geometry = new THREE.PlaneBufferGeometry(5, 5, 5);
-      material = new THREE.MeshNormalMaterial();
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.scale.set(0.3, 0.3, 1);
-      bodyDom.add(mesh);
-      app.world.receivers.push(mesh)
-      mesh.events = new NOVA.Events();
-      mesh.events.tap.add(() => {
-        alert('Hello Nova');
       });
     </script>
   </body>

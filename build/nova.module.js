@@ -75,14 +75,14 @@ class EventManager {
     this.centerSelectedObj = null;
     this.isDetectingEnter = true;
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('pan press tap pressup', (event) => {
+    this.hammer.on('pan press tap pressup pandown panup', (event) => {
       this.raycastCheck(event);
     });
   }
 
   raycastCheck(event) {
     let vec2 = new THREE.Vector2(event.center.x / this.world.app.getWorldWidth() *
-      2 - 1, - event.center.y / this.world.app.getWorldHeight() * 2 + 1);
+      2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2);
     this.raycaster.setFromCamera(vec2, this.world.camera);
     let intersects = this.raycaster.intersectObjects(this.world.receivers,
       this.isDeep);

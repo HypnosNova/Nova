@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <style>
+      body {
+      	background: black;
+        padding: 5% 0 0 10%;
+      }
+      
+      canvas {
+        float: left;
+        border: 1px solid #ffff00;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="../build/three.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      var app = new NOVA.App();
+      document.body.removeChild(app.renderer.domElement);
+
+      var camera = app.world.camera;
+      camera.position.set(1, 1, 1);
+      camera.lookAt(app.world.scene.position);
+      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      material = new THREE.MeshNormalMaterial();
+      mesh = new THREE.Mesh(geometry, material);
+      app.world.scene.add(mesh);
+      app.logicLoop.add(function() {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+      });
+
+      var m1 = new NOVA.Monitor(app.world, {
+        left: 0.1,
+        top: 0.1,
+        width: 0.4,
+        height: 0.4
+      });
+      document.body.appendChild(m1.renderer.domElement);
+
+      var m2 = new NOVA.Monitor(app.world, {
+        left: 0.5,
+        top: 0.1,
+        width: 0.4,
+        height: 0.4
+      });
+      document.body.appendChild(m2.renderer.domElement);
+
+      var m3 = new NOVA.Monitor(app.world, {
+        left: 0.1,
+        top: 0.5,
+        width: 0.4,
+        height: 0.4
+      });
+      document.body.appendChild(m3.renderer.domElement);
+
+      var m4 = new NOVA.Monitor(app.world, {
+        left: 0.5,
+        top: 0.5,
+        width: 0.4,
+        height: 0.4
+      });
+      
+      app.renderLoop.add(() => {
+      	m1.render();
+      	m2.render();
+      	m3.render();
+        m4.render();
+      });
+      document.body.appendChild(m4.renderer.domElement);
+    </script>
+  </body>
+</html>

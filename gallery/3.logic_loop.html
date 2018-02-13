@@ -14,14 +14,11 @@
     <script>
       var app = new NOVA.App();
 
-      var scene = app.world.scene;
-      var camera = app.world.camera;
-      camera.position.z = 2;
-
+      app.world.camera.position.z = 2;
       geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
       material = new THREE.MeshNormalMaterial();
       mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
+      app.world.scene.add(mesh);
 
       app.logicLoop.add(function() {
         mesh.rotation.x += 0.01;

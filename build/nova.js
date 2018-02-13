@@ -594,7 +594,7 @@
 	    this.resize();
 	  }
 
-	  render(time) {
+	  render() {
 	    var left = Math.floor(this.worldWidth * this.left);
 	    var top = Math.floor(this.worldHeight * this.top);
 	    var width = Math.floor(this.worldWidth * this.width);

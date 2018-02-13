@@ -22,6 +22,10 @@ var list = {
     "transition": [
       ["Transitionor", "5.transition"],
     ],
+    "Views": [
+      ["Multiple views", "8.views"],
+      ["Multiple monitors", "1.empty_framework"]
+    ],
     "VR": [
       ["Normal VR", "6.vr"],
     ]

@@ -30,7 +30,7 @@ var list = {
       ["Nova", "999.nova"]
     ],
     "Other": [
-      ["Periodic table", "998.periodic_table.html"]
+      ["Periodic table", "998.periodic_table"]
     ]
   }
 };

@@ -1,48 +1,50 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-		<title></title>
-	</head>
-	<body>
-		<script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
-		<script src="../build/three.min.js"></script>
-		<script src="../build/nova.js"></script>
-		<script>
-			var app = new NOVA.App();
-			app.world.clearColor = 0xff00ff;
-			var scene = app.world.scene;
-			var camera = app.world.camera;
-			camera.position.z = 2;
-			geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-			material = new THREE.MeshNormalMaterial();
-			mesh = new THREE.Mesh(geometry, material);
-			scene.add(mesh);
-			var world1 = app.world;
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+  </head>
 
-			var world2 = new NOVA.World(app, undefined, 0x00ff00);
-			world2.camera.position.z = 2;
-			geometry2 = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-			material2 = new THREE.MeshNormalMaterial();
-			mesh2 = new THREE.Mesh(geometry2, material2);
-			world2.scene.add(mesh2);
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="../build/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      var app = new NOVA.App();
+      app.world.clearColor = 0xff00ff;
+      var scene = app.world.scene;
+      var camera = app.world.camera;
+      camera.position.z = 2;
+      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      material = new THREE.MeshNormalMaterial();
+      mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+      var world1 = app.world;
 
-			var loader = new THREE.TextureLoader();
-			loader.load(
-				'assets/images/transition/transition1.png', (texture) =>{
-					let tran = new NOVA.Transitioner(app, world2, texture);
-					app.logicLoop.add(() => {
-						tran.options.transition = (Math.sin(new Date().getTime() / 1000) + 1) / 2;
-						tran.update();
-					});
-					app.world = tran.world;
-				}
-			);
-			app.logicLoop.add(() => {
-				mesh.rotation.x += 0.01;
-				mesh.rotation.y += 0.02;
-			});
-		</script>
-	</body>
+      var world2 = new NOVA.World(app, undefined, 0x00ff00);
+      world2.camera.position.z = 2;
+      geometry2 = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      material2 = new THREE.MeshNormalMaterial();
+      mesh2 = new THREE.Mesh(geometry2, material2);
+      world2.scene.add(mesh2);
+
+      var loader = new THREE.TextureLoader();
+      loader.load(
+        'assets/images/transition/transition1.png', (texture) => {
+          let tran = new NOVA.Transitioner(app, world2, texture);
+          app.logicLoop.add(() => {
+            tran.options.transition = (Math.sin(new Date().getTime() / 1000) + 1) / 2;
+            tran.update();
+          });
+          app.world = tran.world;
+        }
+      );
+      app.logicLoop.add(() => {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+      });
+    </script>
+  </body>
+
 </html>

@@ -20,8 +20,6 @@ class Events {
   }
 }
 
-THREE.Mesh.prototype.events = new Events();
-
 export {
   Events
 };

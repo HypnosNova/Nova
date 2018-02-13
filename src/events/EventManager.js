@@ -26,11 +26,10 @@ class EventManager {
 
   raycastCheck(event) {
     let vec2 = new THREE.Vector2(event.center.x / this.world.app.getWorldWidth() *
-      2 - 1, event.center.y / this.world.app.getWorldHeight() * 2 - 1);
+      2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2);
     this.raycaster.setFromCamera(vec2, this.world.camera);
     let intersects = this.raycaster.intersectObjects(this.world.receivers,
       this.isDeep);
-
     let intersect;
     for (let i = 0; i < intersects.length; i++) {
       if (intersects[i].object.isPenetrated) {
@@ -43,7 +42,6 @@ class EventManager {
     if (intersect) {
       intersect.object.events[event.type].run(event, intersect);
     }
-
   }
 }
 

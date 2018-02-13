@@ -88,11 +88,10 @@
 
 	  raycastCheck(event) {
 	    let vec2 = new THREE.Vector2(event.center.x / this.world.app.getWorldWidth() *
-	      2 - 1, event.center.y / this.world.app.getWorldHeight() * 2 - 1);
+	      2 - 1, - event.center.y / this.world.app.getWorldHeight() * 2 + 1);
 	    this.raycaster.setFromCamera(vec2, this.world.camera);
 	    let intersects = this.raycaster.intersectObjects(this.world.receivers,
 	      this.isDeep);
-
 	    let intersect;
 	    for (let i = 0; i < intersects.length; i++) {
 	      if (intersects[i].object.isPenetrated) {
@@ -105,7 +104,6 @@
 	    if (intersect) {
 	      intersect.object.events[event.type].run(event, intersect);
 	    }
-
 	  }
 	}
 
@@ -669,8 +667,6 @@
 	  }
 	}
 
-	THREE.Mesh.prototype.events = new Events();
-
 	class GUI extends THREE.Group {
 	  constructor() {
 	    super();
@@ -688,7 +684,7 @@
 	    super();
 	    this.world = world;
 	    this.distanceFromCamera = 50;
-	    this.css = _.defaults(css, [this.css]);
+	    this.css = _.defaults(css || {}, this.css);
 	    this.canvas = document.createElement("canvas");
 	    var spriteMaterial = new THREE.SpriteMaterial({
 	      map: this.canvas,
@@ -733,7 +729,7 @@
 	  constructor(world, css) {
 	    super();
 	    this.world = world;
-	    this.css = _.defaults(css, [this.css]);
+	    this.css = _.defaults(css || {}, this.css);
 	    this.canvas = document.createElement("canvas");
 	    var spriteMaterial = new THREE.SpriteMaterial({
 	      map: canvas,
@@ -765,10 +761,9 @@
 	  }
 	}
 
-	class Txt extends GUI {
+	class Txt extends THREE.Mesh {
 	  constructor(text, css) {
-	    super();
-	    this.css = _.defaults(css || {}, [{
+	    css = _.defaults(css || {}, {
 	      fontStyle: "normal",
 	      fontVariant: "normal",
 	      fontSize: 12,
@@ -776,20 +771,22 @@
 	      fontFamily: "微软雅黑",
 	      color: "#ffffff",
 	      textAlign: "center",
-	      opacity: 1
-	    }, this.css]);
-	    this.canvas = document.createElement("canvas");
-	    this.text = text;
-
-	    var spriteMaterial = new THREE.SpriteMaterial({
-	      map: this.canvas,
+	      backgroundColor: "rgba(0,0,0,0)",
+	      opacity: 1,
+	      width: 1,
+	      height: 1
+	    });
+	    let canvas = document.createElement("canvas");
+	    var material = new THREE.MeshBasicMaterial({
 	      transparent: true,
 	      needsUpdate: false,
 	      color: 0xffffff
 	    });
-	    this.element = new THREE.Sprite(spriteMaterial);
+	    super(new THREE.PlaneBufferGeometry(css.width/8, css.height/8), material);
+	    this.text = text;
+	    this.canvas = canvas;
+	    this.css = css;
 	    this.update();
-	    this.add(this.element);
 	  }
 
 	  update() {
@@ -808,16 +805,9 @@
 	    texture.generateMipmaps = false;
 	    texture.minFilter = THREE.LinearFilter;
 	    texture.magFilter = THREE.LinearFilter;
-	    var spriteMaterial = new THREE.SpriteMaterial({
-	      map: texture,
-	      transparent: true,
-	      needsUpdate: false,
-	      color: 0xffffff
-	    });
-	    this.element.material.dispose();
-	    this.element.material = spriteMaterial;
-	    this.element.scale.set(this.css.width / 4, this.css.height / 4, 1);
-	    this.element.material.opacity = this.css.opacity;
+	    this.material.map = texture;
+	    this.scale.set(this.css.width / 4, this.css.height / 4, 1);
+	    this.material.opacity = this.css.opacity;
 	  }
 	}
 

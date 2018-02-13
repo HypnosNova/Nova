@@ -11,6 +11,7 @@ var list = {
     "app": [
       ["Empty framework", "1.empty_framework"],
       ["Add a box", "2.add_a_box"],
+      ["Screenshot", "7.screenshot"],
     ],
     "loop": [
       ["Logic loop", "3.logic_loop"],

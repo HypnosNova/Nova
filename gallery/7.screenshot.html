@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+  </head>
+
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="../build/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      var app = new NOVA.App();
+
+      var scene = app.world.scene;
+      var camera = app.world.camera;
+      camera.position.z = 2;
+
+      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      material = new THREE.MeshNormalMaterial();
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.events = new NOVA.Events();
+      mesh.events.tap.add(() => {
+        app.screenshot();
+      });
+      scene.add(mesh);
+
+      app.logicLoop.add(function() {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+      });
+    </script>
+  </body>
+
+</html>

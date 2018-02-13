@@ -398,6 +398,15 @@ class App {
       this.openFullScreen();
     }
   }
+
+  screenshot() {
+    var w = window.open('', '');
+    w.document.title = "Nova Screenshot";
+    var img = new Image();
+    this.renderer.render(this.world.scene, this.world.camera);
+    img.src = app.renderer.domElement.toDataURL();
+    w.document.body.appendChild(img);
+  }
 }
 
 class Monitor {

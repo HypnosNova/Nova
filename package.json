@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/hammerjs": "^2.0.35",
     "concurrently": "^3.5.0",
-    "electron": "1.7.8",
+    "electron": "1.7.11",
     "eslint": "^4.14.0",
     "eslint-config-google": "^0.9.1",
     "eslint-config-mdcs": "^4.2.2",

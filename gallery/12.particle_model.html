@@ -8,6 +8,7 @@
   </head>
 
   <body>
+    <div style="position: fixed;top: 50%;left: 50%;transform: translate(-50%,-50%);font-size: 100px;color: yellow;font-weight: bolder;" id="loading">Loading</div>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
     <script src="../lib/tween.js"></script>
     <script src="../lib/three.min.js"></script>
@@ -151,6 +152,7 @@
       });
 
       function init(arr1, arr2) {
+        document.body.removeChild(document.getElementById("loading"));
         var animation = new ParticleAnimation(new THREE.PlaneGeometry(2.0, 2.0), arr1, arr2);
         animation.animate({
           duration: 8000,

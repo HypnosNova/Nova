@@ -12,11 +12,14 @@
     <script src="../lib/tween.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../gallery/js/controls/OrbitControls.js"></script>
+    <script src="js/loaders/OBJLoader.js"></script>
     <script src="../lib/bas.min.js"></script>
     <script src="../build/nova.js"></script>
+    <script src="js/utils/GeometryUtils.js"></script>
     <script>
       class ParticleAnimation extends THREE.Mesh {
-        constructor(singleGeometry, amount, duration = 1.0, durationRange = 1.0) {
+        constructor(singleGeometry, shapeArr1, shapeArr2, duration = 1.0, durationRange = 1.0) {
+          let amount = shapeArr1.length;
           let geometry = new BAS.PrefabBufferGeometry(singleGeometry, amount);
           let delayDuration = geometry.createAttribute('delayDuration', 2);
 
@@ -38,13 +41,13 @@
           var prefabData = [];
 
           for (i = 0; i < amount; i++) {
-            start.x = THREE.Math.randFloatSpread(range << 2);
-            start.y = THREE.Math.randFloatSpread(range << 2);
-            start.z = THREE.Math.randFloatSpread(range << 2);
+            start.x = shapeArr2[i].x;
+            start.y = shapeArr2[i].y - 150;
+            start.z = shapeArr2[i].z;
 
-            end.x = THREE.Math.randFloatSpread(range);
-            end.y = THREE.Math.randFloatSpread(range);
-            end.z = THREE.Math.randFloatSpread(range);
+            end.x = shapeArr1[i].x * 50;
+            end.y = shapeArr1[i].y * 50 - 150;
+            end.z = shapeArr1[i].z * 50;
 
             geometry.setPrefabData(startPositions, i, start.toArray(
               prefabData));
@@ -129,6 +132,37 @@
         }
       });
 
+      let arr1, arr2;
+      var objLoader = new THREE.OBJLoader();
+      objLoader.setPath('assets/model/');
+      objLoader.load('GermanShephardLowPoly.obj', function(obj) {
+        let geo = obj.children[0].geometry;
+        arr1 = THREE.GeometryUtils.randomPointsInBufferGeometry(geo, 30000);
+        if (arr2) {
+          init(arr1, arr2);
+        }
+      });
+      objLoader.load('fu.obj', function(obj) {
+        let geo = obj.children[1].geometry;
+        arr2 = THREE.GeometryUtils.randomPointsInBufferGeometry(geo, 30000);
+        if (arr1) {
+          init(arr1, arr2);
+        }
+      });
+
+      function init(arr1, arr2) {
+        var animation = new ParticleAnimation(new THREE.PlaneGeometry(2.0, 2.0), arr1, arr2);
+        animation.animate({
+          duration: 8000,
+          ease: TWEEN.Easing.Quadratic.Out,
+          repeat: Infinity,
+          delay: 1000,
+          yoyo: true
+        });
+
+        app.world.scene.add(animation);
+      }
+
       let app = new NOVA.App();
       app.renderer.setClearColor(0xaa0000);
       app.world.camera.position.set(0, 0, 1000);
@@ -141,16 +175,6 @@
       light.position.set(-5, 20, 40);
       app.world.scene.add(light);
 
-      var animation = new ParticleAnimation(new THREE.PlaneGeometry(3.0, 3.0), 50000);
-      animation.animate({
-        duration: 8000,
-        ease: TWEEN.Easing.Quadratic.Out,
-        repeat: Infinity,
-        delay: 1000,
-        yoyo: true
-      });
-
-      app.world.scene.add(animation);
       app.logicLoop.add(() => {
         TWEEN.update();
       });

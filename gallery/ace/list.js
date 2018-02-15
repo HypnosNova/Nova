@@ -13,6 +13,9 @@ var list = {
       ["Add a box", "2.add_a_box"],
       ["Screenshot", "7.screenshot"],
     ],
+    "loader":[
+      ["Load obj & mtl", "11.add_model"],
+    ],
     "loop": [
       ["Logic loop", "3.logic_loop"],
     ],

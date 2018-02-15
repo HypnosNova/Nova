@@ -2,21 +2,80 @@
 <html>
 
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no' />
     <title>Particles move</title>
+    <style>
+      #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 100px;
+        color: yellow;
+        font-weight: bolder;
+      }
+      
+      #right {
+        position: fixed;
+        right: 0;
+        top: 50%;
+        transform: translate(0%, -50%);
+        color: yellow;
+        font-weight: bolder;
+        font-size: 40px;
+        writing-mode: tb-rl;
+        animation: mymove 3s;
+        height: auto;
+        white-space : normal nowrap 
+      }
+      
+      #left {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translate(0%, -50%);
+        color: yellow;
+        font-weight: bolder;
+        font-size: 40px;
+        writing-mode: tb-rl;
+        animation: mymove 5s;
+        height: auto;
+        white-space : normal nowrap 
+      }
+      
+      #top {
+        position: fixed;
+        left: 50%;
+        top: 0%;
+        transform: translate(-50%, 0%);
+        color: yellow;
+        font-weight: bolder;
+        font-size: 40px;
+        animation: mymove 5s;
+      }
+      
+      @keyframes mymove {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <div style="position: fixed;top: 50%;left: 50%;transform: translate(-50%,-50%);font-size: 100px;color: yellow;font-weight: bolder;" id="loading">Loading</div>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
-    <script src="../lib/tween.js"></script>
-    <script src="../lib/three.min.js"></script>
-    <script src="../gallery/js/controls/OrbitControls.js"></script>
-    <script src="js/loaders/OBJLoader.js"></script>
-    <script src="../lib/bas.min.js"></script>
-    <script src="../build/nova.js"></script>
-    <script src="js/utils/GeometryUtils.js"></script>
+    <div id='loading'>Loading</div>
+    <script src='https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js'></script>
+    <script src='../lib/tween.js'></script>
+    <script src='../lib/three.min.js'></script>
+    <script src='../gallery/js/controls/OrbitControls.js'></script>
+    <script src='js/loaders/OBJLoader.js'></script>
+    <script src='../lib/bas.min.js'></script>
+    <script src='../build/nova.js'></script>
+    <script src='js/utils/GeometryUtils.js'></script>
     <script>
       class ParticleAnimation extends THREE.Mesh {
         constructor(singleGeometry, shapeArr1, shapeArr2, duration = 1.0, durationRange = 1.0) {
@@ -152,8 +211,8 @@
       });
 
       function init(arr1, arr2) {
-        document.body.removeChild(document.getElementById("loading"));
-        var animation = new ParticleAnimation(new THREE.PlaneGeometry(2.0, 2.0), arr1, arr2);
+        document.body.removeChild(document.getElementById('loading'));
+        let animation = new ParticleAnimation(new THREE.PlaneGeometry(2.0, 2.0), arr1, arr2);
         animation.animate({
           duration: 8000,
           ease: TWEEN.Easing.Quadratic.Out,
@@ -161,8 +220,26 @@
           delay: 1000,
           yoyo: true
         });
-
         app.world.scene.add(animation);
+
+        setTimeout(() => {
+          let div = document.createElement('div');
+          div.innerText = '戌时火树银花夜';
+          div.id = 'right';
+          document.body.appendChild(div);
+        }, 1000);
+        setTimeout(() => {
+          let div = document.createElement('div');
+          div.innerText = '狗岁丰衣足食人';
+          div.id = 'left';
+          document.body.appendChild(div);
+        }, 5500);
+        setTimeout(() => {
+          let div = document.createElement('div');
+          div.innerText = '吉大年狗';
+          div.id = 'top';
+          document.body.appendChild(div);
+        }, 10000);
       }
 
       let app = new NOVA.App();
@@ -170,7 +247,7 @@
       app.world.camera.position.set(0, 0, 1000);
       new THREE.OrbitControls(app.world.camera);
 
-      var light = new THREE.DirectionalLight(0xffff00);
+      let light = new THREE.DirectionalLight(0xffff00);
       app.world.scene.add(light);
       light.position.set(5, -20, 40);
       light = new THREE.DirectionalLight(0xff8800);

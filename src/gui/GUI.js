@@ -31,8 +31,10 @@ class Body extends GUI {
     var c = this.world.camera;
     c.getWorldDirection(this.vector);
     this.rotation.set(c.rotation.x, c.rotation.y, c.rotation.z);
-    this.position.set(c.position.x + this.vector.x * this.distanceFromCamera, c.position.y +
-      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z * this.distanceFromCamera
+    this.position.set(c.position.x + this.vector.x * this.distanceFromCamera,
+      c.position.y +
+      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z *
+      this.distanceFromCamera
     );
   }
 
@@ -105,7 +107,12 @@ class Txt extends THREE.Mesh {
       backgroundColor: "rgba(0,0,0,0)",
       opacity: 1,
       width: 1,
-      height: 1
+      height: 1,
+      scale: {
+        x: 0.25,
+        y: 0.25,
+        z: 1,
+      }
     });
     let canvas = document.createElement("canvas");
     var material = new THREE.MeshBasicMaterial({
@@ -113,7 +120,8 @@ class Txt extends THREE.Mesh {
       needsUpdate: false,
       color: 0xffffff
     });
-    super(new THREE.PlaneBufferGeometry(css.width/8, css.height/8), material);
+    super(new THREE.PlaneBufferGeometry(css.width / 8, css.height / 8),
+      material);
     this.text = text;
     this.canvas = canvas;
     this.css = css;
@@ -127,17 +135,20 @@ class Txt extends THREE.Mesh {
     ctx.fillStyle = this.css.backgroundColor;
     ctx.fillRect(0, 0, this.css.width, this.css.height);
     ctx.textAlign = this.css.textAlign;
-    ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this.css.fontWeight +
+    ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this
+      .css.fontWeight +
       " " + this.css.fontSize + "px " + this.css.fontFamily;
     ctx.fillStyle = this.css.color;
-    let width = ctx.measureText(this.text).width;
-    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css.fontSize / 4);
+    let width = ctx.measureText(this.text)
+      .width;
+    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
+      .fontSize / 4);
     var texture = new THREE.CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     this.material.map = texture;
-    this.scale.set(this.css.width / 4, this.css.height / 4, 1);
+    this.scale.set(this.css.scale.x, this.css.scale.y, this.css.scale.z);
     this.material.opacity = this.css.opacity;
   }
 }

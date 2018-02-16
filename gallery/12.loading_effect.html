@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../lib/tween.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+      app.logicLoop.add(() => {
+        TWEEN.update();
+      });
+      app.renderer.setClearColor(0xffffff);
+
+      let numberTxt, plane, loader;
+
+      createProgress();
+      createLoadFactory();
+
+      function createCards() {
+        let geometry = new THREE.PlaneBufferGeometry(2, 3);
+        for (let i = 0; i < 24; i++) {
+          let material = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            map: loader.Resource.textures["pic" + i]
+          });
+          let card = new THREE.Mesh(geometry, material);
+          card.position.set((i % 6 - 2.5) * 2.5, (Math.floor(i / 6) - 1.5) * 3.5, -20);
+          app.world.scene.add(card);
+        }
+      }
+
+      function createProgress() {
+        let geometry = new THREE.PlaneBufferGeometry(10, 1);
+        let material = new THREE.MeshBasicMaterial({ color: 0x0000ff, side: THREE.DoubleSide, transparent: true });
+        plane = new THREE.Mesh(geometry, material);
+        plane.scale.x = 0.01;
+        app.world.scene.add(plane);
+        plane.position.z = -30;
+        numberTxt = new NOVA.Txt("0%", {
+          fontSize: 40,
+          width: 180,
+          height: 40,
+          scale: {
+            x: 0.1,
+            y: 0.1,
+            z: 1
+          }
+        });
+        numberTxt.position.z = -29;
+        app.world.scene.add(numberTxt);
+      }
+
+      function createLoadFactory() {
+        loader = new NOVA.LoaderFactory();
+        for (let i = 0; i < 24; i++) {
+          loader.loadTexture("pic" + i, "assets/images/cardback/" + i + ".jpg");
+        }
+        loader.onProgress = (url, itemsLoaded, itemsTotal) => {
+          TWEEN.removeAll();
+          new TWEEN.Tween(plane.scale)
+            .to({ x: itemsLoaded / itemsTotal }, 300)
+            .start()
+            .onUpdate(() => {
+              numberTxt.text = Math.round(plane.scale.x * 100) + "%";
+              numberTxt.update();
+            });
+        }
+
+        loader.onLoad = () => {
+          setTimeout(() => {
+            new TWEEN.Tween(numberTxt.material)
+              .to({ opacity: 0 }, 500)
+              .start();
+            new TWEEN.Tween(plane.material)
+              .to({ opacity: 0 }, 500)
+              .start()
+              .onComplete(() => {
+                app.world.scene.remove(numberTxt);
+                app.world.scene.remove(plane);
+                createCards();
+              });
+          }, 300);
+        }
+      }
+    </script>
+  </body>
+
+</html>

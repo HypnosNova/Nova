@@ -709,8 +709,10 @@
 	    var c = this.world.camera;
 	    c.getWorldDirection(this.vector);
 	    this.rotation.set(c.rotation.x, c.rotation.y, c.rotation.z);
-	    this.position.set(c.position.x + this.vector.x * this.distanceFromCamera, c.position.y +
-	      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z * this.distanceFromCamera
+	    this.position.set(c.position.x + this.vector.x * this.distanceFromCamera,
+	      c.position.y +
+	      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z *
+	      this.distanceFromCamera
 	    );
 	  }
 
@@ -783,7 +785,12 @@
 	      backgroundColor: "rgba(0,0,0,0)",
 	      opacity: 1,
 	      width: 1,
-	      height: 1
+	      height: 1,
+	      scale: {
+	        x: 0.25,
+	        y: 0.25,
+	        z: 1,
+	      }
 	    });
 	    let canvas = document.createElement("canvas");
 	    var material = new THREE.MeshBasicMaterial({
@@ -791,7 +798,8 @@
 	      needsUpdate: false,
 	      color: 0xffffff
 	    });
-	    super(new THREE.PlaneBufferGeometry(css.width/8, css.height/8), material);
+	    super(new THREE.PlaneBufferGeometry(css.width / 8, css.height / 8),
+	      material);
 	    this.text = text;
 	    this.canvas = canvas;
 	    this.css = css;
@@ -805,18 +813,90 @@
 	    ctx.fillStyle = this.css.backgroundColor;
 	    ctx.fillRect(0, 0, this.css.width, this.css.height);
 	    ctx.textAlign = this.css.textAlign;
-	    ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this.css.fontWeight +
+	    ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this
+	      .css.fontWeight +
 	      " " + this.css.fontSize + "px " + this.css.fontFamily;
 	    ctx.fillStyle = this.css.color;
-	    let width = ctx.measureText(this.text).width;
-	    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css.fontSize / 4);
+	    let width = ctx.measureText(this.text)
+	      .width;
+	    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
+	      .fontSize / 4);
 	    var texture = new THREE.CanvasTexture(this.canvas);
 	    texture.generateMipmaps = false;
 	    texture.minFilter = THREE.LinearFilter;
 	    texture.magFilter = THREE.LinearFilter;
 	    this.material.map = texture;
-	    this.scale.set(this.css.width / 4, this.css.height / 4, 1);
+	    this.scale.set(this.css.scale.x, this.css.scale.y, this.css.scale.z);
 	    this.material.opacity = this.css.opacity;
+	  }
+	}
+
+	class LoaderFactory {
+	  constructor() {
+	    let manager = new THREE.LoadingManager();
+	    this.Resource = {
+	      images: {},
+	      materials: {},
+	      textures: {},
+	      models: {},
+	      sounds: {},
+	      fonts: {},
+	      unloaded: {
+	        textures: [],
+	        models: [],
+	        sounds: [],
+	        fonts: [],
+	        images: []
+	      }
+	    };
+
+	    manager.onStart = (url, itemsLoaded, itemsTotal) => {
+	      if (this.onStart && typeof this.onStart === 'function') {
+	        this.onStart(url, itemsLoaded, itemsTotal);
+	      }
+	    };
+
+	    manager.onLoad = () => {
+	      if (this.onLoad && typeof this.onLoad === 'function') {
+	        this.onLoad();
+	      }
+	    };
+
+	    manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+	      if (this.onProgress && typeof this.onProgress === 'function') {
+	        this.onProgress(url, itemsLoaded, itemsTotal);
+	      }
+	    };
+
+	    manager.onError = (url) => {
+	      if (this.onError && typeof this.onError === 'function') {
+	        this.onError(url);
+	      }
+	    };
+
+	    this.imageLoader = new THREE.ImageLoader(manager);
+	    this.textureLoader = new THREE.TextureLoader(manager);
+	    this.audioListener = new THREE.AudioListener(manager);
+	  }
+
+	  loadImage(key, src) {
+	    this.imageLoader.load(src,
+	      (data) => {
+	        this.Resource.images[key] = data;
+	      }, undefined, (err) => {
+	        this.Resource.unloaded.images.push(src);
+	      }
+	    );
+	  }
+
+	  loadTexture(key, src) {
+	    this.textureLoader.load(src,
+	      (data) => {
+	        this.Resource.textures[key] = data;
+	      }, undefined, (err) => {
+	        this.Resource.unloaded.textures.push(src);
+	      }
+	    );
 	  }
 	}
 
@@ -890,6 +970,7 @@
 	exports.Body = Body;
 	exports.Txt = Txt;
 	exports.Div = Div;
+	exports.LoaderFactory = LoaderFactory;
 	exports.Util = Util;
 
 	Object.defineProperty(exports, '__esModule', { value: true });

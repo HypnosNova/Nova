@@ -23,5 +23,7 @@ export {
 }
 from './gui/GUI.js';
 
+export { LoaderFactory } from './loader/LoaderFactory.js';
+
 export { Util } from './util/Util.js';
 //export * from './thirdparty/three.module.js';

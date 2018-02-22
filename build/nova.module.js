@@ -56,15 +56,6 @@ class LoopManager {
 
 class EventManager {
   constructor(world) {
-    try {
-    	if(Hammer===undefined){
-    		return;
-    	}
-    } catch (e) {
-      console.warn('Hammer没有引入导致鼠标或触屏事件功能无法使用。Nova的事件引擎依赖Hammer。');
-      return;
-    }
-    
     world.eventManager = this;
     this.world = world;
     this.isDeep = true;
@@ -74,8 +65,38 @@ class EventManager {
     this.selectedObj = null;
     this.centerSelectedObj = null;
     this.isDetectingEnter = true;
+    let normalEventList = ['click', 'mousedown', 'mouseup', 'touchstart',
+      'touchend', 'touchmove', 'mousemove'
+    ];
+
+    function normalEventToHammerEvent(event) {
+      return {
+        changedPointers: [event],
+        center: {
+          x: event.clientX,
+          y: event.clientY,
+        },
+        type: event.type,
+        target: event.target
+      };
+    }
+
+    for (let eventItem of normalEventList) {
+      world.app.parent.addEventListener(eventItem, (event) => {
+        this.raycastCheck(normalEventToHammerEvent(event));
+      });
+    }
+
+    try {
+      if (Hammer === undefined) {
+        return;
+      }
+    } catch (e) {
+      console.warn('Hammer没有引入，手势事件无法使用，只能使用基础的交互事件。');
+      return;
+    }
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('panmove pan press tap pressup pandown panup', (event) => {
+    this.hammer.on('press tap pressup pan', (event) => {
       this.raycastCheck(event);
     });
   }
@@ -95,7 +116,7 @@ class EventManager {
         break;
       }
     }
-    if (intersect) {
+    if (intersect && intersect.object.events[event.type]) {
       intersect.object.events[event.type].run(event, intersect);
     }
   }
@@ -655,19 +676,13 @@ class Signal {
  * 
  * */
 class Events {
-  constructor() {
-    this.press = new Signal('press');
-    this.pressup = new Signal('pressup');
-    this.tap = new Signal('tap');
-    this.enter = new Signal('enter');
-    this.leave = new Signal('leave');
-    this.pan = new Signal('pan');
-    this.panmove = new Signal('panmove');
-    this.panleft = new Signal('panleft');
-    this.panright = new Signal('panright');
-    this.panstart = new Signal('panstart');
-    this.pandown = new Signal('pandown');
-    this.panup = new Signal('panup');
+  constructor(list) {
+    list = list || ['press', 'tap', 'pressup', 'pan', 'click', 'mousedown',
+      'mouseup', 'touchstart', 'touchend', 'touchmove', 'mousemove'
+    ];
+    for (let eventItem of list) {
+      this[eventItem] = new Signal(eventItem);
+    }
   }
 }
 

@@ -1,58 +1,58 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Add a box in the scene</title>
+    <title>Draw on a cube</title>
   </head>
 
   <body>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
     <script src="../lib/three.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="../build/nova.js"></script>
     <script>
       var app = new NOVA.App();
+      app.world.camera.position.z = 300;
       app.start();
-      const CANVAS_WIDTH = 500;
-      const CANVAS_HEIGHT = 500;
+      const CANVAS_WIDTH = 2048;
+      const CANVAS_HEIGHT = 2048;
 
       let canvas = document.createElement('canvas');
-      document.body.appendChild(canvas)
       canvas.width = CANVAS_WIDTH;
       canvas.height = CANVAS_HEIGHT;
       let ctx = canvas.getContext('2d');
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      app.world.camera.position.z = 200;
-
-      geometry = new THREE.BoxGeometry(100, 100, 100);
-      texture = new THREE.Texture(canvas);
-
-      material = new THREE.MeshBasicMaterial();
-      material.map = texture;
-      texture.needsUpdate = true
-      console.log(texture)
-      mesh = new THREE.Mesh(geometry, material);
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial({
+        map: new THREE.CanvasTexture(canvas)
+      }));
       app.world.scene.add(mesh);
+      app.logicLoop.add(() => {
+        mesh.rotation.x += 0.005;
+        mesh.rotation.y += 0.005;
+        mesh.rotation.z += 0.005;
+      });
 
       let point = undefined;
 
       mesh.events = new NOVA.Events();
-      mesh.events.pandown.add((event, obj) => {
-        ctx.beginPath();
+      mesh.events.mousedown.add((event, obj) => {
         point = obj.uv;
         ctx.moveTo(point.x * CANVAS_WIDTH, (1 - point.y) * CANVAS_HEIGHT);
       });
-      mesh.events.panup.add((event, obj) => {
-        ctx.endPath();
+
+      mesh.events.mouseup.add((event, obj) => {
+        point = undefined;
       });
-      mesh.events.panmove.add((event, obj) => {
-        let newPoint = obj.uv;
-        ctx.lineTo(newPoint.x * CANVAS_WIDTH, (1 - newPoint.y) * CANVAS_HEIGHT);
-        ctx.stroke();
+
+      mesh.events.mousemove.add((event, obj) => {
+        if (point) {
+          let newPoint = obj.uv;
+          ctx.lineTo(newPoint.x * CANVAS_WIDTH, (1 - newPoint.y) * CANVAS_HEIGHT);
+          ctx.stroke();
+          mesh.material.map.needsUpdate = true;
+        }
       });
     </script>
   </body>

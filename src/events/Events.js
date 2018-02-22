@@ -5,19 +5,13 @@ import { Signal } from './Signal';
  * 
  * */
 class Events {
-  constructor() {
-    this.press = new Signal('press');
-    this.pressup = new Signal('pressup');
-    this.tap = new Signal('tap');
-    this.enter = new Signal('enter');
-    this.leave = new Signal('leave');
-    this.pan = new Signal('pan');
-    this.panmove = new Signal('panmove');
-    this.panleft = new Signal('panleft');
-    this.panright = new Signal('panright');
-    this.panstart = new Signal('panstart');
-    this.pandown = new Signal('pandown');
-    this.panup = new Signal('panup');
+  constructor(list) {
+    list = list || ['press', 'tap', 'pressup', 'pan', 'click', 'mousedown',
+      'mouseup', 'touchstart', 'touchend', 'touchmove', 'mousemove'
+    ];
+    for (let eventItem of list) {
+      this[eventItem] = new Signal(eventItem);
+    }
   }
 }
 

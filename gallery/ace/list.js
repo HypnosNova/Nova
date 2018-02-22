@@ -1,12 +1,4 @@
-var list = {
-  "Beginner": {
-    "tutorial": [
-      ["空的框架", "1.empty_framework"],
-      ["添加立方体", "2.add_a_box"],
-      ["逻辑循环", "3.logic_loop"],
-      ["事件", "4.event"],
-    ]
-  },
+const list = {
   "Framework Core": {
     "app": [
       ["Empty framework", "1.empty_framework"],
@@ -20,9 +12,6 @@ var list = {
     "loop": [
       ["Logic loop", "3.logic_loop"],
     ],
-    "events": [
-      ["Tap event", "4.event"],
-    ],
     "transition": [
       ["Transitionor", "5.transition"],
     ],
@@ -32,6 +21,14 @@ var list = {
     ],
     "VR": [
       ["Normal VR", "6.vr"],
+    ]
+  },
+  "Event": {
+    "Normal": [
+      ["Draw on a cube", "13.pen"]
+    ],
+    "Hammer": [
+      ["Tap event", "4.event"]
     ]
   },
   "BAS": {

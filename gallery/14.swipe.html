@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Swipe</title>
+  </head>
+
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+      app.world.camera.position.z = 800;
+      app.start();
+
+      const WIDTH = 180,
+        HEIGHT = 320,
+        SCALE = 0.43,
+        FONT_FAMILY = "微软雅黑",
+        RADIUS = 400,
+        NUMBER_SIZE = 100,
+        WORD_COLOR = "#ffffff",
+        AMOUNT = 18,
+        BACK_COLOR = "rgba(0,64,96,0.9)";
+
+      let cardArr = [];
+      let angle = 0;
+
+      for (let i = 0; i < AMOUNT; i++) {
+        let obj = drawCard(i + 1);
+        cardArr.push(obj);
+        app.world.scene.add(obj);
+      }
+
+      app.logicLoop.add(() => {
+        for (let index = 0; index < cardArr.length; index++) {
+          cardArr[index].position.set(Math.sin((index / AMOUNT - 1) * Math.PI * 2 + angle) * RADIUS, 0, Math.cos((index / AMOUNT - 1) * Math.PI * 2 + angle) * RADIUS);
+          cardArr[index].lookAt(app.world.camera.position);
+        }
+      });
+
+      function drawCard(index) {
+        let canvas = document.createElement("canvas");
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+        let ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        if (window.devicePixelRatio) {
+          canvas.height = HEIGHT * window.devicePixelRatio;
+          canvas.width = WIDTH * window.devicePixelRatio;
+          ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        ctx.fillStyle = BACK_COLOR;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.textAlign = "center";
+        ctx.font = "bolder" + " " + NUMBER_SIZE + "px " + FONT_FAMILY;
+        ctx.fillStyle = WORD_COLOR;
+        let width = ctx.measureText(index + "")
+          .width;
+        ctx.fillText(index + "", WIDTH * 0.5, HEIGHT * 0.62);
+
+        let texture = new THREE.CanvasTexture(canvas);
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        let geometry = new THREE.PlaneBufferGeometry(WIDTH * SCALE, HEIGHT * SCALE, 1);
+        let material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true
+        });
+        let obj = new THREE.Mesh(geometry, material);
+        obj.events=new NOVA.Events(['swipeleft']);
+        obj.events.swipeleft.add((event)=>{
+        	console.log(event)
+        });
+        return obj;
+      }
+    </script>
+  </body>
+
+</html>

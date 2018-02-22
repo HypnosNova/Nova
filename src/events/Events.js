@@ -6,8 +6,9 @@ import { Signal } from './Signal';
  * */
 class Events {
   constructor(list) {
-    list = list || ['press', 'tap', 'pressup', 'pan', 'click', 'mousedown',
-      'mouseup', 'touchstart', 'touchend', 'touchmove', 'mousemove'
+    list = list || ['press', 'tap', 'pressup', 'pan', 'swipe', 'click',
+      'mousedown', 'mouseup', 'touchstart', 'touchend', 'touchmove',
+      'mousemove'
     ];
     for (let eventItem of list) {
       this[eventItem] = new Signal(eventItem);

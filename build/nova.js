@@ -102,7 +102,7 @@
 	      return;
 	    }
 	    this.hammer = new Hammer(world.app.renderer.domElement);
-	    this.hammer.on('press tap pressup pan', (event) => {
+	    this.hammer.on('press tap pressup pan swipe', (event) => {
 	      this.raycastCheck(event);
 	    });
 	  }
@@ -122,7 +122,7 @@
 	        break;
 	      }
 	    }
-	    if (intersect && intersect.object.events[event.type]) {
+	    if (intersect && intersect.object.events && intersect.object.events[event.type]) {
 	      intersect.object.events[event.type].run(event, intersect);
 	    }
 	  }
@@ -683,8 +683,9 @@
 	 * */
 	class Events {
 	  constructor(list) {
-	    list = list || ['press', 'tap', 'pressup', 'pan', 'click', 'mousedown',
-	      'mouseup', 'touchstart', 'touchend', 'touchmove', 'mousemove'
+	    list = list || ['press', 'tap', 'pressup', 'pan', 'swipe', 'click',
+	      'mousedown', 'mouseup', 'touchstart', 'touchend', 'touchmove',
+	      'mousemove'
 	    ];
 	    for (let eventItem of list) {
 	      this[eventItem] = new Signal(eventItem);

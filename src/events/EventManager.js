@@ -40,7 +40,7 @@ class EventManager {
       return;
     }
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('press tap pressup pan', (event) => {
+    this.hammer.on('press tap pressup pan swipe', (event) => {
       this.raycastCheck(event);
     });
   }
@@ -60,7 +60,7 @@ class EventManager {
         break;
       }
     }
-    if (intersect && intersect.object.events[event.type]) {
+    if (intersect && intersect.object.events && intersect.object.events[event.type]) {
       intersect.object.events[event.type].run(event, intersect);
     }
   }

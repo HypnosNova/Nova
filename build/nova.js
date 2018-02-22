@@ -81,7 +81,7 @@
 	    this.centerSelectedObj = null;
 	    this.isDetectingEnter = true;
 	    this.hammer = new Hammer(world.app.renderer.domElement);
-	    this.hammer.on('pan press tap pressup pandown panup', (event) => {
+	    this.hammer.on('panmove pan press tap pressup pandown panup', (event) => {
 	      this.raycastCheck(event);
 	    });
 	  }
@@ -668,6 +668,7 @@
 	    this.enter = new Signal('enter');
 	    this.leave = new Signal('leave');
 	    this.pan = new Signal('pan');
+	    this.panmove = new Signal('panmove');
 	    this.panleft = new Signal('panleft');
 	    this.panright = new Signal('panright');
 	    this.panstart = new Signal('panstart');

@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Add a box in the scene</title>
+    <title>Tap event</title>
   </head>
 
   <body>
@@ -14,18 +14,13 @@
     <script src="../build/nova.js"></script>
     <script>
       var app = new NOVA.App();
-      app.setCommonCSS();
       app.start();
-
-      var scene = app.world.scene;
-      var camera = app.world.camera;
-      camera.position.z = 2;
+      app.world.camera.position.z = 2;
 
       geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
       material = new THREE.MeshNormalMaterial();
       mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
-
+      app.world.scene.add(mesh);
       mesh.events = new NOVA.Events();
       mesh.events.tap.add(() => {
         alert('Hello Nova');

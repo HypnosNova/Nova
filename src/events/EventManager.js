@@ -19,7 +19,7 @@ class EventManager {
     this.centerSelectedObj = null;
     this.isDetectingEnter = true;
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('pan press tap pressup pandown panup', (event) => {
+    this.hammer.on('panmove pan press tap pressup pandown panup', (event) => {
       this.raycastCheck(event);
     });
   }

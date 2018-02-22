@@ -12,6 +12,7 @@ class Events {
     this.enter = new Signal('enter');
     this.leave = new Signal('leave');
     this.pan = new Signal('pan');
+    this.panmove = new Signal('panmove');
     this.panleft = new Signal('panleft');
     this.panright = new Signal('panright');
     this.panstart = new Signal('panstart');

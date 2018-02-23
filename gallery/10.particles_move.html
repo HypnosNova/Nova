@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Particles move</title>
   </head>
-
   <body>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/tween.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../gallery/js/controls/OrbitControls.js"></script>
@@ -41,11 +39,9 @@
             start.x = THREE.Math.randFloatSpread(range << 2);
             start.y = THREE.Math.randFloatSpread(range << 2);
             start.z = THREE.Math.randFloatSpread(range << 2);
-
             end.x = THREE.Math.randFloatSpread(range);
             end.y = THREE.Math.randFloatSpread(range);
             end.z = THREE.Math.randFloatSpread(range);
-
             geometry.setPrefabData(startPositions, i, start.toArray(
               prefabData));
             geometry.setPrefabData(endPositions, i, end.toArray(prefabData));
@@ -54,20 +50,15 @@
           var axis = new THREE.Vector3();
           var angle;
           geometry.createAttribute('aAxisAngle', 4, function(data, i, total) {
-            // get a random axis
             axis.x = THREE.Math.randFloatSpread(2);
             axis.y = THREE.Math.randFloatSpread(2);
             axis.z = THREE.Math.randFloatSpread(2);
-            // axis has to be normalized, or else things get weird
             axis.normalize();
-            // the total angle of rotation around the axis
             angle = Math.PI * THREE.Math.randFloat(4.0, 8.0);
-
-            // copy the data to the array
             axis.toArray(data);
             data[3] = angle;
           });
-          //----------------------------------------------------------
+
           let material = new BAS.StandardAnimationMaterial({
             flatShading: true,
             uniforms: {
@@ -120,6 +111,7 @@
             .start();
         }
       }
+
       Object.defineProperty(ParticleAnimation.prototype, 'time', {
         get: function() {
           return this.material.uniforms['uTime'].value;
@@ -156,5 +148,4 @@
       });
     </script>
   </body>
-
 </html>

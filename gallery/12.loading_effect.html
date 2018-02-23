@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title></title>
+    <title>Loading effect</title>
   </head>
-
   <body>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../lib/tween.js"></script>
     <script src="../build/nova.js"></script>
@@ -20,7 +18,6 @@
       app.renderer.setClearColor(0xffffff);
 
       let numberTxt, plane, loader;
-
       createProgress();
       createLoadFactory();
 
@@ -94,5 +91,4 @@
       }
     </script>
   </body>
-
 </html>

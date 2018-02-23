@@ -4,7 +4,7 @@ let DefaultSettings = {
   setCommonCSS: true, //设置默认CSS样式，无法滚动，超出区域不显示，取消所有内外边距
   autoStart: true, //自动执行渲染循环和逻辑循环
   autoResize: true, //自动拉伸自适应不同屏幕分辨率
-  vrSupport: false, //是否加载VR支持模块
+  VRSupport: false, //是否加载VR支持模块
   renderer: {
     clearColor: 0x000000, //渲染器的默认清除颜色
     clearAlpha: 1, //渲染器的默认清除颜色的透明度
@@ -341,7 +341,7 @@ class App {
       this.start();
     }
     this.effectFactory = new EffectFactory(this);
-    if (this.options.vrSupport) {
+    if (this.options.VRSupport) {
       this.VR = new VR(this);
     }
   }

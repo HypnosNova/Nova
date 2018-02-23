@@ -31,7 +31,7 @@ class App {
       this.start();
     }
     this.effectFactory = new EffectFactory(this);
-    if (this.options.vrSupport) {
+    if (this.options.VRSupport) {
       this.VR = new VR(this);
     }
   }

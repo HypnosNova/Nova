@@ -3,24 +3,24 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title></title>
+    <title>VR effect</title>
   </head>
-
   <body>
     <button>VR</button>
     <button>Exit</button>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../lib/webvr-polyfill.min.js"></script>
     <script src="js/effects/VREffect.js"></script>
     <script src="../build/nova.js"></script>
     <script>
-      var app = new NOVA.App();
+      var app = new NOVA.App({
+        VRSupport: true
+      });
 
       var scene = app.world.scene;
       var camera = app.world.camera;
       camera.position.z = 2;
-
       geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
       material = new THREE.MeshNormalMaterial();
       mesh = new THREE.Mesh(geometry, material);
@@ -42,5 +42,4 @@
         });
     </script>
   </body>
-
 </html>

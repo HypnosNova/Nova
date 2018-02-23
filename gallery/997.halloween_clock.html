@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>时钟特效</title>
+    <title>Clock effect</title>
   </head>
 
   <body>
-        <script type="text/template" id="vertex-shader">
+    <script type="text/template" id="vertex-shader">
       varying vec2 vUv;
-  
       void main () {
         vec3 newPosition = position;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
         vUv = uv;
       }
     </script>
-
     <script type="text/template" id="fragment-shader">
       uniform sampler2D u_texture1;
       uniform sampler2D u_texture2;
       uniform float u_time;
       uniform float u_mixFactor;
       varying vec2 vUv;
-  
       <perlin-noise>
-
       void main () {
         vec2 newUv = vUv;
     
@@ -63,7 +58,7 @@
         return 130.0 * dot(m, g);
       }
     </script>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.4/lodash.core.min.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../lib/tween.js"></script>
     <script src="../build/nova.js"></script>
@@ -167,5 +162,4 @@
       });
     </script>
   </body>
-
 </html>

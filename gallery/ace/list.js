@@ -4,6 +4,7 @@ const list = {
       ["Empty framework", "1.empty_framework"],
       ["Add a box", "2.add_a_box"],
       ["Screenshot", "7.screenshot"],
+      ["Toggle fullscreen", "15.fullscreen"],
     ],
     "loader": [
       ["Load obj & mtl", "11.add_model"],

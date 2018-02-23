@@ -429,7 +429,7 @@
 	  }
 
 	  closeFullScreen() {
-	    let container = this.parent;
+	    let container = document;
 	    this.isFullScreen = false;
 	    if (container.exitFullscreen) {
 	      container.exitFullscreen();
@@ -454,6 +454,7 @@
 	    } else {
 	      this.openFullScreen();
 	    }
+	   
 	  }
 
 	  screenshot() {

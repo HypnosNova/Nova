@@ -24,8 +24,8 @@ class App {
     this.state = APP_STOP;
     this.logicLoop = new LoopManager();
     this.renderLoop = new LoopManager();
-    window.addEventListener('resize', ()=>{
-    	this.resize();
+    window.addEventListener('resize', () => {
+      this.resize();
     });
     if (this.options.autoStart) {
       this.start();
@@ -50,8 +50,8 @@ class App {
       this.world.update(time);
       this.renderLoop.update(time);
     }
-    this.animationFrame = requestAnimationFrame(()=>{
-    	this.update();
+    this.animationFrame = requestAnimationFrame(() => {
+      this.update();
     });
   }
 
@@ -113,7 +113,7 @@ class App {
   }
 
   closeFullScreen() {
-    let container = this.parent;
+    let container = document;
     this.isFullScreen = false;
     if (container.exitFullscreen) {
       container.exitFullscreen();
@@ -125,8 +125,7 @@ class App {
       container.msExitFullscreen();
     } else if (container.webkitCancelFullScreen) {
       container.webkitCancelFullScreen();
-    }
-    if (container.webkitExitFullScreen) {
+    } else if (container.webkitExitFullScreen) {
       container.webkitCancelFullScreen();
     }
     return this.isFullScreen;
@@ -138,6 +137,7 @@ class App {
     } else {
       this.openFullScreen();
     }
+
   }
 
   screenshot() {

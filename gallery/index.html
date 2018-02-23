@@ -1,269 +1,269 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
-	<head>
-		<meta charset="utf-8">
-		<title>three.js / documentation</title>
-		<link rel="stylesheet" href="https://cdn.bootcss.com/foundation/5.5.3/css/foundation.min.css">
-		<link rel="stylesheet" type="text/css" href="css/style.css" />
-		<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
-		<script src="https://cdn.bootcss.com/foundation/5.5.3/js/foundation.min.js"></script>
-		<script src="https://cdn.bootcss.com/foundation/5.5.3/js/vendor/modernizr.js"></script>
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	</head>
+  <head>
+    <meta charset="utf-8">
+    <title>three.js / documentation</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/foundation/5.5.3/css/foundation.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/foundation/5.5.3/js/foundation.min.js"></script>
+    <script src="https://cdn.bootcss.com/foundation/5.5.3/js/vendor/modernizr.js"></script>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  </head>
 
-	<body>
-		<div class="off-canvas-wrap" data-offcanvas>
-			<div class="inner-wrap">
-				<nav class="tab-bar">
-					<section class="left-small">
-						<a class="left-off-canvas-toggle menu-icon" href="#"><span></span></a>
-					</section>
+  <body>
+    <div class="off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+        <nav class="tab-bar">
+          <section class="left-small">
+            <a class="left-off-canvas-toggle menu-icon" href="#"><span></span></a>
+          </section>
 
-					<section class="middle tab-bar-section">
-						<h1 class="title">Nova</h1>
-					</section>
+          <section class="middle tab-bar-section">
+            <h1 class="title">Nova</h1>
+          </section>
 
-					<section class="right-small">
-						<a class="right-off-canvas-toggle menu-icon" href="#"><span></span></a>
-					</section>
-				</nav>
+          <section class="right-small">
+            <a class="right-off-canvas-toggle menu-icon" href="#"><span></span></a>
+          </section>
+        </nav>
 
-				<aside class="left-off-canvas-menu">
-					<h1><a href="https://github.com/HypnosNova/ThreeQuery">Nova</a> 实例展示</h1>
-					<a id="expandButton" href="#">
-						<span></span>
-						<span></span>
-						<span></span>
-					</a>
-					<div class="filterBlock">
-						<input type="text" id="filterInput" placeholder="Type to filter" />
-						<a href="#" id="clearFilterButton">x</a>
-					</div>
-					<ul class="off-canvas-list" id="content"></ul>
-					<div id="content"></div>
-				</aside>
+        <aside class="left-off-canvas-menu">
+          <h1><a href="https://github.com/HypnosNova/ThreeQuery">Nova</a> 实例展示</h1>
+          <a id="expandButton" href="#">
+            <span></span>
+            <span></span>
+            <span></span>
+          </a>
+          <div class="filterBlock">
+            <input type="text" id="filterInput" placeholder="Type to filter" />
+            <a href="#" id="clearFilterButton">x</a>
+          </div>
+          <ul class="off-canvas-list" id="content"></ul>
+          <div id="content"></div>
+        </aside>
 
-				<aside class="right-off-canvas-menu">
-					<nav class="top-bar" data-topbar role="navigation">
-						<ul class="title-area">
-							<li class="name">
-								<h1><a href="#">Nova code editor</a></h1>
-							</li>
-						</ul>
-						<section class="top-bar-section">
-							<ul class="right">
-								<li class="active">
-									<a href="#" id="runBtn">Run</a>
-								</li>
-							</ul>
-						</section>
-					</nav>
-					<div id="editor"></div>
-				</aside>
-				<section class="main-section">
-					<iframe id="viewer"></iframe>
-				</section>
-				<a class="exit-off-canvas"></a>
-			</div>
-		</div>
+        <aside class="right-off-canvas-menu">
+          <nav class="top-bar" data-topbar role="navigation">
+            <ul class="title-area">
+              <li class="name">
+                <h1><a href="#">Nova code editor</a></h1>
+              </li>
+            </ul>
+            <section class="top-bar-section">
+              <ul class="right">
+                <li class="active">
+                  <a href="#" id="runBtn">Run</a>
+                </li>
+              </ul>
+            </section>
+          </nav>
+          <div id="editor"></div>
+        </aside>
+        <section class="main-section">
+          <iframe id="viewer"></iframe>
+        </section>
+        <a class="exit-off-canvas"></a>
+      </div>
+    </div>
 
-		<script src="ace/list.js"></script>
-		<script src="ace/three4ace.js"></script>
-		<script src="ace/src-min/ace.js"></script>
-		<script src="ace/src-min/ext-language_tools.js"></script>
-		<script>
-			$(document)
-				.ready(function() {
-					$(".inner-wrap")
-						.css("height", innerHeight + "px");
-					$(document)
-						.foundation();
-				})
+    <script src="ace/list.js"></script>
+    <script src="ace/three4ace.js"></script>
+    <script src="ace/src-min/ace.js"></script>
+    <script src="ace/src-min/ext-language_tools.js"></script>
+    <script>
+      $(document)
+        .ready(function() {
+          $(".inner-wrap")
+            .css("height", innerHeight + "px");
+          $(document)
+            .foundation();
+        })
 
-			function extractQuery() {
-				var p = window.location.search.indexOf('?q=');
-				if (p !== -1) {
-					return window.location.search.substr(3);
-				}
-				return ''
-			}
+      function extractQuery() {
+        var p = window.location.search.indexOf('?q=');
+        if (p !== -1) {
+          return window.location.search.substr(3);
+        }
+        return ''
+      }
 
-			var viewer = document.getElementById('viewer');
+      var viewer = document.getElementById('viewer');
 
-			var expandButton = document.getElementById('expandButton');
-			expandButton.addEventListener('click', function(event) {
-				event.preventDefault();
-			});
+      var expandButton = document.getElementById('expandButton');
+      expandButton.addEventListener('click', function(event) {
+        event.preventDefault();
+      });
 
-			var filterInput = document.getElementById('filterInput');
-			var clearFilterButton = document.getElementById('clearFilterButton');
+      var filterInput = document.getElementById('filterInput');
+      var clearFilterButton = document.getElementById('clearFilterButton');
 
-			var DELIMITER = '/';
-			var MEMBER_DELIMITER = '.';
-			var nameCategoryMap = {};
-			var sections = [];
-			var selected = null;
+      var DELIMITER = '/';
+      var MEMBER_DELIMITER = '.';
+      var nameCategoryMap = {};
+      var sections = [];
+      var selected = null;
 
-			var content = document.getElementById('content');
+      var content = document.getElementById('content');
 
-			for (var section in list) {
-				$(content)
-					.append("<li><label>" + section + "</label></li>");
+      for (var section in list) {
+        $(content)
+          .append("<li><label>" + section + "</label></li>");
 
-				for (var category in list[section]) {
-					var div = document.createElement('div');
-					$(div)
-						.append("<li><label class='label2'>" + category + "</label></li>");
+        for (var category in list[section]) {
+          var div = document.createElement('div');
+          $(div)
+            .append("<li><label class='label2'>" + category + "</label></li>");
 
-					var ul = document.createElement('ul');
-					$(ul)
-						.addClass("off-canvas-list");
-					div.appendChild(ul);
+          var ul = document.createElement('ul');
+          $(ul)
+            .addClass("off-canvas-list");
+          div.appendChild(ul);
 
-					for (var i = 0; i < list[section][category].length; i++) {
-						var page = list[section][category][i];
+          for (var i = 0; i < list[section][category].length; i++) {
+            var page = list[section][category][i];
 
-						var li = document.createElement('li');
-						var a = document.createElement('a');
-						a.setAttribute('href', '#');
-						(function(s, c, p) {
-							a.addEventListener('click', function(e) {
-								goTo(s, c, p);
-								e.preventDefault();
-							})
-						})(section, category, page[0]);
-						a.textContent = page[0];
-						li.appendChild(a);
-						ul.appendChild(li);
-						nameCategoryMap[page[0]] = {
-							section: section,
-							category: category,
-							name: page[0],
-							element: a
-						};
-					}
-					content.appendChild(div);
-					sections.push(ul);
-				}
-			}
-			$(content)
-				.append('<li><a style="pointer-events: none;">&nbsp;</a></li>')
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.setAttribute('href', '#');
+            (function(s, c, p) {
+              a.addEventListener('click', function(e) {
+                goTo(s, c, p);
+                e.preventDefault();
+              })
+            })(section, category, page[0]);
+            a.textContent = page[0];
+            li.appendChild(a);
+            ul.appendChild(li);
+            nameCategoryMap[page[0]] = {
+              section: section,
+              category: category,
+              name: page[0],
+              element: a
+            };
+          }
+          content.appendChild(div);
+          sections.push(ul);
+        }
+      }
+      $(content)
+        .append('<li><a style="pointer-events: none;">&nbsp;</a></li>')
 
-			function layoutList() {
-				sections.forEach(function(el) {
-					var collapsed = true;
-					Array.prototype.slice.apply(el.children)
-						.forEach(function(item) {
-							if (!item.classList.contains('filtered')) {
-								collapsed = false;
-							}
-						});
-					if (collapsed) {
-						el.parentElement.classList.add('filtered');
-					} else {
-						el.parentElement.classList.remove('filtered');
-					}
-				});
-			}
+      function layoutList() {
+        sections.forEach(function(el) {
+          var collapsed = true;
+          Array.prototype.slice.apply(el.children)
+            .forEach(function(item) {
+              if (!item.classList.contains('filtered')) {
+                collapsed = false;
+              }
+            });
+          if (collapsed) {
+            el.parentElement.classList.add('filtered');
+          } else {
+            el.parentElement.classList.remove('filtered');
+          }
+        });
+      }
 
-			filterInput.addEventListener('input', function(e) {
-				updateFilter();
-			});
+      filterInput.addEventListener('input', function(e) {
+        updateFilter();
+      });
 
-			clearFilterButton.addEventListener('click', function(e) {
-				filterInput.value = '';
-				updateFilter();
-				e.preventDefault();
-			});
+      clearFilterButton.addEventListener('click', function(e) {
+        filterInput.value = '';
+        updateFilter();
+        e.preventDefault();
+      });
 
-			function updateFilter() {
-				var v = filterInput.value;
-				if (v !== '') {
-					window.history.replaceState({}, '', '?q=' + v);
-				} else {
-					window.history.replaceState({}, '', window.location.pathname);
-				}
-				if (selected) window.location.hash = selected;
+      function updateFilter() {
+        var v = filterInput.value;
+        if (v !== '') {
+          window.history.replaceState({}, '', '?q=' + v);
+        } else {
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+        if (selected) window.location.hash = selected;
 
-				var exp = new RegExp(filterInput.value, 'gi');
-				for (var j in nameCategoryMap) {
-					var res = nameCategoryMap[j].name.match(exp);
-					if (res && res.length > 0) {
-						nameCategoryMap[j].element.parentElement.classList.remove('filtered');
-						var str = nameCategoryMap[j].name;
-						for (var i = 0; i < res.length; i++) {
-							str = str.replace(res[i], '<b>' + res[i] + '</b>');
-						}
-						nameCategoryMap[j].element.innerHTML = str;
-					} else {
-						nameCategoryMap[j].element.parentElement.classList.add('filtered');
-						nameCategoryMap[j].element.textContent = nameCategoryMap[j].name;
-					}
-				}
-				layoutList();
-			}
+        var exp = new RegExp(filterInput.value, 'gi');
+        for (var j in nameCategoryMap) {
+          var res = nameCategoryMap[j].name.match(exp);
+          if (res && res.length > 0) {
+            nameCategoryMap[j].element.parentElement.classList.remove('filtered');
+            var str = nameCategoryMap[j].name;
+            for (var i = 0; i < res.length; i++) {
+              str = str.replace(res[i], '<b>' + res[i] + '</b>');
+            }
+            nameCategoryMap[j].element.innerHTML = str;
+          } else {
+            nameCategoryMap[j].element.parentElement.classList.add('filtered');
+            nameCategoryMap[j].element.textContent = nameCategoryMap[j].name;
+          }
+        }
+        layoutList();
+      }
 
-			function encodeUrl(path) {
-				return path.replace(/\ \/\ /g, '.')
-					.replace(/\ /g, '_');
-			}
+      function encodeUrl(path) {
+        return path.replace(/\ \/\ /g, '.')
+          .replace(/\ /g, '_');
+      }
 
-			function decodeUrl(path) {
-				return path.replace(/_/g, ' ')
-					.replace(/\./g, ' / ');
-			}
+      function decodeUrl(path) {
+        return path.replace(/_/g, ' ')
+          .replace(/\./g, ' / ');
+      }
 
-			// Page loading
+      // Page loading
 
-			function goTo(section, category, name, member) {
-				var urlShort = pages[section][category][name];
-				$.ajax({
-					type: "get",
-					url: urlShort + ".html",
-					async: true,
-					success: function(data) {
-						editor.setValue(data);
-						writeToIFrame();
-					}
-				});
-			}
+      function goTo(section, category, name, member) {
+        var urlShort = pages[section][category][name];
+        $.ajax({
+          type: "get",
+          url: urlShort + ".html",
+          async: true,
+          success: function(data) {
+            editor.setValue(data);
+            writeToIFrame();
+          }
+        });
+      }
 
-			filterInput.value = extractQuery();
-			updateFilter();
-		</script>
-		<script>
-			var langTools = ace.require("ace/ext/language_tools");
+      filterInput.value = extractQuery();
+      updateFilter();
+    </script>
+    <script>
+      var langTools = ace.require("ace/ext/language_tools");
 
-			langTools.addCompleter({
-				getCompletions: function(editor, session, pos, prefix, callback) {
-					if (prefix.length === 0) {
-						return callback(null, []);
-					} else {
-						return callback(null, three4ace);
-					}
-				}
-			});
+      langTools.addCompleter({
+        getCompletions: function(editor, session, pos, prefix, callback) {
+          if (prefix.length === 0) {
+            return callback(null, []);
+          } else {
+            return callback(null, three4ace);
+          }
+        }
+      });
 
-			var editor = ace.edit("editor");
-			editor.session.setMode("ace/mode/html");
-			editor.setTheme("ace/theme/terminal");
-			editor.setOptions({
-				enableBasicAutocompletion: true,
-				enableSnippets: true,
-				enableLiveAutocompletion: true,
-				fontSize: 20
-			});
+      var editor = ace.edit("editor");
+      editor.session.setMode("ace/mode/html");
+      editor.setTheme("ace/theme/terminal");
+      editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        fontSize: 20
+      });
 
-			var iframe = document.getElementById('viewer');
+      var iframe = document.getElementById('viewer');
 
-			$("#runBtn")
-				.click(writeToIFrame);
+      $("#runBtn")
+        .click(writeToIFrame);
 
-			function writeToIFrame() {
-				iframe.srcdoc = editor.getValue();
-			}
-		</script>
-	</body>
+      function writeToIFrame() {
+        iframe.srcdoc = editor.getValue();
+      }
+    </script>
+  </body>
 
 </html>

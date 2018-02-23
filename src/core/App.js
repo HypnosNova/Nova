@@ -3,49 +3,56 @@ import { APP_RUNNING, APP_STOP, APP_PAUSE } from './../constant.js';
 import { LoopManager } from './LoopManager.js';
 import { VR } from './VR.js';
 import { EffectFactory } from './../effect/EffectFactory.js';
+import { DefaultSettings } from './settings/DefaultSettings.js';
 
 class App {
-  constructor(parent, options = {}) {
-    this.options = _.defaults(options, {
-      setCommonCSS: true,
-      autoStart: true
-    });
+  constructor(settings = {}) {
+    this.options = _.defaultsDeep(settings, DefaultSettings);
     if (this.options.setCommonCSS) {
       this.setCommonCSS();
     }
-    this.parent = parent || document.body;
+    this.parent = this.options.parent;
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true
+      antialias: this.options.renderer.antialias,
+      precision: this.options.renderer.precision,
+      alpha: this.options.renderer.alpha,
     });
+    this.renderer.setClearColor(this.options.renderer.clearColor,
+      this.options.renderer.clearAlpha);
     this.world = new World(this);
     this.animationFrame;
     this.state = APP_STOP;
     this.logicLoop = new LoopManager();
     this.renderLoop = new LoopManager();
-    this.update = (time) => {
-      if (this.state === APP_RUNNING) {
-        this.logicLoop.update(time);
-        this.world.update(time);
-        this.renderLoop.update(time);
-      }
-      this.animationFrame = requestAnimationFrame(this.update);
-    };
-
-    this.resize = () => {
-      let width = this.getWorldWidth();
-      let height = this.getWorldHeight();
-
-      this.world.resize(width, height);
-
-      this.renderer.setSize(width, height);
-      this.renderer.setPixelRatio(1);
-    };
-    window.addEventListener('resize', this.resize);
+    window.addEventListener('resize', ()=>{
+    	this.resize();
+    });
     if (this.options.autoStart) {
       this.start();
     }
     this.effectFactory = new EffectFactory(this);
-    this.VR = new VR(this);
+    if (this.options.vrSupport) {
+      this.VR = new VR(this);
+    }
+  }
+
+  resize() {
+    let width = this.getWorldWidth();
+    let height = this.getWorldHeight();
+    this.world.resize(width, height);
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(this.options.renderer.pixelRatio);
+  }
+
+  update(time) {
+    if (this.state === APP_RUNNING) {
+      this.logicLoop.update(time);
+      this.world.update(time);
+      this.renderLoop.update(time);
+    }
+    this.animationFrame = requestAnimationFrame(()=>{
+    	this.update();
+    });
   }
 
   setCommonCSS() {

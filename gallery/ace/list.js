@@ -28,7 +28,8 @@ const list = {
       ["Draw on a cube", "13.pen"]
     ],
     "Hammer": [
-      ["Tap event", "4.event"]
+      ["Tap event", "4.event"],
+      ["Swipe event", "14.swipe"]
     ]
   },
   "BAS": {

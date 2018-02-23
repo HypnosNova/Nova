@@ -2,6 +2,7 @@ class EventManager {
   constructor(world) {
     world.eventManager = this;
     this.world = world;
+    this.disable = false;
     this.isDeep = true;
     this.receivers = world.receivers;
     this.raycaster = new THREE.Raycaster();
@@ -9,9 +10,7 @@ class EventManager {
     this.selectedObj = null;
     this.centerSelectedObj = null;
     this.isDetectingEnter = true;
-    let normalEventList = ['click', 'mousedown', 'mouseup', 'touchstart',
-      'touchend', 'touchmove', 'mousemove'
-    ];
+    let normalEventList = world.app.options.normalEventList;
 
     function normalEventToHammerEvent(event) {
       return {
@@ -27,6 +26,7 @@ class EventManager {
 
     for (let eventItem of normalEventList) {
       world.app.parent.addEventListener(eventItem, (event) => {
+        if (this.disable) return;
         this.raycastCheck(normalEventToHammerEvent(event));
       });
     }
@@ -40,7 +40,9 @@ class EventManager {
       return;
     }
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('press tap pressup pan swipe', (event) => {
+    console.log(world.app.options.hammerEventList)
+    this.hammer.on(world.app.options.hammerEventList, (event) => {
+    	if (this.disable) return;
       this.raycastCheck(event);
     });
   }
@@ -60,7 +62,8 @@ class EventManager {
         break;
       }
     }
-    if (intersect && intersect.object.events && intersect.object.events[event.type]) {
+    if (intersect && intersect.object.events && intersect.object.events[event
+        .type]) {
       intersect.object.events[event.type].run(event, intersect);
     }
   }

@@ -1,3 +1,24 @@
+//适合大部分WebGL的APP设置
+let DefaultSettings = {
+  parent: document.body, //APP所在DOM容器
+  setCommonCSS: true, //设置默认CSS样式，无法滚动，超出区域不显示，取消所有内外边距
+  autoStart: true, //自动执行渲染循环和逻辑循环
+  autoResize: true, //自动拉伸自适应不同屏幕分辨率
+  vrSupport: false, //是否加载VR支持模块
+  renderer: {
+    clearColor: 0x000000, //渲染器的默认清除颜色
+    clearAlpha: 1, //渲染器的默认清除颜色的透明度
+    pixelRatio: window.devicePixelRatio || 1, //用于移动平台的清晰度
+    precision: 'highp', // 渲染精细度，默认为高
+    antialias: true, //是否开启抗锯齿
+    alpha: false, // 渲染器是否保存alpha缓冲
+  },
+  normalEventList: ['click', 'mousedown', 'mouseup', 'touchstart',
+    'touchend', 'touchmove', 'mousemove'
+  ], //默认开启的原生事件监听，不建议将所有的事件监听都写在里面，每一个事件监听都会增加一次射线法碰撞检测，如果不必要的事件过多会降低性能
+  hammerEventList: 'press tap pressup pan swipe', //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
+};
+
 let NotFunctionError$1 = class extends Error {
   constructor( message ) {
     super( message );
@@ -58,6 +79,7 @@ class EventManager {
   constructor(world) {
     world.eventManager = this;
     this.world = world;
+    this.disable = false;
     this.isDeep = true;
     this.receivers = world.receivers;
     this.raycaster = new THREE.Raycaster();
@@ -65,9 +87,7 @@ class EventManager {
     this.selectedObj = null;
     this.centerSelectedObj = null;
     this.isDetectingEnter = true;
-    let normalEventList = ['click', 'mousedown', 'mouseup', 'touchstart',
-      'touchend', 'touchmove', 'mousemove'
-    ];
+    let normalEventList = world.app.options.normalEventList;
 
     function normalEventToHammerEvent(event) {
       return {
@@ -83,6 +103,7 @@ class EventManager {
 
     for (let eventItem of normalEventList) {
       world.app.parent.addEventListener(eventItem, (event) => {
+        if (this.disable) return;
         this.raycastCheck(normalEventToHammerEvent(event));
       });
     }
@@ -96,7 +117,9 @@ class EventManager {
       return;
     }
     this.hammer = new Hammer(world.app.renderer.domElement);
-    this.hammer.on('press tap pressup pan swipe', (event) => {
+    console.log(world.app.options.hammerEventList);
+    this.hammer.on(world.app.options.hammerEventList, (event) => {
+    	if (this.disable) return;
       this.raycastCheck(event);
     });
   }
@@ -116,7 +139,8 @@ class EventManager {
         break;
       }
     }
-    if (intersect && intersect.object.events && intersect.object.events[event.type]) {
+    if (intersect && intersect.object.events && intersect.object.events[event
+        .type]) {
       intersect.object.events[event.type].run(event, intersect);
     }
   }
@@ -292,47 +316,53 @@ class EffectFactory {
 }
 
 class App {
-  constructor(parent, options = {}) {
-    this.options = _.defaults(options, {
-      setCommonCSS: true,
-      autoStart: true
-    });
+  constructor(settings = {}) {
+    this.options = _.defaultsDeep(settings, DefaultSettings);
     if (this.options.setCommonCSS) {
       this.setCommonCSS();
     }
-    this.parent = parent || document.body;
+    this.parent = this.options.parent;
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true
+      antialias: this.options.renderer.antialias,
+      precision: this.options.renderer.precision,
+      alpha: this.options.renderer.alpha,
     });
+    this.renderer.setClearColor(this.options.renderer.clearColor,
+      this.options.renderer.clearAlpha);
     this.world = new World(this);
     this.animationFrame;
     this.state = APP_STOP;
     this.logicLoop = new LoopManager();
     this.renderLoop = new LoopManager();
-    this.update = (time) => {
-      if (this.state === APP_RUNNING) {
-        this.logicLoop.update(time);
-        this.world.update(time);
-        this.renderLoop.update(time);
-      }
-      this.animationFrame = requestAnimationFrame(this.update);
-    };
-
-    this.resize = () => {
-      let width = this.getWorldWidth();
-      let height = this.getWorldHeight();
-
-      this.world.resize(width, height);
-
-      this.renderer.setSize(width, height);
-      this.renderer.setPixelRatio(1);
-    };
-    window.addEventListener('resize', this.resize);
+    window.addEventListener('resize', ()=>{
+    	this.resize();
+    });
     if (this.options.autoStart) {
       this.start();
     }
     this.effectFactory = new EffectFactory(this);
-    this.VR = new VR(this);
+    if (this.options.vrSupport) {
+      this.VR = new VR(this);
+    }
+  }
+
+  resize() {
+    let width = this.getWorldWidth();
+    let height = this.getWorldHeight();
+    this.world.resize(width, height);
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(this.options.renderer.pixelRatio);
+  }
+
+  update(time) {
+    if (this.state === APP_RUNNING) {
+      this.logicLoop.update(time);
+      this.world.update(time);
+      this.renderLoop.update(time);
+    }
+    this.animationFrame = requestAnimationFrame(()=>{
+    	this.update();
+    });
   }
 
   setCommonCSS() {
@@ -421,9 +451,9 @@ class App {
   }
 
   screenshot() {
-    var w = window.open('', '');
+    let w = window.open('', '');
     w.document.title = "Nova Screenshot";
-    var img = new Image();
+    let img = new Image();
     this.renderer.render(this.world.scene, this.world.camera);
     img.src = app.renderer.domElement.toDataURL();
     w.document.body.appendChild(img);
@@ -965,5 +995,5 @@ let Util = {
 
 //export * from './thirdparty/three.module.js';
 
-export { App, LoopManager, Monitor, Transitioner, View, VR, World, EffectFactory, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, Util };
+export { DefaultSettings, App, LoopManager, Monitor, Transitioner, View, VR, World, EffectFactory, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, Util };
 //# sourceMappingURL=nova.module.js.map

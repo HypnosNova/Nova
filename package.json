@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "build-uglify": "rollup -c && uglifyjs build/three.js -cm --preamble \"// threejs.org/license\" > build/three.min.js",
+    "build-uglify": "rollup -c && uglifyjs build/nova.js -cm --preamble \"// threejs.org/license\" > build/nova.min.js",
     "dev": "concurrently --names \"ROLLUP,HTTP\" -c \"bgBlue.bold,bgGreen.bold\" \"rollup -c -w -m inline\" \"serve --port 8080\"",
     "start": "npm run dev",
     "lint": "eslint src"

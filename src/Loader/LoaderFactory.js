@@ -46,22 +46,26 @@ class LoaderFactory {
     this.audioListener = new THREE.AudioListener(manager);
   }
 
-  loadImage(key, src) {
-    this.imageLoader.load(src,
+  loadImage(key, src, sucFunc, errFunc) {
+    return this.imageLoader.load(src,
       (data) => {
         this.Resource.images[key] = data;
+        if (sucFunc) sucFunc(data);
       }, undefined, (err) => {
         this.Resource.unloaded.images.push(src);
+        if (errFunc) errFunc(err);
       }
     );
   }
 
-  loadTexture(key, src) {
-    this.textureLoader.load(src,
+  loadTexture(key, src, sucFunc, errFunc) {
+    return this.textureLoader.load(src,
       (data) => {
         this.Resource.textures[key] = data;
+        if (sucFunc) sucFunc(data);
       }, undefined, (err) => {
         this.Resource.unloaded.textures.push(src);
+        if (errFunc) errFunc(err);
       }
     );
   }

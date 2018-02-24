@@ -34,6 +34,10 @@ class LoopManager {
     }
   }
 
+  removeAll() {
+    this.functionMap.clear();
+  }
+
   remove(funcOrKey) {
     if (typeof funcOrKey === 'function') {
       this.functionMap.forEach((value, key) => {

@@ -2,7 +2,6 @@ import { World } from './World.js';
 import { APP_RUNNING, APP_STOP, APP_PAUSE } from './../constant.js';
 import { LoopManager } from './LoopManager.js';
 import { VR } from './VR.js';
-import { EffectFactory } from './../effect/EffectFactory.js';
 import { DefaultSettings } from './settings/DefaultSettings.js';
 
 class App {
@@ -30,7 +29,6 @@ class App {
     if (this.options.autoStart) {
       this.start();
     }
-    this.effectFactory = new EffectFactory(this);
     if (this.options.VRSupport) {
       this.VR = new VR(this);
     }

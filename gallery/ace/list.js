@@ -33,6 +33,12 @@ const list = {
       ["Swipe event", "14.swipe"]
     ]
   },
+  "Postprocessing": {
+    "Normal": [
+      ["Dot effect", "16.dot_effect"],
+      ["Glitch effect", "17.glitch_effect"]
+    ]
+  },
   "BAS": {
     "Animation": [
       ["Particles moving", "10.particles_move"]

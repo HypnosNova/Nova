@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>FAXX effect</title>
+    <title>FXAA effect</title>
   </head>
-
   <body>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../build/nova.js"></script>
     <script>
       let app = new NOVA.App();
-      //    app.world.renderLoop.removeAll();
       app.world.camera.position.z = 2;
 
       loader = new NOVA.LoaderFactory();
-      loader.loadTexture('faxx', 'assets/images/faxx.png', (texture) => {
+      loader.loadTexture('fxaa', 'assets/images/fxaa.png', (texture) => {
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
 
@@ -36,11 +33,7 @@
         mesh = new THREE.Mesh(geometry, fxaaMaterial);
         app.world.scene.add(mesh);
         mesh.position.x = -0.7;
-
       });
-
-      //    let composer = new NOVA.EffectComposer(app.world);
-      //    new NOVA.ShaderPass(0.8, false, composer, true);
     </script>
   </body>
 

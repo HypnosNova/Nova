@@ -25,6 +25,7 @@ export { DotScreenPass } from './postprocessing/DotScreenPass.js';
 export { RenderPass }    from './postprocessing/RenderPass.js';
 export { ShaderPass }    from './postprocessing/ShaderPass.js';
 export { GlitchPass }    from './postprocessing/GlitchPass.js';
+export { OutlinePass }    from './postprocessing/OutlinePass.js';
 
 export { GlitchShader }    from './postprocessing/shader/GlitchShader.js';
 export { FXAAShader }      from './postprocessing/shader/FXAAShader.js';

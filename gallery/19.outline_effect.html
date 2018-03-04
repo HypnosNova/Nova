@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Outline effect</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  </head>
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="../build/nova.js"></script>
+    <script src='js/dat.gui.min.js'></script>
+    <script>
+      let app = new NOVA.App();
+      app.world.renderLoop.removeAll();
+
+      let composer, effectFXAA, outlinePass;
+      let group = new THREE.Group();
+      let params = {
+        edgeStrength: 3.0,
+        edgeGlow: 0.0,
+        edgeThickness: 1.0,
+        pulsePeriod: 0,
+        rotate: false,
+        usePatternTexture: false
+      };
+
+      let gui = initGUI();
+
+      function initGUI() {
+        let gui = new dat.GUI({ width: 300 });
+
+        gui.add(params, 'edgeStrength', 0.01, 10)
+          .onChange(function(value) {
+            outlinePass.edgeStrength = Number(value);
+          });
+
+        gui.add(params, 'edgeGlow', 0.0, 1)
+          .onChange(function(value) {
+            outlinePass.edgeGlow = Number(value);
+          });
+
+        gui.add(params, 'edgeThickness', 1, 4)
+          .onChange(function(value) {
+            outlinePass.edgeThickness = Number(value);
+          });
+
+        gui.add(params, 'pulsePeriod', 0.0, 5)
+          .onChange(function(value) {
+            outlinePass.pulsePeriod = Number(value);
+          });
+
+        gui.add(params, 'rotate');
+
+        gui.add(params, 'usePatternTexture')
+          .onChange(function(value) {
+            outlinePass.usePatternTexture = value;
+          });
+
+        let conf = {
+          visibleEdgeColor: '#ffffff',
+          hiddenEdgeColor: '#190a05'
+        };
+
+        let controllerVisible = gui.addColor(conf, 'visibleEdgeColor')
+          .onChange(function(value) {
+            outlinePass.visibleEdgeColor.set(value);
+          });
+
+        let controllerHidden = gui.addColor(conf, 'hiddenEdgeColor')
+          .onChange(function(value) {
+            outlinePass.hiddenEdgeColor.set(value);
+          });
+        return gui;
+      }
+
+      init();
+
+      function init() {
+        let d = 10;
+        controls = new THREE.OrbitControls(app.world.camera, app.renderer.domElement);
+        controls.minDistance = 5;
+        controls.maxDistance = 20;
+
+        app.world.scene.add(new THREE.AmbientLight(0xaaaaaa, 0.2));
+        let light = new THREE.DirectionalLight(0xddffdd, 0.6);
+        light.position.set(1, 1, 1);
+
+        app.world.scene.add(light);
+        app.world.scene.add(group);
+
+        let geometry = new THREE.SphereBufferGeometry(3, 48, 24);
+
+        for (let i = 0; i < 10; i++) {
+          let material = new THREE.MeshLambertMaterial();
+          material.color.setHSL(Math.random(), 1.0, 0.3);
+          let mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * 4 - 2);
+          mesh.scale.multiplyScalar(Math.random() * 0.3 + 0.1);
+          group.add(mesh);
+        }
+
+        composer = new NOVA.EffectComposer(app.world);
+        outlinePass = new NOVA.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), app.world, [], composer);
+
+        new THREE.TextureLoader()
+          .load('assets/images/tri_pattern.jpg', (texture) => {
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            outlinePass.patternTexture = texture;
+          });
+
+        effectFXAA = new NOVA.ShaderPass(NOVA.FXAAShader, composer, true);
+        effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+
+        window.addEventListener('mousemove', onTouchMove);
+        window.addEventListener('touchmove', onTouchMove);
+
+        function onTouchMove(event) {
+          let intersect = app.world.eventManager.raycastCheck(app.world.eventManager.toNovaEvent(event));
+          outlinePass.selectedObjects = intersect ? [intersect.object] : [];
+        }
+      }
+
+      app.logicLoop.add(() => {
+        let timer = performance.now();
+        if (params.rotate) {
+          group.rotation.y = timer * 0.0001;
+        }
+        controls.update();
+      });
+
+      app.renderLoop.add(() => {
+        composer.render();
+      });
+    </script>
+  </body>
+</html>

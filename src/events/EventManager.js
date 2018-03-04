@@ -12,22 +12,10 @@ class EventManager {
     this.isDetectingEnter = true;
     let normalEventList = world.app.options.normalEventList;
 
-    function normalEventToHammerEvent(event) {
-      return {
-        changedPointers: [event],
-        center: {
-          x: event.clientX,
-          y: event.clientY,
-        },
-        type: event.type,
-        target: event.target
-      };
-    }
-
     for (let eventItem of normalEventList) {
       world.app.parent.addEventListener(eventItem, (event) => {
         if (this.disable) return;
-        this.raycastCheck(normalEventToHammerEvent(event));
+        this.raycastCheck(this.toNovaEvent(event));
       });
     }
 
@@ -42,9 +30,21 @@ class EventManager {
     this.hammer = new Hammer(world.app.renderer.domElement);
     console.log(world.app.options.hammerEventList)
     this.hammer.on(world.app.options.hammerEventList, (event) => {
-    	if (this.disable) return;
+      if (this.disable) return;
       this.raycastCheck(event);
     });
+  }
+
+  toNovaEvent(event) {
+    return {
+      changedPointers: [event],
+      center: {
+        x: event.clientX,
+        y: event.clientY,
+      },
+      type: event.type,
+      target: event.target
+    };
   }
 
   raycastCheck(event) {
@@ -66,6 +66,7 @@ class EventManager {
         .type]) {
       intersect.object.events[event.type].run(event, intersect);
     }
+    return intersect;
   }
 }
 

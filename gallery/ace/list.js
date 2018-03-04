@@ -36,7 +36,9 @@ const list = {
   "Postprocessing": {
     "Normal": [
       ["Dot effect", "16.dot_effect"],
-      ["Glitch effect", "17.glitch_effect"]
+      ["Glitch effect", "17.glitch_effect"],
+      ["FXAA effect", "18.fxaa_effect"],
+      ["Outline effect", "19.outline_effect"]
     ]
   },
   "BAS": {

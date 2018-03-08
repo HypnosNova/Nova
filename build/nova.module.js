@@ -439,6 +439,29 @@ class App {
   }
 }
 
+class Bind {
+  constructor(obj) {
+    for (let i in obj) {
+      this[i] = obj[i];
+      this.defineReactive(this, i, this[i]);
+    }
+  }
+
+  defineReactive(data, key, val) {
+    Object.defineProperty(data, key, {
+      enumerable: true,
+      configurable: false,
+      get: function() {
+        return val;
+      },
+      set: function(newVal) {
+        console.log('哈哈哈，监听到值变化了 ', val, ' --> ', newVal);
+        val = newVal;
+      }
+    });
+  }
+}
+
 class Monitor {
   constructor(world, option) {
     this.option = option;
@@ -3081,5 +3104,5 @@ let Util = {
 
 //export * from './thirdparty/three.module.js';
 
-export { DefaultSettings, App, LoopManager, Monitor, Transitioner, View, VR, World, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, GlitchShader, FXAAShader, CopyShader, DotScreenShader, Util };
+export { DefaultSettings, App, Bind, LoopManager, Monitor, Transitioner, View, VR, World, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, GlitchShader, FXAAShader, CopyShader, DotScreenShader, Util };
 //# sourceMappingURL=nova.module.js.map

@@ -445,6 +445,29 @@
 	  }
 	}
 
+	class Bind {
+	  constructor(obj) {
+	    for (let i in obj) {
+	      this[i] = obj[i];
+	      this.defineReactive(this, i, this[i]);
+	    }
+	  }
+
+	  defineReactive(data, key, val) {
+	    Object.defineProperty(data, key, {
+	      enumerable: true,
+	      configurable: false,
+	      get: function() {
+	        return val;
+	      },
+	      set: function(newVal) {
+	        console.log('哈哈哈，监听到值变化了 ', val, ' --> ', newVal);
+	        val = newVal;
+	      }
+	    });
+	  }
+	}
+
 	class Monitor {
 	  constructor(world, option) {
 	    this.option = option;
@@ -3089,6 +3112,7 @@
 
 	exports.DefaultSettings = DefaultSettings;
 	exports.App = App;
+	exports.Bind = Bind;
 	exports.LoopManager = LoopManager;
 	exports.Monitor = Monitor;
 	exports.Transitioner = Transitioner;

@@ -1,38 +1,53 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Bind</title>
   </head>
-
   <body>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="../build/nova.js"></script>
     <script>
-      var app = new NOVA.App();
-
+      let app = new NOVA.App();
       app.world.camera.position.z = 2;
-      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-      material = new THREE.MeshNormalMaterial();
-      mesh = new THREE.Mesh(geometry, material);
-      app.world.scene.add(mesh);
 
-      app.logicLoop.add(function() {
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y += 0.02;
-      });
+      let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      let material = new THREE.MeshNormalMaterial();
+      let mesh1 = new THREE.Mesh(geometry, material);
+      app.world.scene.add(mesh1);
+
+      let mesh2 = mesh1.clone();
+      mesh2.position.x = 0.5;
+      app.world.scene.add(mesh2);
+
+      let mesh3 = mesh1.clone();
+      mesh3.position.x = -0.5;
+      app.world.scene.add(mesh3);
 
       let bind = new NOVA.Bind({
         x: 0,
         y: 0,
         z: 0
       });
-      bind.x++;
-      console.log(bind)
+
+      bind.add(mesh1.rotation);
+      bind.add(mesh2.rotation, {
+        x: (x) => {
+          return x * 10;
+        }
+      });
+      bind.add(mesh3.rotation, {
+        y: (y) => {
+          return y * 10;
+        }
+      });
+
+      app.logicLoop.add(function() {
+        bind.x += 0.01;
+        bind.y += 0.01;
+      });
     </script>
   </body>
-
 </html>

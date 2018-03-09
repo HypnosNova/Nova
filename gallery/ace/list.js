@@ -5,6 +5,7 @@ const list = {
       ["Add a box", "2.add_a_box"],
       ["Screenshot", "7.screenshot"],
       ["Toggle fullscreen", "15.fullscreen"],
+      ["Bind value", "20.bind"],
     ],
     "loader": [
       ["Load obj & mtl", "11.add_model"],

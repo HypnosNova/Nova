@@ -27,7 +27,7 @@ class Bind {
         let bindMap = data.bindMap;
         for (let [obj, funcs] of bindMap) {
           if (obj[key] !== undefined) {
-            obj[key] = funcs[key] ? funcs[key](val) : val;
+            obj[key] = funcs[key] ? funcs[key](val, obj) : val;
           }
         }
       }

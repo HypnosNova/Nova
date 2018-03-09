@@ -6,6 +6,7 @@ const list = {
       ["Screenshot", "7.screenshot"],
       ["Toggle fullscreen", "15.fullscreen"],
       ["Bind value", "20.bind"],
+      ["Bind more values", "21.bind_advance"],
     ],
     "loader": [
       ["Load obj & mtl", "11.add_model"],

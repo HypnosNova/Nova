@@ -23,8 +23,13 @@ class World {
       this.app.getWorldHeight(), this.renderTargetParameters);
     this.defaultRenderID = Symbol();
     this.renderLoop.add(() => {
-      this.app.renderer.render(this.scene, this.camera);
+      if (this.isRTT) {
+        this.app.renderer.render(this.scene, this.camera, this.fbo, true);
+      } else {
+        this.app.renderer.render(this.scene, this.camera);
+      }
     }, this.defaultRenderID);
+    this.defaultUpdateID = Symbol();
   }
 
   update(time) {

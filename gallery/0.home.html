@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Empty Framework</title>
+  </head>
+
+  <body>
+    <script src="../lib/tween.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App({
+        renderer: {
+          clearColor: 0xffffff
+        }
+      });
+
+      let geometry = new THREE.PlaneBufferGeometry(2, 3);
+      let material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide,
+        map: new THREE.TextureLoader()
+          .load('assets/images/cardback/2.jpg')
+      });
+      let card1 = new THREE.Mesh(geometry, material);
+      card1.position.set(0, 0, -10);
+      app.world.scene.add(card1);
+
+      let card2 = card1.clone();
+      card2.position.set(3, 0, -10);
+      app.world.scene.add(card2);
+
+      let card3 = card1.clone();
+      card3.position.set(-3, 0, -10);
+      app.world.scene.add(card3);
+
+      window.addEventListener('mousemove', onTouchMove);
+      window.addEventListener('touchmove', onTouchMove);
+      let intersect;
+
+      function onTouchMove(event) {
+        intersectTmp = app.world.eventManager.raycastCheck(app.world.eventManager.toNovaEvent(event));
+        if (intersectTmp) {
+          if (intersectTmp.tween) {
+            TWEEN.remove(intersectTmp.tween);
+            intersectTmp.tween = false;
+          }
+          let uv = intersectTmp.uv;
+          let mesh = intersectTmp.object;
+          mesh.rotation.set(Math.sin(-0.5 + uv.y), Math.sin(-uv.x + 0.5), 0);
+        }
+        if (intersect && intersectTmp && (intersect.object != intersectTmp.object)) {
+          rotateMesh(intersect.object);
+        } else if (intersect && !intersectTmp) {
+          rotateMesh(intersect.object);
+        }
+        intersect = intersectTmp;
+      }
+
+      function rotateMesh(mesh) {
+        mesh.tween = new TWEEN.Tween(mesh.rotation)
+          .to({
+            x: 0,
+            y: 0,
+            z: 0
+          }, 300)
+          .start();
+      }
+
+      app.logicLoop.add(() => {
+        TWEEN.update();
+      });
+    </script>
+  </body>
+
+</html>

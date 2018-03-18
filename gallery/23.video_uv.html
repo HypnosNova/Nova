@@ -15,62 +15,47 @@
     <script src="../lib/three.min.js"></script>
     <script src="../build/nova.js"></script>
     <script>
-      var app = new NOVA.App();
-
-      var camera, scene, renderer;
-      var video, texture, material, mesh;
-      var composer;
-      var mouseX = 0;
-      var mouseY = 0;
-      var windowHalfX = window.innerWidth / 2;
-      var windowHalfY = window.innerHeight / 2;
-      var cube_count,
-        meshes = [],
-        materials = [],
-        xgrid = 3,
-        ygrid = 1;
+      let app = new NOVA.App();
+      let video, texture, material, mesh;
+      let meshes = [];
+      let materials = [];
+      let xgrid = 5;
+      let ygrid = 3;
+      let bind = new NOVA.Bind({ z: 0 });
       init();
 
       function init() {
         app.world.camera.position.z = 500;
-        var light = new THREE.DirectionalLight(0xffffff);
-        light.position.set(0.5, 1, 1)
-          .normalize();
-        app.world.scene.add(light);
-
         video = document.getElementById('video');
         texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
         texture.format = THREE.RGBFormat;
-        //
-        var i, j, ux, uy, ox, oy,
-          geometry,
-          xsize, ysize;
-        ux = 1 / xgrid;
-        uy = 1 / ygrid;
-        xsize = 480 / xgrid;
-        ysize = 204 / ygrid;
-        var parameters = { color: 0xffffff, map: texture };
-        cube_count = 0;
-        for (i = 0; i < xgrid; i++)
-          for (j = 0; j < ygrid; j++) {
-            ox = i;
-            oy = j;
-            geometry = new THREE.BoxGeometry(xsize, ysize, xsize);
-            change_uvs(geometry, ux, uy, ox, oy);
-            materials[cube_count] = new THREE.MeshLambertMaterial(parameters);
-            material = materials[cube_count];
+
+        let ux = 1 / xgrid;
+        let uy = 1 / ygrid;
+        let xsize = 480 / xgrid;
+        let ysize = 204 / ygrid;
+        let parameters = { color: 0xffffff, map: texture };
+
+        for (let i = 0; i < xgrid; i++) {
+          for (let j = 0; j < ygrid; j++) {
+            let geometry = new THREE.PlaneGeometry(xsize, ysize);
+            change_uvs(geometry, ux, uy, i, j);
+            material = new THREE.MeshBasicMaterial(parameters);
+            materials.push(material);
             material.saturation = 1 - j / ygrid;
             mesh = new THREE.Mesh(geometry, material);
-            mesh.position.x = (i - xgrid / 2 + 0.5) * xsize;
-            mesh.position.y = (j - ygrid / 2 + 0.5) * ysize;
-            mesh.position.z = 0;
-            mesh.scale.set(1, 1, 1);
+            mesh.position.set((i - xgrid / 2 + 0.5) * xsize, (j - ygrid / 2 + 0.5) * ysize, 0);
             app.world.scene.add(mesh);
-            meshes[cube_count] = mesh;
-            cube_count += 1;
+            meshes.push(mesh);
+            bind.add(mesh.position, {
+              z: (z) => {
+                return Math.sin((i + j) / 2 + z) * 128;
+              }
+            });
           }
+        }
         app.renderer.autoClear = false;
       }
 
@@ -86,7 +71,9 @@
         }
       }
 
-      var h, counter = 1;
+      app.logicLoop.add(() => {
+        bind.z += 0.04;
+      });
     </script>
   </body>
 

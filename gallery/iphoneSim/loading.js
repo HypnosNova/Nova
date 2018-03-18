@@ -26,7 +26,7 @@ var materialsUpdate = [{
   name: "第8个是正面框架",
   color: 0xeeeeee
 }, {
-  name: "第9个是屏幕",//---------------------
+  name: "第9个是屏幕", //---------------------
   color: 0xffffff
 }, {
   name: "第10个是正面轮廓圈",
@@ -139,7 +139,7 @@ function createProgress() {
 function createLoadFactory() {
   let loader = new NOVA.LoaderFactory();
   loader.loadTexture("bg", "assets/images/bg.jpg");
-
+  window.RESOURCE = loader.Resource;
   let mtlLoader = new THREE.MTLLoader(loader.manager);
   mtlLoader.setPath('../assets/model/iPhone/');
   mtlLoader.load('iphone_6_model.mtl', function(materials) {
@@ -178,6 +178,7 @@ function createLoadFactory() {
           new THREE.OrbitControls(app.world.camera);
           fixColor(window.iphoneGroup);
           window.IPHONE = new IPhone(app, window.iphoneGroup);
+          let novaWorld = createNovaWorld();
           window.IPHONE.screen.mesh.material.map = novaWorld.fbo.texture;
         });
     }, 300);

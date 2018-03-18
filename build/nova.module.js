@@ -1783,7 +1783,7 @@ class Body extends GUI {
     super();
     this.world = world;
     this.distanceFromCamera = 50;
-    this.css = _.defaults(css || {}, this.css);
+    this.css = _.defaultsDeep(css || {}, this.css);
     this.canvas = document.createElement("canvas");
     var spriteMaterial = new THREE.SpriteMaterial({
       map: this.canvas,
@@ -1830,7 +1830,7 @@ class Div extends GUI {
   constructor(world, css) {
     super();
     this.world = world;
-    this.css = _.defaults(css || {}, this.css);
+    this.css = _.defaultsDeep(css || {}, this.css);
     this.canvas = document.createElement("canvas");
     var spriteMaterial = new THREE.SpriteMaterial({
       map: canvas,
@@ -1864,7 +1864,7 @@ class Div extends GUI {
 
 class Txt extends THREE.Mesh {
   constructor(text, css) {
-    css = _.defaults(css || {}, {
+    css = _.defaultsDeep(css || {}, {
       fontStyle: "normal",
       fontVariant: "normal",
       fontSize: 12,

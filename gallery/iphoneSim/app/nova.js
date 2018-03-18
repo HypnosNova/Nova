@@ -1,5 +1,6 @@
-let fs =
-  `uniform float time;
+function createNovaWorld() {
+  let fs =
+    `uniform float time;
       varying vec3 vTexCoord3D;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
@@ -75,7 +76,7 @@ let fs =
         // height
         float n = heightMap( vTexCoord3D );
         // color
-        gl_FragColor = vec4( vec3( 1.5 - n, 1.0 - n, 0.5 - n ), 1.0 );
+        gl_FragColor = vec4( vec3( 1.0 - n, 1.2 - n, 1.5 - n ), 1.0 );
         // normal
         const float e = 0.001;
         float nx = heightMap( vTexCoord3D + vec3( e, 0.0, 0.0 ) );
@@ -93,13 +94,13 @@ let fs =
         float dirSpecularWeight = 0.0;
         if ( dirDotNormalHalf >= 0.0 )
           dirSpecularWeight = ( 1.0 - n ) * pow( dirDotNormalHalf, 5.0 );
-        vLightWeighting += vec3( 1.0, 0.5, 0.0 ) * dirSpecularWeight * n * 2.0;
+        vLightWeighting += vec3( 1.0, 0.9, 0.3 ) * dirSpecularWeight * n * 2.0;
         gl_FragColor *= vec4( vLightWeighting, 1.0 );
       }`;
 
-let vs =
-  `
-uniform float time;
+  let vs =
+    `
+      uniform float time;
       uniform float scale;
       varying vec3 vTexCoord3D;
       varying vec3 vNormal;
@@ -111,42 +112,65 @@ uniform float time;
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
       }`;
 
-let novaWorld = new NOVA.World(app);
-let camera = novaWorld.camera;
-let scene = novaWorld.scene;
-var uniforms, mesh;
-var oldTime = new Date()
-  .getTime();
-init();
-
-function init() {
-  camera.position.z = 3;
-  start_time = new Date()
+  let novaWorld = new FBOWorld(app, undefined, 1024, 1024);
+  let camera = novaWorld.camera;
+  let scene = novaWorld.scene;
+  var uniforms, mesh;
+  var oldTime = new Date()
     .getTime();
-  uniforms = {
-    time: { type: "f", value: 1.0 },
-    scale: { type: "f", value: 1.0 }
-  };
-  var material = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: vs,
-    fragmentShader: fs
+  init();
+
+  function init() {
+    camera.position.z = 5;
+    start_time = new Date()
+      .getTime();
+    uniforms = {
+      time: { type: "f", value: 1.0 },
+      scale: { type: "f", value: 0.4 }
+    };
+    var material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: vs,
+      fragmentShader: fs
+    });
+    var size = 0.75;
+    mesh = new THREE.Mesh(new THREE.SphereBufferGeometry(size, 64, 64), material);
+    scene.add(mesh);
+    mesh2 = new THREE.Mesh(new THREE.PlaneBufferGeometry(9, 16), new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      map: RESOURCE.textures['bg']
+    }));
+    mesh2.position.z = -14.2;
+    mesh2.lookAt(camera.position);
+    scene.add(mesh2);
+
+    text = new NOVA.Txt("20:25", {
+      fontSize: 110,
+      width: 600,
+      height: 120,
+      scale: {
+        x: 0.035,
+        y: 0.035,
+        z: 1,
+      }
+    });
+    text.position.y = 1.4;
+    scene.add(text);
+  }
+  novaWorld.isRTT = true;
+  novaWorld.logicLoop.add(function() {
+    var time = new Date()
+      .getTime();
+    var delta = 0.001 * (time - oldTime);
+    oldTime = time;
+    uniforms.time.value += 0.175 * delta;
+    mesh.rotation.y += 0.1 * delta;
+    mesh.rotation.x += 0.1 * delta;
   });
-  var size = 0.75;
-  mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 64, 64), material);
-  scene.add(mesh);
-}
-novaWorld.isRTT = true;
-novaWorld.logicLoop.add(function() {
-  var time = new Date()
-    .getTime();
-  var delta = 0.001 * (time - oldTime);
-  oldTime = time;
-  uniforms.time.value += 0.275 * delta;
-  mesh.rotation.y += 0.5 * delta;
-  mesh.rotation.x += 0.1 * delta;
-});
 
-app.logicLoop.add(() => {
-  novaWorld.update();
-}, novaWorld.defaultUpdateID);
+  app.logicLoop.add(() => {
+    novaWorld.update();
+  }, novaWorld.defaultUpdateID);
+
+  return novaWorld;
+}

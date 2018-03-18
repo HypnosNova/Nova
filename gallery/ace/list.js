@@ -7,6 +7,7 @@ const list = {
       ["Toggle fullscreen", "15.fullscreen"],
       ["Bind value", "20.bind"],
       ["Bind more values", "21.bind_advance"],
+      ["Video uv", "23.video_uv"],
     ],
     "loader": [
       ["Load obj & mtl", "11.add_model"],

@@ -112,7 +112,7 @@ function createNovaWorld() {
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
       }`;
 
-  let novaWorld = new FBOWorld(app, undefined, 1024, 1024);
+  let novaWorld = new NOVA.FBOWorld(app, undefined, 1024, 1024);
   let camera = novaWorld.camera;
   let scene = novaWorld.scene;
   var uniforms, mesh;

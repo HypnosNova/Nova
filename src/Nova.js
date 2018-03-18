@@ -2,6 +2,7 @@
 export { DefaultSettings } from './core/settings/DefaultSettings.js';
 export { App } from './core/App.js';
 export { Bind } from './core/Bind.js';
+export { FBOWorld } from './core/FBOWorld.js';
 export { LoopManager } from './core/LoopManager.js';
 export { Monitor } from './core/Monitor.js';
 export { QRCode } from './core/QRCode.js';

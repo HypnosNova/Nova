@@ -178,8 +178,8 @@ function createLoadFactory() {
           new THREE.OrbitControls(app.world.camera);
           fixColor(window.iphoneGroup);
           window.IPHONE = new IPhone(app, window.iphoneGroup);
-          let novaWorld = createNovaWorld();
-          window.IPHONE.screen.mesh.material.map = novaWorld.fbo.texture;
+          let novaWorld = new NovaWorld(app);
+          window.IPHONE.setFBOWorld(novaWorld);
         });
     }, 300);
   }

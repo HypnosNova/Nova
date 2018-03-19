@@ -8,11 +8,19 @@ class IPhone {
     };
     this.curentFBOWorld = new NOVA.FBOWorld();
     this.app.world.scene.add(this.group);
+    this.app.logicLoop.add(()=>{
+    	this.update();
+    });
   }
-  
-  update(){
-  	if(this.curentFBOWorld){
-  		this.curentFBOWorld.update();
-  	}
+
+  setFBOWorld(world) {
+    this.curentFBOWorld = world;
+    this.screen.mesh.material.map = world.fbo.texture;
+  }
+
+  update() {
+    if (this.curentFBOWorld) {
+      this.curentFBOWorld.update();
+    }
   }
 }

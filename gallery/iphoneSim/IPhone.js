@@ -6,7 +6,13 @@ class IPhone {
       mesh: group.children[9],
       isHorizontal: false
     };
-    this.curentApp = undefined;
+    this.curentFBOWorld = new NOVA.FBOWorld();
     this.app.world.scene.add(this.group);
+  }
+  
+  update(){
+  	if(this.curentFBOWorld){
+  		this.curentFBOWorld.update();
+  	}
   }
 }

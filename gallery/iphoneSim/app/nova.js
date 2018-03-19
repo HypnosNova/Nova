@@ -1,3 +1,10 @@
+class NovaWorld extends NOVA.FBOWorld {
+  constructor(app, size = 1024) {
+    super(app, undefined, size, size);
+    
+  }
+}
+
 function createNovaWorld() {
   let fs =
     `uniform float time;

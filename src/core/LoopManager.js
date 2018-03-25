@@ -7,12 +7,13 @@ class LoopManager {
     //记录循环次数
     this.times = 0;
     //每隔多少循环执行一次update，用于调整fps。数字越大，fps越低
-    this.cycleLevel = cycleLevel <= 0 ? 1 : cycleLevel;
+    this.cycleLevel = cycleLevel <= 1 ? 1 : cycleLevel;
     this.functionMap = new Map();
   }
 
   update(time) {
-    if (this.disable || this.times % this.cycleLevel !== 0) {
+    this.times++;
+    if (this.disable || (this.times % this.cycleLevel) !== 0) {
       return;
     }
     this.functionMap.forEach((value) => {

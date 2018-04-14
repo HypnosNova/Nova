@@ -12,6 +12,7 @@ const list = {
     "loader": [
       ["Load obj & mtl", "11.add_model"],
       ["Loding progress", "12.loading_effect"],
+      ["Model clip", "24.model_clip"],
     ],
     "loop": [
       ["Logic loop", "3.logic_loop"],

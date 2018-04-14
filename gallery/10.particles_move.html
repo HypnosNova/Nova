@@ -126,14 +126,14 @@
       app.world.camera.position.set(0, 0, 1000);
       new THREE.OrbitControls(app.world.camera);
 
-      var light = new THREE.DirectionalLight(0xffff00);
+      let light = new THREE.DirectionalLight(0xffff00);
       app.world.scene.add(light);
       light.position.set(5, -20, 40);
       light = new THREE.DirectionalLight(0xff8800);
       light.position.set(-5, 20, 40);
       app.world.scene.add(light);
 
-      var animation = new ParticleAnimation(new THREE.PlaneGeometry(3.0, 3.0), 50000);
+      let animation = new ParticleAnimation(new THREE.PlaneGeometry(3.0, 3.0), 50000);
       animation.animate({
         duration: 8000,
         ease: TWEEN.Easing.Quadratic.Out,

@@ -12,6 +12,7 @@ let DefaultSettings = {
     precision: 'highp', // 渲染精细度，默认为高
     antialias: true, //是否开启抗锯齿
     alpha: false, // 渲染器是否保存alpha缓冲
+    logarithmicDepthBuffer: false, // 逻辑深度缓冲
   },
   normalEventList: ['click', 'mousedown', 'mouseup', 'touchstart',
     'touchend', 'touchmove', 'mousemove'
@@ -34,12 +35,13 @@ class LoopManager {
     //记录循环次数
     this.times = 0;
     //每隔多少循环执行一次update，用于调整fps。数字越大，fps越低
-    this.cycleLevel = cycleLevel <= 0 ? 1 : cycleLevel;
+    this.cycleLevel = cycleLevel <= 1 ? 1 : cycleLevel;
     this.functionMap = new Map();
   }
 
   update(time) {
-    if (this.disable || this.times % this.cycleLevel !== 0) {
+    this.times++;
+    if (this.disable || (this.times % this.cycleLevel) !== 0) {
       return;
     }
     this.functionMap.forEach((value) => {
@@ -311,6 +313,7 @@ class App {
       antialias: this.options.renderer.antialias,
       precision: this.options.renderer.precision,
       alpha: this.options.renderer.alpha,
+      logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer
     });
     this.renderer.setClearColor(this.options.renderer.clearColor,
       this.options.renderer.clearAlpha);

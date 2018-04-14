@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Empty Framework</title>
+  </head>
+
+  <body>
+    <script src="../lib/tween.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/loaders/ColladaLoader.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      var app = new NOVA.App();
+      app.world.camera.position.set(50, 50, 50);
+      app.world.camera.lookAt(app.world.scene.position);
+      app.logicLoop.add(() => {
+        TWEEN.update();
+      });
+
+      var spotLight = new THREE.SpotLight(0xffffff);
+      spotLight.position.set(50, 50, 50);
+      app.world.scene.add(spotLight);
+
+      var platArr = [];
+      let downTime, upTime, force = 0,
+        charactor;
+      createPlat();
+      charactor = createCharacter();
+
+      function createCharacter() {
+        var geometry = new THREE.CylinderBufferGeometry(1, 2, 5, 4);
+        var material = new THREE.MeshLambertMaterial({ color: 0xff00ff });
+        var cylinder = new THREE.Mesh(geometry, material);
+        app.world.scene.add(cylinder);
+        cylinder.position.y = 5;
+        return cylinder;
+      }
+
+      function createPlat() {
+        var geometry = new THREE.CylinderBufferGeometry(5, 5, 4, 32);
+        var material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+        var cylinder = new THREE.Mesh(geometry, material);
+        app.world.scene.add(cylinder);
+      }
+
+      let canvas = document.getElementsByTagName('canvas')[0];
+
+      canvas.addEventListener("mousedown", () => {
+        downTime = new Date()
+          .getTime();
+        app.logicLoop.add(makeForce, forceId);
+      });
+      canvas.addEventListener("mouseup", () => {
+        upTime = new Date()
+          .getTime();
+        app.logicLoop.remove(forceId);
+        goUpDown(upTime - downTime);
+        new TWEEN.Tween(charactor.scale)
+          .to({
+            x: 1,
+            y: 1,
+            z: 1
+          }, (charactor.scale.x - 1) * 1000)
+          .start()
+          .easing(TWEEN.Easing.Elastic.Out);
+      });
+
+      let forceId = Symbol();
+
+      function makeForce() {
+        charactor.scale.y -= 0.005;
+        charactor.scale.x += 0.005;
+        charactor.scale.z += 0.005;
+        charactor.position.y -= 0.0025 * 5;
+      }
+
+      function goUpDown(force) {
+        let v = force/350;
+        let id = Symbol();
+        let move = () => {
+          charactor.position.y += v;
+          v-=0.3;
+          if (charactor.position.y < 5) {
+            charactor.position.y = 5;
+            app.logicLoop.remove(id);
+          }
+        }
+
+        app.logicLoop.add(() => {
+          move();
+        }, id);
+
+      }
+    </script>
+  </body>
+
+</html>

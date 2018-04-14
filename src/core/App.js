@@ -15,6 +15,7 @@ class App {
       antialias: this.options.renderer.antialias,
       precision: this.options.renderer.precision,
       alpha: this.options.renderer.alpha,
+      logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer
     });
     this.renderer.setClearColor(this.options.renderer.clearColor,
       this.options.renderer.clearAlpha);

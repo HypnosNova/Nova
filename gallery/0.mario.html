@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Empty Framework</title>
+  </head>
+
+  <body>
+    <script src="../lib/tween.js"></script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/loaders/ColladaLoader.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+    	
+    	
+      let app = new NOVA.App();
+      app.world.camera.position.set(50, 50, 50);
+      app.world.camera.lookAt(app.world.scene.position);
+      new THREE.OrbitControls(app.world.camera);
+      app.logicLoop.add(() => {
+        TWEEN.update();
+      });
+      app.world.camera.position.z = 50;
+      app.world.camera.lookAt(app.world.scene.position)
+
+      let spotLight = new THREE.SpotLight(0xffffff);
+      spotLight.position.set(50, 50, 50);
+      app.world.scene.add(spotLight);
+      app.world.scene.add(new THREE.AmbientLight(0x666666));
+
+      let loader = new THREE.ColladaLoader();
+      loader.load('assets/model/Mario/mario.dae', function(collada) {
+        elf = collada.scene;
+        app.world.scene.add(elf);
+        createBoneAnimation(elf.children[1].skeleton.bones);
+      });
+
+      function createBoneAnimation(bone) {
+        let smdloader = new THREE.FileLoader();
+        smdloader.load('assets/model/Mario/smd/mario_run.smd', function(smd) {
+          let smdobj = parseSMD(smd);
+
+          findBone(bone, smdobj);
+
+          for (let i = 0; i < smdobj.length; i++) {
+            smdobj[i].bone.rotation.order = 'ZYX';
+            animate(smdobj[i]);
+          }
+
+        });
+      }
+
+      function animate(smdobj) {
+        let animateObj = {
+          smdobj: smdobj,
+          index: 0,
+          loop: true,
+          time: 500,
+          start: () => {
+            let bone = animateObj.smdobj.bone;
+            let pa = animateObj.smdobj.position;
+            let ra = animateObj.smdobj.rotation;
+            bone.position.set(pa[animateObj.index], pa[animateObj.index + 1], pa[animateObj.index + 2]);
+            bone.rotation.set(ra[animateObj.index], ra[animateObj.index + 1], ra[animateObj.index + 2]);
+            animateObj.index += 3;
+            ani();
+
+            function ani() {
+              new TWEEN.Tween(bone.rotation)
+                .to({
+                  x: ra[animateObj.index],
+                  y: ra[animateObj.index + 1],
+                  z: ra[animateObj.index + 2]
+                }, animateObj.time)
+                .start()
+              new TWEEN.Tween(bone.position)
+                .to({
+                  x: pa[animateObj.index],
+                  y: pa[animateObj.index + 1],
+                  z: pa[animateObj.index + 2]
+                }, animateObj.time)
+                .start()
+                .onComplete(() => {
+                  animateObj.index += 3;
+                  if (animateObj.index >= pa.length) {
+                    animateObj.index = 0;
+                  }
+                  if (animateObj.loop) {
+                    ani();
+                  }
+                });
+            }
+
+          }
+        }
+        animateObj.start();
+      }
+
+      function parseSMD(text) {
+        let bodyObj = [];
+        let index = 0;
+        let passage = text.split('\n');
+        let passageLen = passage.length;
+        let flag = undefined;
+
+        for (index = 0; index < passageLen; index++) {
+          let line = passage[index];
+
+          if (!flag) {
+            if (line.indexOf('nodes') > -1) {
+              flag = 'nodes';
+              continue;
+            } else if (line.indexOf('skeleton') > -1) {
+              flag = 'skeleton';
+              continue;
+            }
+          }
+          if (!flag) {
+            continue;
+          }
+          if (line.indexOf('end') > -1) {
+            flag = undefined;
+            continue;
+          }
+          if (flag === 'nodes') {
+            parseNodes(bodyObj, line);
+          } else if (flag === 'skeleton') {
+            parseSkeleton(bodyObj, line)
+          }
+        }
+        return bodyObj;
+      }
+
+      function parseNodes(bodyObj, line) {
+        let info = line.split(' ');
+        bodyObj[parseInt(info[0])] = {
+          name: info[1].substr(1, info[1].length - 2),
+          parent: info[2],
+          position: [],
+          rotation: [],
+          bone: undefined
+        }
+      }
+
+      function parseSkeleton(bodyObj, line) {
+        if (line.indexOf('time') > -1) {
+          bodyObj.tmpIndex = parseInt(line.split(' ')[1]);
+          return;
+        }
+        let info = line.split(' ');
+
+        let obj = bodyObj[parseInt(info[0])];
+        obj.position.push(parseFloat(info[1]));
+        obj.position.push(parseFloat(info[2]));
+        obj.position.push(parseFloat(info[3]));
+
+        obj.rotation.push(parseFloat(info[4]));
+        obj.rotation.push(parseFloat(info[5]));
+        obj.rotation.push(parseFloat(info[6]));
+
+      }
+
+      function findBone(bone, smd) {
+        for (let i in bone) {
+          smd[i].bone = bone[i];
+        }
+      }
+    </script>
+  </body>
+
+</html>

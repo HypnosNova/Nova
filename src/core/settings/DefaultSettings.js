@@ -12,6 +12,7 @@ let DefaultSettings = {
     precision: 'highp', // 渲染精细度，默认为高
     antialias: true, //是否开启抗锯齿
     alpha: false, // 渲染器是否保存alpha缓冲
+    logarithmicDepthBuffer: false, // 逻辑深度缓冲
   },
   normalEventList: ['click', 'mousedown', 'mouseup', 'touchstart',
     'touchend', 'touchmove', 'mousemove'

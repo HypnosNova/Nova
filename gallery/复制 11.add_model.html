@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Add a model</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/loaders/MTLLoader.js"></script>
+    <script src="js/loaders/OBJLoader.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App({
+      	renderer:{
+      		logarithmicDepthBuffer:true
+      	}
+      });
+      app.renderer.setClearColor(0xffffff);
+      app.world.camera.position.z = 50;
+      new THREE.OrbitControls(app.world.camera);
+
+      var ambient = new THREE.AmbientLight(0xffffff);
+      app.world.scene.add(ambient);
+      var directionalLight = new THREE.DirectionalLight(0xffeedd);
+      directionalLight.position.set(0, 0, 1)
+        .normalize();
+      app.world.scene.add(directionalLight);
+
+      var mtlLoader = new THREE.MTLLoader();
+      mtlLoader.setPath('assets/model/ipx/');
+      mtlLoader.load('VP_Free_Iphone_OBJ.mtl', function(materials) {
+        materials.preload();
+        var objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.setPath('assets/model/ipx/');
+        objLoader.load('VP_Free_Iphone_OBJ.obj', function(object) {
+          console.log(object.children[1])
+          app.world.scene.add(object.children[1]);
+        });
+      });
+    </script>
+  </body>
+
+</html>

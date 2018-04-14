@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  </head>
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/loaders/MTLLoader.js"></script>
+    <script src="js/loaders/OBJLoader.js"></script>
+    <script src="js/loaders/ColladaLoader.js"></script>
+    <script src="js/controls/OrbitControls.js"></script>
+    <script src="../build/nova.js"></script>
+    <script src="../lib/tween.js"></script>
+    <script>
+      let app = new NOVA.App({
+        renderer: {
+          clearColor: 0x666666,
+          logarithmicDepthBuffer: true
+        }
+      });
+      app.world.camera.position.z = 60;
+      app.world.camera.lookAt(new THREE.Vector3(0, 0, 0));
+      
+      let controls = new THREE.OrbitControls(app.world.camera);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      app.logicLoop.add(() => {
+        TWEEN.update();
+        controls.update();
+      });
+
+      let light = new THREE.PointLight(0xffffcc, 4, 65);
+      light.position.set(0, 20, 40);
+      app.world.scene.add(light);
+      let light2 = new THREE.AmbientLight(0x20202A, 6, 100);
+      app.world.scene.add(light2);
+
+      let geometry = new THREE.BoxBufferGeometry(12, 0.4, 12);
+      let scanMaterial = new THREE.MeshPhongMaterial({
+        transparent: true,
+        opacity: 0.8,
+        color: 0x44ff88,
+        blending: THREE.AdditiveBlending
+      });
+      let scanCube = new THREE.Mesh(geometry, scanMaterial);
+      scanCube.position.y = 12;
+      scanCube.scale.set(0.0000000001, 1, 0.0000000001);
+      app.world.scene.add(scanCube);
+
+      app.renderer.localClippingEnabled = true;
+
+      var wireClipIn = new THREE.Plane(new THREE.Vector3(0, 12, 0), -1);
+      var wireClipOut = new THREE.Plane(new THREE.Vector3(0, -12, 0), 1);
+      let clipPlanesWireframe = [wireClipIn, wireClipOut];
+      let clipPlanes = [
+        new THREE.Plane(new THREE.Vector3(0, 12, 0), -1)
+      ];
+
+      let scanOut = new TWEEN.Tween(scanCube.scale)
+        .to({
+          x: 1,
+          z: 1
+        });
+      let scanDown = new TWEEN.Tween(scanCube.position)
+        .to({
+          y: -6
+        }, 2000);
+      let clipDown = new TWEEN.Tween(clipPlanes[0])
+        .to({
+          constant: 0.5
+        }, 2000);
+      let clipUp = new TWEEN.Tween(clipPlanes[0])
+        .to({
+          constant: -1
+        }, 2000);
+      let clip1Down = new TWEEN.Tween(wireClipIn)
+        .to({
+          constant: 0.5
+        }, 2000);
+      let clip1Up = new TWEEN.Tween(wireClipIn)
+        .to({
+          constant: -1
+        }, 2000);
+
+      let clip2Down = new TWEEN.Tween(wireClipOut)
+        .to({
+          constant: 1
+        }, 2000);
+
+      let clip2Up = new TWEEN.Tween(wireClipOut)
+        .to({
+          constant: -0.5
+        }, 2000);
+
+      let scanIn = new TWEEN.Tween(scanCube.scale)
+        .to({
+          x: 0.0000000001,
+          z: 0.0000000001
+        });
+
+      let scanUp = new TWEEN.Tween(scanCube.position)
+        .to({
+          y: 12
+        }, 2000);
+
+      function startShowAnimation() {
+        scanOut.start()
+          .onComplete(() => {
+            clip1Down.start();
+            scanDown.start();
+          });
+        scanDown.onComplete(() => {
+          scanIn.start();
+        });
+        scanIn.onComplete(() => {
+          scanCube.position.y = 12;
+          scanOut.start()
+            .onComplete(() => {
+              scanDown.start();
+              clipDown.start();
+              clip2Up.start();
+              scanIn.onComplete(() => {
+                startHideAnimation();
+              });
+            });
+        });
+      }
+      
+      function startHideAnimation() {
+        scanOut.start()
+          .onComplete(() => {
+            clipUp.start();
+            scanUp.start();
+            clip2Down.start();
+          });
+        scanUp.onComplete(() => {
+          scanIn.start();
+        });
+        scanIn.onComplete(() => {
+          scanCube.position.y = -6;
+          scanOut.start()
+            .onComplete(() => {
+              scanUp.start();
+              clip1Up.start();
+              scanIn.onComplete(() => {
+                startShowAnimation();
+              });
+            });
+        });
+      }
+
+      let mtlLoader = new THREE.MTLLoader();
+      mtlLoader.crossOrigin = true;
+      mtlLoader.setPath('assets/model/ipx/');
+      mtlLoader.load('VP_Free_Iphone_OBJ.mtl', function(materials) {
+        materials.preload();
+        let objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.setPath('assets/model/ipx/');
+        objLoader.load('VP_Free_Iphone_OBJ.obj', function(obj) {
+          for (var key in materials.materials) {
+            materials.materials[key].side = THREE.DoubleSide;
+            materials.materials[key].clippingPlanes = clipPlanes;
+            materials.materials[key].clipIntersection = true;
+          }
+
+          obj.position.set(0, -5.5, -1);
+          app.world.scene.add(obj);
+          let clone = obj.clone();
+          clone.traverse(function(obj) {
+            if (obj.material) {
+              obj.material = new THREE.MeshPhongMaterial({
+                wireframe: true,
+                color: 0x00ff00,
+                clippingPlanes: clipPlanesWireframe,
+                clipIntersection: false
+              });
+            }
+          });
+          app.world.scene.add(clone);
+          startShowAnimation();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -56,6 +56,7 @@ const list = {
       ["Halloween clock", "997.halloween_clock"]
     ],
     "Other": [
+      ["Noise flower", "25.flower"],
       ["Periodic table", "998.periodic_table"]
     ]
   }

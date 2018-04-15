@@ -1,63 +1,17 @@
 <!DOCTYPE HTML>
 <html>
-
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/836/variaboard.min.css"/>
-    <style>
-      html,
-      body {
-        height: 100%;
-      }
-      
-      body {
-        background: #000;
-        overflow: hidden;
-      }
-      
-      canvas {
-        bottom: 0;
-        cursor: move;
-        cursor: grab;
-        left: 0;
-        position: fixed;
-        right: 0;
-        top: 0;
-      }
-      
-      canvas:active {
-        cursor: move;
-        cursor: grabbing;
-      }
-      
-      .variaboard-panel {
-        animation: slide-in 500ms 3000ms ease-out forwards;
-        font-family: 'Source Code Pro', monospace;
-        opacity: 0;
-        transform: translateY(5px);
-        visibility: hidden;
-      }
-      
-      @keyframes slide-in {
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-          visibility: visible;
-        }
-      }
-    </style>
   </head>
-
   <body>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
     <script src="js/controls/OrbitControls.js"></script>
     <script src="../build/nova.js"></script>
-    <script src="../lib/tween.js"></script>
     <script src="js/THREE.MeshLine.js"></script>
-    <script src="js/gui/variaboard.min.js"></script>
     <script src="js/noise/simplex-noise.min.js"></script>
+    <script src="js/gui/dat.gui.min.js"></script>
     <script>
       function rangeMap(val, inputMin, inputMax, outputMin, outputMax) {
         return (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) + outputMin;
@@ -67,16 +21,8 @@
         return Math.max(Math.min(val, max), min);
       }
 
-      function rand(min, max, ease) {
-        if (max === undefined) {
-          max = min;
-          min = 0;
-        }
-        var random = Math.random();
-        if (ease) {
-          random = ease(Math.random(), 0, 1, 1);
-        }
-        return random * (max - min) + min;
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
       }
 
       function inOutExpo(t, b, c, d) {
@@ -89,19 +35,12 @@
       function outExpo(t, b, c, d) {
         return t == d ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
       }
-      //    let app = new NOVA.App({
-      //      renderer: {
-      //        logarithmicDepthBuffer: true
-      //      }
-      //    });
-      //    app.world.camera.position.z = 60;
-      //    app.world.camera.lookAt(new THREE.Vector3(0, 0, 0));
-      //    let controls = new THREE.OrbitControls(app.world.camera);
-      //
-      //    app.logicLoop.add(() => {
-      //      TWEEN.update();
-      //      controls.update();
-      //    });
+
+      let app = new NOVA.App({
+        renderer: {
+          logarithmicDepthBuffer: true
+        }
+      });
 
       class Walker {
         constructor(config) {
@@ -116,10 +55,8 @@
           this.angleRange = config.angleRange;
           this.away = config.away;
           this.depth = config.depth;
-
           this.position = new THREE.Vector3(this.x, this.y, 0);
           this.path = [];
-
           this.build();
         }
 
@@ -156,192 +93,61 @@
             z: this.position.z
           });
         }
-
       }
 
-      class Generator {
-
-        constructor() {
-          this.setupCamera();
-          this.setupScene();
-          this.setupRenderer();
+      class FlowerWorld extends NOVA.World {
+        constructor(app) {
+          super(app);
+          this.setupFlowerArguments();
           this.setupLines();
           this.setupOrbit();
           this.setupControls();
-
-          this.listen();
-          this.onResize();
           this.reset();
-          this.loop();
-        }
-
-        setupCamera() {
-          this.fov = 75;
-          this.camera = new THREE.PerspectiveCamera(this.fov, 0, 0.01, 1000);
-          this.camera.position.z = 10;
-        }
-
-        setupScene() {
-          this.scene = new THREE.Scene();
-        }
-
-        setupRenderer() {
-          this.renderer = new THREE.WebGLRenderer({
-            antialias: true
+          this.logicLoop.add(() => {
+            this.loop();
           });
-          document.body.appendChild(this.renderer.domElement);
+        }
+
+        setupFlowerArguments() {
+          this.count = 3;
+          this.stems = 5;
+          this.angleRange = 0.01;
+          this.depth = 5;
+          this.noiseSpeed = 0.0003;
+          this.iterations = 3000;
+          this.hue = 100;
+          this.hueRange = 90;
+          this.lightness = 60;
         }
 
         setupOrbit() {
-          this.orbit = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+          this.orbit = new THREE.OrbitControls(this.camera, this.app.renderer.domElement);
           this.orbit.enableDamping = true;
           this.orbit.dampingFactor = 0.2;
           this.orbit.enableKeys = false;
         }
 
         setupControls() {
-          this.vb = new VariaBoard({
-            container: document.body,
-            title: 'Simplex Flower Generator',
-            changeCallback: () => {
-              this.reset();
-            }
-          });
-
-          this.vb.addRange({
-            id: 'lines',
-            title: 'Lines',
-            description: 'Amount of lines per stem',
-            min: 1,
-            max: 6,
-            step: 1,
-            default: 3,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'stems',
-            title: 'Stems',
-            description: 'Amount of stems (reflections of lines)',
-            min: 1,
-            max: 10,
-            step: 1,
-            default: 5,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'angle-range',
-            title: 'Angle Range',
-            description: 'Amount that the angle can change per noise step',
-            min: 0.002,
-            max: 0.018,
-            step: 0.001,
-            default: 0.01,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'depth',
-            title: 'Depth',
-            description: 'Depth of the flower in Z space',
-            min: 0,
-            max: 10,
-            step: 0.1,
-            default: 5,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'noise-speed',
-            title: 'Noise Speed',
-            description: 'How fast the noise values change over time',
-            min: 0.000001,
-            max: 0.0005,
-            step: 0.000001,
-            default: 0.0003,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'iterations',
-            title: 'Iterations',
-            description: 'Amount of growth iterations per stem',
-            min: 500,
-            max: 8000,
-            step: 1,
-            default: 3000,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'hue',
-            title: 'Hue',
-            description: 'Base hue of the flower',
-            min: 0,
-            max: 360,
-            step: 1,
-            default: 300,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'hue-range',
-            title: 'Hue Range',
-            description: 'Hue variance from the base hue per line',
-            min: 0,
-            max: 90,
-            step: 1,
-            default: 90,
-            eased: false
-          });
-
-          this.vb.addRange({
-            id: 'lightness',
-            title: 'Lightness',
-            description: 'Overall lightness of lines',
-            min: 0,
-            max: 100,
-            step: 1,
-            default: 60,
-            eased: false
-          });
-
-          this.vb.addBoolean({
-            id: 'invert',
-            title: 'Invert',
-            description: 'Flip the background color',
-            default: false
-          });
-
-          this.vb.addButton({
-            id: 'randomize',
-            title: 'Randomize',
-            description: 'Set all controls to random values',
-            callback: () => {
-              this.vb.randomize();
-            }
-          });
-
-          this.vb.addButton({
-            id: 'save-image',
-            title: 'Save Image',
-            description: 'Save flower snapshot as an image file',
-            callback: (e, button, variaboard) => {
-              this.renderer.render(this.scene, this.camera);
-              button.dom.button.setAttribute('href', this.renderer.domElement.toDataURL('image/png'));
-              button.dom.button.setAttribute('download', `simplex-flower-${Date.now()}.png`);
-            }
-          });
-
-          this.vb.addButton({
-            id: 'generate',
-            title: 'Generate',
-            description: 'Generate a new flower',
-            callback: () => {
-              this.reset();
-            }
-          });
+          var gui = new dat.GUI({ name: 'Simplex Flower GUI' });
+          gui.add(this, 'count', 0, 20).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'stems', 0, 20).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'angleRange', 0.002, 0.018)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'depth', 0, 10)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'noiseSpeed', 0.000001, 0.0005).step(0.000001)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'iterations', 500, 8000).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'hue', 0, 360).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'hueRange', 0, 180).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'lightness', 0, 100).step(1)
+            .onChange(() => { this.reset(); });
+          gui.add(this, 'reset');
         }
 
         setupLines() {
@@ -354,26 +160,23 @@
 
         generate() {
           this.simplex = new SimplexNoise();
-          this.count = this.vb.get('lines');
-          this.stems = this.vb.get('stems');
           this.edge = 0;
-
-          this.scene.background = this.vb.get('invert') ? new THREE.Color('#fff') : new THREE.Color('#000')
+          this.scene.background = new THREE.Color('#000');
 
           for (let i = 0; i < this.count; i++) {
             // setup a new walker/wanderer
             let centered = Math.random() > 0.5;
             let walker = new Walker({
               simplex: this.simplex,
-              total: this.vb.get('iterations'),
+              total: this.iterations,
               x: centered ? 0 : rand(-1, 1),
               y: centered ? 0 : rand(-1, 1),
               dir: (i / (this.count)) * ((Math.PI * 2) / this.stems),
               speed: 0,
-              delta: this.vb.get('noise-speed'),
-              angleRange: this.vb.get('angle-range'),
+              delta: this.noiseSpeed,
+              angleRange: this.angleRange,
               away: 0,
-              depth: this.vb.get('depth'),
+              depth: this.depth,
               time: i * 1000
             });
             let geometry = new THREE.Geometry();
@@ -398,8 +201,8 @@
 
             // create new material based on the controls
             let material = new MeshLineMaterial({
-              blending: this.vb.get('invert') ? THREE.NormalBlending : THREE.AdditiveBlending,
-              color: new THREE.Color(`hsl(${360 + this.vb.get('hue') + rangeMap(i, 0, this.count, -this.vb.get('hue-range'), this.vb.get('hue-range'))}, 100%, ${this.vb.get('lightness')}%)`),
+              blending: THREE.AdditiveBlending,
+              color: new THREE.Color(`hsl(${360 + this.hue + rangeMap(i, 0, this.count, -this.hueRange, this.hueRange)}, 100%, ${this.lightness}%)`),
               depthTest: false,
               opacity: 1,
               transparent: true,
@@ -440,10 +243,8 @@
           }
 
           // reset the camera
-          this.camera.position.x = 0;
-          this.camera.position.y = 0;
-          this.camera.position.z = 10;
-          this.camera.lookAt(new THREE.Vector3());
+          this.camera.position.set(0, 0, 10);
+          this.camera.lookAt(this.scene.position);
 
           // initialize progres values
           this.progress = 0; // overall progress ticker
@@ -451,7 +252,6 @@
           this.progressModulo = 0; // resets progress on modulus
           this.progressEffective = 0; // progress amount to use
           this.progressEased = 0; // eased progress
-
           this.generate();
 
           requestAnimationFrame(() => {
@@ -470,26 +270,7 @@
           });
         }
 
-        listen() {
-          window.addEventListener('resize', () => this.onResize());
-        }
-
-        onResize() {
-          this.resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
-          this.dpr = window.devicePixelRatio > 1 ? 2 : 1;
-
-          this.camera.aspect = this.resolution.x / this.resolution.y;
-          this.camera.updateProjectionMatrix();
-
-          this.renderer.setPixelRatio(this.dpr);
-          this.renderer.setSize(this.resolution.x, this.resolution.y);
-        }
-
         loop() {
-          // subtly rotate the mesh
-          this.meshGroup.rotation.x = Math.cos(Date.now() * 0.001) * 0.1;
-          this.meshGroup.rotation.y = Math.sin(Date.now() * 0.001) * -0.1;
-
           // handle all the funky progress math
           // there is a cleaner way of doing this, I'll find it
           this.progress += 0.005;
@@ -514,18 +295,10 @@
 
           // update orbit controls
           this.orbit.update();
-
-          // render the scene and queue up another frame
-          this.renderer.render(this.scene, this.camera);
-          window.requestAnimationFrame(() => this.loop());
         }
-
       }
 
-      setTimeout(() => {
-        let generator = new Generator();
-      }, 250);
+      app.world = new FlowerWorld(app);
     </script>
   </body>
-
 </html>

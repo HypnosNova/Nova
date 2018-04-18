@@ -30,7 +30,8 @@ const list = {
   },
   "Event": {
     "Normal": [
-      ["Draw on a cube", "13.pen"]
+      ["Draw on a cube", "13.pen"],
+      ["Virtual event", "26.particle_event"]
     ],
     "Hammer": [
       ["Tap event", "4.event"],

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  </head>
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+      app.world.camera.position.z = 120;
+
+      const ANIMATION_FRAME_LENGTH = 30;
+      const INTERACT_DISTANCE = 2.5;
+      const SCREEN_HEIGHT = app.getWorldHeight();
+      const SCREEN_WIDTH = app.getWorldWidth();
+      const BITMAP_SKIP = 5;
+
+      var viewHeight = 2 * Math.tan(THREE.Math.degToRad(app.world.camera.fov / 2)) * app.world.camera.position.z;
+      var viewWidth = viewHeight * SCREEN_WIDTH / SCREEN_HEIGHT;
+
+      let img = new Image();
+      img.src = 'assets/images/cardback/0.jpg';
+      img.onload = () => {
+        let canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        let data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let len = data.length;
+        let bitmap = [], line = [];
+        for (let i = 0; i < len; i += 4) {
+          line.push(new THREE.Color(data[i] / 255, data[i + 1] / 255, data[i + 2] / 255));
+          if (line.length >= canvas.width) {
+            bitmap.push(line);
+            line = [];
+          }
+        }
+        createParticle(bitmap);
+      }
+
+      let objetArray = [],
+        animationQueue = [];
+      let mouse = new THREE.Vector3(10000, 10000, -1),
+        mouseScaled = new THREE.Vector3(10000, 10000, -1);
+
+      function createParticle(bitmap) {
+        let planeGeometry = new THREE.PlaneBufferGeometry(1, 1);
+        var xOffset = -bitmap[0].length / (BITMAP_SKIP * 2);
+        var yOffset = bitmap.length / (BITMAP_SKIP * 2);
+        for (var i = 0; i < bitmap.length; i += BITMAP_SKIP) {
+          for (var j = 0; j < bitmap[i].length; j += BITMAP_SKIP) {
+            planeMaterial = new THREE.MeshBasicMaterial({
+              color: bitmap[i][j],
+              transparent: true,
+              opacity: THREE.Math.randFloat(0.4, 0.6)
+            });
+
+            planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+            planeMesh.position.set(xOffset + j / BITMAP_SKIP, yOffset - i / BITMAP_SKIP, 0);
+            var randWidth = THREE.Math.randFloat(0.6, 1.2);
+            var randHeight = randWidth
+            planeMesh.scale.set(randWidth, randHeight, 1);
+            app.world.scene.add(planeMesh);
+            objetArray.push([planeMesh, false]);
+          }
+        }
+      }
+
+      app.renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
+
+      function onDocumentMouseMove(event) {
+        var rect = app.renderer.domElement.getBoundingClientRect();
+        mouse.x = event.clientX - rect.left;
+        mouse.y = event.clientY - rect.top;
+        mouseScaled.x = mouse.x * viewWidth / SCREEN_WIDTH - viewWidth / 2;
+        mouseScaled.y = -mouse.y * viewHeight / SCREEN_HEIGHT + viewHeight / 2;
+      }
+
+      app.logicLoop.add(() => {
+        while (animationQueue.length > 0) {
+          var obj_index = animationQueue[0][0];
+          var ani_frame = animationQueue[0][1];
+          if (ani_frame > ANIMATION_FRAME_LENGTH) {
+            objetArray[obj_index][1] = false;
+            animationQueue.shift();
+          } else {
+            break;
+          }
+        }
+
+        for (var i = 0; i < objetArray.length; i++) {
+          var obj = objetArray[i][0];
+          var isAnimating = objetArray[i][1];
+          if (isAnimating == false) {
+            var px = obj.position.x;
+            var py = obj.position.y;
+            var dist = Math.sqrt(Math.pow(px - mouseScaled.x, 2) + Math.pow(py - mouseScaled.y, 2));
+            if (dist < INTERACT_DISTANCE) {
+              var startPosVector = obj.position.clone();
+              var mouseRepelVector = new THREE.Vector3()
+                .subVectors(startPosVector, mouseScaled)
+                .multiplyScalar(THREE.Math.randFloat(INTERACT_DISTANCE + 0.5, INTERACT_DISTANCE + 2) - dist);
+              var endPosVector = new THREE.Vector3()
+                .addVectors(startPosVector, mouseRepelVector);
+              animationQueue.push([i, 0, startPosVector, endPosVector]);
+              objetArray[i][1] = true;
+            }
+          }
+        }
+
+        for (var i = 0; i < animationQueue.length; i++) {
+          var obj = objetArray[animationQueue[i][0]][0];
+          var ani_frame = animationQueue[i][1];
+          var startPosVector = animationQueue[i][2];
+          var endPosVector = animationQueue[i][3];
+          var curPosVector = new THREE.Vector3();
+          var frac = 1 - Math.abs(ani_frame - (ANIMATION_FRAME_LENGTH / 2)) / (ANIMATION_FRAME_LENGTH / 2);
+          frac = frac * (2 - frac);
+          curPosVector.lerpVectors(startPosVector, endPosVector, frac);
+
+          obj.position.x = curPosVector.x;
+          obj.position.y = curPosVector.y;
+          obj.position.z = curPosVector.z;
+          animationQueue[i][1] += 1;
+        }
+
+        mouse = new THREE.Vector3(10000, 10000, -2);
+        mouseScaled = new THREE.Vector3(10000, 10000, -2);
+      });
+    </script>
+  </body>
+</html>

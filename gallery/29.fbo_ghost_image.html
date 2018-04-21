@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Fbo ghost image</title>
+  </head>
+
+  <body>
+  	<script id="vertShader" type="shader-code">
+	varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  }
+</script>
+
+<script id="fragShader" type="shader-code">
+	uniform sampler2D tOld;
+  uniform sampler2D tNew;
+
+  varying vec2 vUv;
+
+  // from http://theorangeduck.com/page/avoiding-shader-conditionals
+  float when_gt(float x, float y) {
+    return max(sign(x - y), 0.0);
+  }
+
+  void main() {
+    vec4 texelOld = texture2D(tOld, vUv);
+    vec4 texelNew = texture2D(tNew, vUv);
+    texelOld *= 0.97;
+
+    // the expressions bellow are equivalent to
+    // if (texelOld.a < 0.2) texelOld.a = 0.0;
+    texelOld.r *= when_gt(texelOld.r, 0.2);
+    texelOld.g *= when_gt(texelOld.g, 0.2);
+    texelOld.b *= when_gt(texelOld.b, 0.2);
+    texelOld.a *= when_gt(texelOld.a, 0.2);
+
+    gl_FragColor = texelOld + texelNew;
+  }
+</script>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="js/controls/TrackballControls.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+//    let app = new NOVA.App();
+
+      var cameraOrto, cameraPerspective;
+      var sceneComp, sceneContent, sceneScreen;
+      var renderer;
+
+      var textureOld, textureNew, textureComp;
+
+      var controls;
+
+      init();
+      animate();
+
+      function init() {
+        // scenes
+        sceneComp = new THREE.Scene();
+        sceneContent = new THREE.Scene();
+        sceneScreen = new THREE.Scene();
+
+        // cameras
+        cameraOrtho = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, -10000, 10000);
+        cameraOrtho.position.z = 100;
+
+        cameraPerspective = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+        cameraPerspective.position.z = 400;
+
+        // render targets
+        textureOld = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat });
+        textureNew = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat });
+        textureComp = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat });
+
+        // renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // trackball controls
+        controls = new THREE.TrackballControls(cameraPerspective, renderer.domElement);
+        controls.zoomSpeed = 0.8;
+        controls.panSpeed = 0.8;
+        controls.staticMoving = false;
+        controls.dynamicDampingFactor = 0.15;
+        controls.maxDistance = 3000;
+
+        // content
+        initContent();
+        initQuads();
+      }
+
+      function initContent() {
+        var geometry = new THREE.BoxGeometry(200, 200, 200);
+
+        var material = new THREE.MeshBasicMaterial({
+          color: 0xFF0000,
+          wireframe: false
+        });
+
+        var mesh = new THREE.Mesh(geometry, material);
+        sceneContent.add(mesh);
+      }
+
+      function initQuads() {
+        var geometry = new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight);
+
+        var material = new THREE.ShaderMaterial({
+          uniforms: {
+            tOld: { value: textureOld.texture },
+            tNew: { value: textureNew.texture },
+          },
+          vertexShader: document.getElementById('vertShader')
+            .innerHTML,
+          fragmentShader: document.getElementById('fragShader')
+            .innerHTML,
+        });
+
+        var quadComp = new THREE.Mesh(geometry, material);
+        sceneComp.add(quadComp);
+
+        material = new THREE.MeshBasicMaterial({ map: textureComp.texture });
+        var quadScreen = new THREE.Mesh(geometry, material);
+        sceneScreen.add(quadScreen);
+      }
+
+      function animate() {
+        // update
+        controls.update();
+
+        // draw
+        renderer.render(sceneContent, cameraPerspective, textureNew);
+        renderer.render(sceneComp, cameraOrtho, textureComp);
+        renderer.render(sceneScreen, cameraOrtho, textureOld);
+        renderer.render(sceneScreen, cameraOrtho);
+
+        // animate
+        requestAnimationFrame(animate);
+      }
+    </script>
+  </body>
+
+</html>

@@ -4182,25 +4182,35 @@
 	  return Math.floor( Math.random() * max );
 	};
 
-	let rndString = ( len ) => {
-	  if( len <= 0 ) {
+	let rndString = (len) => {
+	  if (len <= 0) {
 	    return '';
 	  }
 	  len = len - 1 || 31;
 	  let $chars =
 	    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	  let maxPos = $chars.length + 1;
-	  let pwd = $chars.charAt( Math.floor( Math.random() * ( maxPos - 10 ) ) );
-	  for( let i = 0; i < len; i++ ) {
-	    pwd += $chars.charAt( Math.floor( Math.random() * maxPos ) );
+	  let pwd = $chars.charAt(Math.floor(Math.random() * (maxPos - 10)));
+	  for (let i = 0; i < len; i++) {
+	    pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
 	  }
 	  return pwd;
+	};
+
+	let geoToCartesian = (lat = 0, lon = 0, radius = 1) => {
+	  lat *= Math.PI / 180;
+	  lon *= Math.PI / 180;
+	  return new THREE.Vector3(-radius * Math.cos(lat) * Math.cos(lon),
+	    radius * Math.sin(lat),
+	    radius * Math.cos(lat) * Math.sin(lon)
+	  );
 	};
 
 	let Util = {
 	  extend: _extends,
 	  rndInt,
-	  rndString
+	  rndString,
+	  geoToCartesian
 	};
 
 	/* eslint-disable */

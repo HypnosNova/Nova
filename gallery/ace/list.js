@@ -16,6 +16,7 @@ const list = {
     ],
     "loop": [
       ["Logic loop", "3.logic_loop"],
+      ["Particle global cities", "28.particle_global_cities"]
     ],
     "transition": [
       ["Transitionor", "5.transition"],
@@ -48,7 +49,8 @@ const list = {
   },
   "BAS": {
     "Animation": [
-      ["Particles moving", "10.particles_move"]
+      ["Particles moving", "10.particles_move"],
+      ["Picture sandglass", "27.picture_sandglass"]
     ]
   },
   "Others": {

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Particle global cities</title>
+  </head>
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+      app.world.camera.position.z = 1500;
+
+      new THREE.FileLoader()
+        .load('assets/data/globalCities.json', (data) => {
+          let geometry = new THREE.Geometry();
+          let material = new THREE.PointsMaterial({ color: 0x22aaff, size: 5 });
+          let radius = 500;
+
+          let cities = JSON.parse(data).data;
+          let len = cities.length;
+          for (let i = 0; i < len; i++) {
+            let vertex = NOVA.Util.geoToCartesian(cities[i][0], cities[i][1], 400);
+            geometry.vertices.push(vertex);
+            app.logicLoop.add(() => {
+              vertex.normalize().multiplyScalar(radius + Math.sin(app.logicLoop.times * 0.03) * 100);
+            });
+          }
+
+          let particles = new THREE.Points(geometry, material);
+          app.world.scene.add(particles);
+
+          app.logicLoop.add(() => {
+            material.color.setHSL(Math.abs(Math.sin(app.logicLoop.times * 0.003)), 0.5, 0.5);
+            particles.rotation.y += 0.007;
+            particles.geometry.verticesNeedUpdate = true;
+          });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  </head>
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src='../lib/three.min.js'></script>
+    <script src='../lib/bas.min.js'></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+
+      const TEXTURE_SRC_BEFORE = 'https://images.unsplash.com/photo-1457369900526-e7606baa133b?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=600&fit=max&s=96647cd4038299342a15cd2bd177075f';
+      const TEXTURE_SRC_AFTER = 'https://images.unsplash.com/photo-1456947700819-d91abdf38117?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=600&fit=max&s=96647cd4038299342a15cd2bd177075f';
+
+      const PREFAB = {
+        WIDTH: 0.5,
+        HEIGHT: 0.5
+      };
+
+      const START_DELAY = 500;
+      const INTERVAL = '10.';
+      const DURATION_START = '1.2';
+      const DURATION_END = '1.2';
+
+      function init(textureBefore, textureAfter) {
+        const image = textureBefore.image;
+        const width = image.width;
+        const height = image.height;
+        const intervalX = width / PREFAB.WIDTH;
+        const intervalY = height / PREFAB.HEIGHT;
+
+        app.world.camera.position.z = width * 2.5;
+
+        const prefab = new THREE.PlaneGeometry(PREFAB.WIDTH, PREFAB.HEIGHT);
+        const geometry = new BAS.PrefabBufferGeometry(prefab, intervalX * intervalY);
+        const aPosition = geometry.createAttribute('aPosition', 4);
+
+        let i = 0;
+        for (let x = 0; x < intervalX; x++) {
+          for (let y = 0; y < intervalY; y++) {
+            geometry.setPrefabData(aPosition, i++, [
+              x * PREFAB.WIDTH - (width / 2),
+              y * PREFAB.HEIGHT - (height / 2),
+              0,
+              Math.random()
+            ]);
+          }
+        }
+
+        textureBefore.minFilter = THREE.LinearFilter;
+        textureAfter.minFilter = THREE.LinearFilter;
+
+        const material = new BAS.BasicAnimationMaterial({
+          side: THREE.DoubleSide,
+          vertexColors: THREE.VertexColors,
+          uniforms: {
+            uTime: { type: 'f', value: 0 },
+            uSize: { type: 'vf2', value: [width, height] },
+            mapBefore: { type: 't', value: textureBefore },
+            mapAfter: { type: 't', value: textureAfter },
+          },
+          vertexFunctions: [
+            BAS.ShaderChunk['ease_quad_in_out'],
+            BAS.ShaderChunk['ease_quad_in'],
+            BAS.ShaderChunk['ease_quad_out'],
+          ],
+          vertexParameters: `
+      uniform float uTime;
+      uniform vec2 uSize;
+      uniform sampler2D mapBefore;
+      uniform sampler2D mapAfter;
+      attribute vec4 aPosition;
+      const float interval = ${INTERVAL};
+      const float durationStart = ${DURATION_START};
+      const float durationEnd = ${DURATION_END};
+      const float totalTime = durationStart + interval + durationEnd;
+      const float speed = 60.;
+      const float minWeight = 0.3;
+      const float fallSpeed = 4.;
+      const float xSpeed = 0.03;
+      const float spreadPosition = 0.03;
+    `,
+          vertexInit: `
+      vec2 texelCoord = (aPosition.xy + uSize / 2.) / uSize;
+      vec4 texelBefore = texture2D(mapBefore, texelCoord);
+      vec4 texelAfter = texture2D(mapAfter, texelCoord);
+      float bottom = aPosition.y - uSize.y * 1.8;
+      float time = uTime / 50.;
+      float tTime = mod(time, totalTime);
+      float doubleTime = mod(time, totalTime * 2.);
+      float isReverse = step(totalTime, doubleTime);
+      float progress = max(tTime - durationStart, 0.);
+      float nProgress = progress / interval;
+      float move = progress * speed;
+      float weightBefore = pow(1. - texelBefore.r * texelBefore.g * texelBefore.b, 2.) * (1. - minWeight) + minWeight;
+      float weightAfter = pow(1. - texelAfter.r * texelAfter.g * texelAfter.b, 2.) * (1. - minWeight) + minWeight;
+      float order = pow(abs(aPosition.x) / (uSize.x * 0.5), 2.) * 40.;
+      float fall = max(-aPosition.y - uSize.y / 2. + move - order, 0.) * (aPosition.w * 0.2 + 1.) * (0.3 + nProgress) * fallSpeed;
+      float y = aPosition.y - fall * mix(weightBefore, weightAfter, easeQuadIn(min(fall, -bottom) / -bottom)) - move + order * clamp(progress, 0., 1.);
+      float offsetY = easeQuadOut(clamp(tTime / durationStart, 0., 1.)) * uSize.y * 0.9;
+      float endOffsetY = easeQuadIn(clamp((tTime - (durationStart + interval)) / durationEnd, 0., 1.)) * uSize.y * 0.9;
+    `,
+          vertexPosition: `
+      transformed.x += aPosition.x / (1. + fall * xSpeed * max(1. - max(-y + (bottom * (1. - spreadPosition)), 0.) / (-bottom * spreadPosition), 0.));
+      transformed.y += max(y, bottom) + offsetY + endOffsetY;
+      transformed.z += aPosition.z;
+    `,
+          vertexColor: `
+      vec4 colorBefore = texelBefore * (1. - isReverse) + texelAfter * isReverse;
+      vec4 colorAfter = texelBefore * isReverse + texelAfter * (1. - isReverse);
+      vColor = mix(colorBefore.rgb, colorAfter.rgb, smoothstep(-uSize.y / 2., bottom, y));
+    `,
+        });
+        material.uniforms['mapBefore'].value.needsUpdate = true;
+        material.uniforms['mapAfter'].value.needsUpdate = true;
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.frustumCulled = false;
+
+        app.world.scene.add(mesh);
+
+        let time = -50;
+
+        app.logicLoop.add(() => {
+          time++;
+          material.uniforms['uTime'].value = time;
+        });
+
+      }
+
+      let textureBefore, textureAfter;
+
+      function onLoad() {
+        (textureBefore && textureAfter) && init(textureBefore, textureAfter);
+      }
+      new THREE.TextureLoader()
+        .load(TEXTURE_SRC_BEFORE, texture => {
+          textureBefore = texture
+          onLoad()
+        });
+      new THREE.TextureLoader()
+        .load(TEXTURE_SRC_AFTER, texture => {
+          textureAfter = texture
+          onLoad()
+        });
+    </script>
+  </body>
+
+</html>

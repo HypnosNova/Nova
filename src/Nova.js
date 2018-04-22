@@ -23,17 +23,19 @@ export { LoaderFactory } from './loader/LoaderFactory.js';
 
 export { EffectComposer } from './postprocessing/EffectComposer.js';
 
-export { Pass }          from './postprocessing/Pass.js';
+export { Pass } from './postprocessing/Pass.js';
 export { DotScreenPass } from './postprocessing/DotScreenPass.js';
-export { RenderPass }    from './postprocessing/RenderPass.js';
-export { ShaderPass }    from './postprocessing/ShaderPass.js';
-export { GlitchPass }    from './postprocessing/GlitchPass.js';
-export { OutlinePass }    from './postprocessing/OutlinePass.js';
+export { RenderPass } from './postprocessing/RenderPass.js';
+export { ShaderPass } from './postprocessing/ShaderPass.js';
+export { GhostImagePass } from './postprocessing/GhostImagePass.js';
+export { GlitchPass } from './postprocessing/GlitchPass.js';
+export { OutlinePass } from './postprocessing/OutlinePass.js';
 
-export { GlitchShader }    from './postprocessing/shader/GlitchShader.js';
-export { FXAAShader }      from './postprocessing/shader/FXAAShader.js';
-export { CopyShader }      from './postprocessing/shader/CopyShader.js';
+export { CopyShader } from './postprocessing/shader/CopyShader.js';
 export { DotScreenShader } from './postprocessing/shader/DotScreenShader.js';
+export { FXAAShader } from './postprocessing/shader/FXAAShader.js';
+export { GhostImageShader } from './postprocessing/shader/GhostImageShader.js';
+export { GlitchShader } from './postprocessing/shader/GlitchShader.js';
 
 export { Util } from './util/Util.js';
 

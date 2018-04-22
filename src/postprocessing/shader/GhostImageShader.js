@@ -1,6 +1,8 @@
 let GhostImageShader = {
   uniforms: {
-    "damp": { value: 0.96 }
+    "damp": { value: 0.96 },
+    "tOld": { value: null },
+    "tNew": { value: null }
   },
 
   vertexShader: `

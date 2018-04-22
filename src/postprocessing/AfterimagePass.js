@@ -1,10 +1,10 @@
 import { Pass } from './Pass.js';
-import { GhostImageShader } from './shader/GhostImageShader.js';
+import { AfterimageShader } from './shader/AfterimageShader.js';
 
-class GhostImagePass extends Pass {
+class AfterimagePass extends Pass {
   constructor(damp = 0.96, effectComposer, renderToScreen = false) {
     super(effectComposer, renderToScreen);
-    this.uniforms = THREE.UniformsUtils.clone(GhostImageShader.uniforms);
+    this.uniforms = THREE.UniformsUtils.clone(AfterimageShader.uniforms);
     this.uniforms["damp"].value = damp;
 
     this.textureComp = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
@@ -21,8 +21,8 @@ class GhostImagePass extends Pass {
 
     this.shaderMaterial = new THREE.ShaderMaterial({
       uniforms: this.uniforms,
-      vertexShader: GhostImageShader.vertexShader,
-      fragmentShader: GhostImageShader.fragmentShader
+      vertexShader: AfterimageShader.vertexShader,
+      fragmentShader: AfterimageShader.fragmentShader
     });
 
     this.sceneComp = new THREE.Scene();
@@ -56,5 +56,5 @@ class GhostImagePass extends Pass {
 }
 
 export {
-  GhostImagePass
+  AfterimagePass
 };

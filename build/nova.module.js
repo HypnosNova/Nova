@@ -2269,6 +2269,99 @@ class EffectComposer {
   }
 }
 
+let AfterimageShader = {
+  uniforms: {
+    "damp": { value: 0.96 },
+    "tOld": { value: null },
+    "tNew": { value: null }
+  },
+
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }`,
+
+  fragmentShader: `
+    uniform sampler2D tOld;
+    uniform sampler2D tNew;
+    uniform float damp;
+
+    varying vec2 vUv;
+
+    float when_gt(float x, float y) {
+      return max(sign(x - y), 0.0);
+    }
+
+    void main() {
+      vec4 texelOld = texture2D(tOld, vUv);
+      vec4 texelNew = texture2D(tNew, vUv);
+
+      texelOld *= damp;
+      texelOld.r *= when_gt(texelOld.r, 0.2);
+      texelOld.g *= when_gt(texelOld.g, 0.2);
+      texelOld.b *= when_gt(texelOld.b, 0.2);
+      texelOld.a *= when_gt(texelOld.a, 0.2);
+
+      gl_FragColor = texelOld + texelNew;
+    }`
+};
+
+class AfterimagePass extends Pass {
+  constructor(damp = 0.96, effectComposer, renderToScreen = false) {
+    super(effectComposer, renderToScreen);
+    this.uniforms = THREE.UniformsUtils.clone(AfterimageShader.uniforms);
+    this.uniforms["damp"].value = damp;
+
+    this.textureComp = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBAFormat
+    });
+
+    this.textureOld = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBAFormat
+    });
+
+    this.shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: this.uniforms,
+      vertexShader: AfterimageShader.vertexShader,
+      fragmentShader: AfterimageShader.fragmentShader
+    });
+
+    this.sceneComp = new THREE.Scene();
+    this.sceneScreen = new THREE.Scene();
+
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this.camera.position.z = 1;
+    var geometry = new THREE.PlaneBufferGeometry(2, 2);
+
+    this.quadComp = new THREE.Mesh(geometry, this.shaderMaterial);
+    this.sceneComp.add(this.quadComp);
+
+    let material = new THREE.MeshBasicMaterial({ map: this.textureComp.texture });
+    var quadScreen = new THREE.Mesh(geometry, material);
+    this.sceneScreen.add(quadScreen);
+  }
+
+  render(renderer, writeBuffer, readBuffer, delta, maskActive) {
+    this.uniforms["tOld"].value = this.textureOld.texture;
+    this.uniforms["tNew"].value = readBuffer.texture;
+    this.quadComp.material = this.shaderMaterial;
+
+    renderer.render(this.sceneComp, this.camera, this.textureComp);
+    renderer.render(this.sceneScreen, this.camera, this.textureOld);
+    if (this.renderToScreen) {
+      renderer.render(this.sceneScreen, this.camera);
+    } else {
+      renderer.render(this.sceneScreen, this.camera, writeBuffer, this.clear);
+    }
+  }
+}
+
 let DotScreenShader = {
   uniforms: {
     "tDiffuse": { value: null },
@@ -2339,99 +2432,6 @@ class DotScreenPass extends Pass {
       renderer.render(this.scene, this.camera);
     } else {
       renderer.render(this.scene, this.camera, writeBuffer, this.clear);
-    }
-  }
-}
-
-let GhostImageShader = {
-  uniforms: {
-    "damp": { value: 0.96 },
-    "tOld": { value: null },
-    "tNew": { value: null }
-  },
-
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    }`,
-
-  fragmentShader: `
-    uniform sampler2D tOld;
-    uniform sampler2D tNew;
-    uniform float damp;
-
-    varying vec2 vUv;
-
-    float when_gt(float x, float y) {
-      return max(sign(x - y), 0.0);
-    }
-
-    void main() {
-      vec4 texelOld = texture2D(tOld, vUv);
-      vec4 texelNew = texture2D(tNew, vUv);
-
-      texelOld *= damp;
-      texelOld.r *= when_gt(texelOld.r, 0.2);
-      texelOld.g *= when_gt(texelOld.g, 0.2);
-      texelOld.b *= when_gt(texelOld.b, 0.2);
-      texelOld.a *= when_gt(texelOld.a, 0.2);
-
-      gl_FragColor = texelOld + texelNew;
-    }`
-};
-
-class GhostImagePass extends Pass {
-  constructor(damp = 0.96, effectComposer, renderToScreen = false) {
-    super(effectComposer, renderToScreen);
-    this.uniforms = THREE.UniformsUtils.clone(GhostImageShader.uniforms);
-    this.uniforms["damp"].value = damp;
-
-    this.textureComp = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.NearestFilter,
-      format: THREE.RGBAFormat
-    });
-
-    this.textureOld = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.NearestFilter,
-      format: THREE.RGBAFormat
-    });
-
-    this.shaderMaterial = new THREE.ShaderMaterial({
-      uniforms: this.uniforms,
-      vertexShader: GhostImageShader.vertexShader,
-      fragmentShader: GhostImageShader.fragmentShader
-    });
-
-    this.sceneComp = new THREE.Scene();
-    this.sceneScreen = new THREE.Scene();
-
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    this.camera.position.z = 1;
-    var geometry = new THREE.PlaneBufferGeometry(2, 2);
-
-    this.quadComp = new THREE.Mesh(geometry, this.shaderMaterial);
-    this.sceneComp.add(this.quadComp);
-
-    let material = new THREE.MeshBasicMaterial({ map: this.textureComp.texture });
-    var quadScreen = new THREE.Mesh(geometry, material);
-    this.sceneScreen.add(quadScreen);
-  }
-
-  render(renderer, writeBuffer, readBuffer, delta, maskActive) {
-    this.uniforms["tOld"].value = this.textureOld.texture;
-    this.uniforms["tNew"].value = readBuffer.texture;
-    this.quadComp.material = this.shaderMaterial;
-
-    renderer.render(this.sceneComp, this.camera, this.textureComp);
-    renderer.render(this.sceneScreen, this.camera, this.textureOld);
-    if (this.renderToScreen) {
-      renderer.render(this.sceneScreen, this.camera);
-    } else {
-      renderer.render(this.sceneScreen, this.camera, writeBuffer, this.clear);
     }
   }
 }
@@ -4305,5 +4305,5 @@ let Util = {
 
 //export * from './thirdparty/three.module.js';
 
-export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, Pass, DotScreenPass, RenderPass, ShaderPass, GhostImagePass, GlitchPass, OutlinePass, CopyShader, DotScreenShader, FXAAShader, GhostImageShader, GlitchShader, Util };
+export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, AfterimagePass, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, AfterimageShader, CopyShader, DotScreenShader, FXAAShader, GlitchShader, Util };
 //# sourceMappingURL=nova.module.js.map

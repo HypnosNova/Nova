@@ -1,4 +1,4 @@
-let GhostImageShader = {
+let AfterimageShader = {
   uniforms: {
     "damp": { value: 0.96 },
     "tOld": { value: null },
@@ -38,5 +38,5 @@ let GhostImageShader = {
 };
 
 export {
-  GhostImageShader
+  AfterimageShader
 };

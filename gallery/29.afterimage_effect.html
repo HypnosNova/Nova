@@ -24,7 +24,7 @@
       app.world.scene.add(mesh);
 
       let composer = new NOVA.EffectComposer(app.world);
-      new NOVA.AfterimagePass(0.96, composer, true);
+      new NOVA.AfterimagePass(0.97, composer, true);
       let controls = new THREE.TrackballControls(app.world.camera);
       app.renderLoop.add(() => {
         mesh.rotation.x += 0.005;

@@ -82,75 +82,71 @@ class LoopManager {
 }
 
 class EventManager {
-  constructor(world) {
-    world.eventManager = this;
-    this.world = world;
-    this.disable = false;
-    this.isDeep = true;
-    this.receivers = world.receivers;
-    this.raycaster = new THREE.Raycaster();
-    this.centerRaycaster = new THREE.Raycaster();
-    this.selectedObj = null;
-    this.centerSelectedObj = null;
-    this.isDetectingEnter = true;
-    let normalEventList = world.app.options.normalEventList;
+	constructor( world ) {
+		world.eventManager = this;
+		this.world = world;
+		this.disable = false;
+		this.isDeep = true;
+		this.receivers = world.receivers;
+		this.raycaster = new THREE.Raycaster();
+		this.centerRaycaster = new THREE.Raycaster();
+		this.selectedObj = null;
+		this.centerSelectedObj = null;
+		this.isDetectingEnter = true;
+		let normalEventList = world.app.options.normalEventList;
 
-    for (let eventItem of normalEventList) {
-      world.app.parent.addEventListener(eventItem, (event) => {
-        if (this.disable) return;
-        this.raycastCheck(this.toNovaEvent(event));
-      });
-    }
+		for ( let eventItem of normalEventList ) {
+			world.app.parent.addEventListener( eventItem, ( event ) => {
+				if ( this.disable ) return;
+				this.raycastCheck( this.toNovaEvent( event ) );
+			} );
+		}
 
-    try {
-      if (Hammer === undefined) {
-        return;
-      }
-    } catch (e) {
-      console.warn('Hammer没有引入，手势事件无法使用，只能使用基础的交互事件。');
-      return;
-    }
-    this.hammer = new Hammer(world.app.renderer.domElement);
-    console.log(world.app.options.hammerEventList);
-    this.hammer.on(world.app.options.hammerEventList, (event) => {
-      if (this.disable) return;
-      this.raycastCheck(event);
-    });
-  }
+		try {
+			if ( Hammer === undefined ) {
+				return;
+			}
+		} catch ( e ) {
+			console.warn( 'Hammer没有引入，手势事件无法使用，只能使用基础的交互事件。' );
+			return;
+		}
+		this.hammer = new Hammer( world.app.renderer.domElement );
+		this.hammer.on( world.app.options.hammerEventList, ( event ) => {
+			if ( this.disable ) return;
+			this.raycastCheck( event );
+		} );
+	}
 
-  toNovaEvent(event) {
-    return {
-      changedPointers: [event],
-      center: {
-        x: event.clientX,
-        y: event.clientY,
-      },
-      type: event.type,
-      target: event.target
-    };
-  }
+	toNovaEvent( event ) {
+		return {
+			changedPointers: [ event ],
+			center: new THREE.Vector2( event.clientX, event.clientY ),
+			type: event.type,
+			target: event.target
+		};
+	}
 
-  raycastCheck(event) {
-    let vec2 = new THREE.Vector2(event.center.x / this.world.app.getWorldWidth() *
-      2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2);
-    this.raycaster.setFromCamera(vec2, this.world.camera);
-    let intersects = this.raycaster.intersectObjects(this.world.receivers,
-      this.isDeep);
-    let intersect;
-    for (let i = 0; i < intersects.length; i++) {
-      if (intersects[i].object.isPenetrated) {
-        continue;
-      } else {
-        intersect = intersects[i];
-        break;
-      }
-    }
-    if (intersect && intersect.object.events && intersect.object.events[event
-        .type]) {
-      intersect.object.events[event.type].run(event, intersect);
-    }
-    return intersect;
-  }
+	raycastCheck( event ) {
+		let vec2 = new THREE.Vector2( event.center.x / this.world.app.getWorldWidth() *
+			2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2 );
+		this.raycaster.setFromCamera( vec2, this.world.camera );
+		let intersects = this.raycaster.intersectObjects( this.world.receivers,
+			this.isDeep );
+		let intersect;
+		for ( let i = 0; i < intersects.length; i++ ) {
+			if ( intersects[ i ].object.isPenetrated ) {
+				continue;
+			} else {
+				intersect = intersects[ i ];
+				break;
+			}
+		}
+		if ( intersect && intersect.object.events && intersect.object.events[ event
+				.type ] ) {
+			intersect.object.events[ event.type ].run( event, intersect );
+		}
+		return intersect;
+	}
 }
 
 class World {
@@ -303,148 +299,158 @@ class VR {
 }
 
 class App {
-  constructor(settings = {}) {
-    this.options = _.defaultsDeep(settings, DefaultSettings);
-    if (this.options.setCommonCSS) {
-      this.setCommonCSS();
-    }
-    this.parent = this.options.parent;
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: this.options.renderer.antialias,
-      precision: this.options.renderer.precision,
-      alpha: this.options.renderer.alpha,
-      logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer
-    });
-    this.renderer.setClearColor(this.options.renderer.clearColor,
-      this.options.renderer.clearAlpha);
-    this.world = new World(this);
-    this.animationFrame;
-    this.state = APP_STOP;
-    this.logicLoop = new LoopManager();
-    this.renderLoop = new LoopManager();
-    window.addEventListener('resize', () => {
-      this.resize();
-    });
-    if (this.options.autoStart) {
-      this.start();
-    }
-    if (this.options.VRSupport) {
-      this.VR = new VR(this);
-    }
-  }
+	constructor( settings = {} ) {
+		this.options = _.defaultsDeep( settings, DefaultSettings );
+		if ( this.options.setCommonCSS ) {
+			this.setCommonCSS();
+		}
+		this.parent = this.options.parent;
+		this.renderer = new THREE.WebGLRenderer( {
+			antialias: this.options.renderer.antialias,
+			precision: this.options.renderer.precision,
+			alpha: this.options.renderer.alpha,
+			logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer
+		} );
+		this.renderer.setClearColor( this.options.renderer.clearColor,
+			this.options.renderer.clearAlpha );
+		this.world = new World( this );
+		this.animationFrame;
+		this.state = APP_STOP;
+		this.logicLoop = new LoopManager();
+		this.renderLoop = new LoopManager();
+		window.addEventListener( 'resize', () => {
+			this.resize();
+		} );
+		if ( this.options.autoStart ) {
+			this.start();
+		}
+		if ( this.options.VRSupport ) {
+			this.VR = new VR( this );
+		}
+	}
 
-  resize() {
-    let width = this.getWorldWidth();
-    let height = this.getWorldHeight();
-    this.world.resize(width, height);
-    this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(this.options.renderer.pixelRatio);
-  }
+	resize() {
+		let width = this.getWorldWidth();
+		let height = this.getWorldHeight();
+		this.world.resize( width, height );
+		this.renderer.setSize( width, height );
+		this.renderer.setPixelRatio( this.options.renderer.pixelRatio );
+	}
 
-  update(time) {
-    if (this.state === APP_RUNNING) {
-      this.logicLoop.update(time);
-      this.world.update(time);
-      this.renderLoop.update(time);
-    }
-    this.animationFrame = requestAnimationFrame(() => {
-      this.update();
-    });
-  }
+	update( time ) {
+		if ( this.state === APP_RUNNING ) {
+			this.logicLoop.update( time );
+			this.world.update( time );
+			this.renderLoop.update( time );
+		}
+		this.animationFrame = requestAnimationFrame( () => {
+			this.update();
+		} );
+	}
 
-  setCommonCSS() {
-    document.write(
-      '<style>*{margin:0;padding:0} body{overflow:hidden}</style>');
-  }
+	setCommonCSS() {
+		document.write(
+			'<style>*{margin:0;padding:0} body{overflow:hidden}</style>' );
+	}
 
-  getWorldWidth() {
-    return this.parent === document.body ? window.innerWidth :
-      this.parent.offsetWidth;
-  }
+	getWorldWidth() {
+		return this.parent === document.body ? window.innerWidth :
+			this.parent.offsetWidth;
+	}
 
-  getWorldHeight() {
-    return this.parent === document.body ? window.innerHeight :
-      this.parent.offsetHeight;
-  }
+	getWorldHeight() {
+		return this.parent === document.body ? window.innerHeight :
+			this.parent.offsetHeight;
+	}
 
-  start() {
-    if (this.state === APP_STOP) {
-      this.state = APP_RUNNING;
-      this.parent.appendChild(this.renderer.domElement);
-      this.resize();
-      this.update();
-    }
-  }
+	start() {
+		if ( this.state === APP_STOP ) {
+			this.state = APP_RUNNING;
+			this.parent.appendChild( this.renderer.domElement );
+			this.resize();
+			this.update();
+		}
+	}
 
-  resume() {
-    if (this.state === APP_PAUSE) {
-      this.state = APP_RUNNING;
-    }
-  }
+	resume() {
+		if ( this.state === APP_PAUSE ) {
+			this.state = APP_RUNNING;
+		}
+	}
 
-  pause() {
-    if (this.state === APP_RUNNING) {
-      this.state = APP_PAUSE;
-    }
-  }
+	pause() {
+		if ( this.state === APP_RUNNING ) {
+			this.state = APP_PAUSE;
+		}
+	}
 
-  destroy() {
-    this.world.destroy();
-  }
+	destroy() {
+		this.world.destroy();
+	}
 
-  openFullScreen() {
-    let container = this.parent;
-    this.isFullScreen = true;
-    if (container.requestFullscreen) {
-      container.requestFullscreen();
-    } else if (container.msRequestFullscreen) {
-      container.msRequestFullscreen();
-    } else if (container.mozRequestFullScreen) {
-      container.mozRequestFullScreen();
-    } else if (container.webkitRequestFullscreen) {
-      container.webkitRequestFullscreen();
-    } else {
-      this.isFullScreen = false;
-    }
-    return this.isFullScreen;
-  }
+	openFullScreen() {
+		let container = this.parent;
+		this.isFullScreen = true;
+		if ( container.requestFullscreen ) {
+			container.requestFullscreen();
+		} else if ( container.msRequestFullscreen ) {
+			container.msRequestFullscreen();
+		} else if ( container.mozRequestFullScreen ) {
+			container.mozRequestFullScreen();
+		} else if ( container.webkitRequestFullscreen ) {
+			container.webkitRequestFullscreen();
+		} else {
+			this.isFullScreen = false;
+		}
+		return this.isFullScreen;
+	}
 
-  closeFullScreen() {
-    let container = document;
-    this.isFullScreen = false;
-    if (container.exitFullscreen) {
-      container.exitFullscreen();
-    } else if (container.mozCancelFullScreen) {
-      container.mozCancelFullScreen();
-    } else if (container.webkitExitFullScreen) {
-      container.webkitExitFullScreen();
-    } else if (container.msExitFullscreen) {
-      container.msExitFullscreen();
-    } else if (container.webkitCancelFullScreen) {
-      container.webkitCancelFullScreen();
-    } else if (container.webkitExitFullScreen) {
-      container.webkitCancelFullScreen();
-    }
-    return this.isFullScreen;
-  }
+	closeFullScreen() {
+		let container = document;
+		this.isFullScreen = false;
+		if ( container.exitFullscreen ) {
+			container.exitFullscreen();
+		} else if ( container.mozCancelFullScreen ) {
+			container.mozCancelFullScreen();
+		} else if ( container.webkitExitFullScreen ) {
+			container.webkitExitFullScreen();
+		} else if ( container.msExitFullscreen ) {
+			container.msExitFullscreen();
+		} else if ( container.webkitCancelFullScreen ) {
+			container.webkitCancelFullScreen();
+		} else if ( container.webkitExitFullScreen ) {
+			container.webkitCancelFullScreen();
+		}
+		return this.isFullScreen;
+	}
 
-  toggleFullScreen() {
-    if (this.isFullScreen) {
-      this.closeFullScreen();
-    } else {
-      this.openFullScreen();
-    }
+	toggleFullScreen() {
+		if ( this.isFullScreen ) {
+			this.closeFullScreen();
+		} else {
+			this.openFullScreen();
+		}
+	}
 
-  }
+	screenshot() {
+		let w = window.open( '', '' );
+		w.document.title = "Nova Screenshot";
+		let img = new Image();
+		this.renderer.render( this.world.scene, this.world.camera );
+		img.src = app.renderer.domElement.toDataURL();
+		w.document.body.appendChild( img );
+	}
 
-  screenshot() {
-    let w = window.open('', '');
-    w.document.title = "Nova Screenshot";
-    let img = new Image();
-    this.renderer.render(this.world.scene, this.world.camera);
-    img.src = app.renderer.domElement.toDataURL();
-    w.document.body.appendChild(img);
-  }
+	sceneCoordinateToCanvasCoordinate( obj, camera = this.world.camera ) {
+		let worldVector = obj.position.clone();
+		let vector = worldVector.project( camera );
+
+		let halfWidth = this.getWorldWidth() / 2;
+		let halfHeight = this.getWorldHeight() / 2;
+
+		return new THREE.Vector2( Math.round( vector.x * halfWidth + halfWidth ),
+			Math.round( -vector.y * halfHeight + halfHeight ) );
+	}
 }
 
 class Bind {
@@ -2290,21 +2296,17 @@ let AfterimageShader = {
 
     varying vec2 vUv;
 
-    float when_gt(float x, float y) {
-      return max(sign(x - y), 0.0);
+    vec4 when_gt( vec4 texel, float y ) {
+      return max( sign( texel - y ), 0. );
     }
 
     void main() {
-      vec4 texelOld = texture2D(tOld, vUv);
-      vec4 texelNew = texture2D(tNew, vUv);
+      vec4 texelOld = texture2D( tOld, vUv );
+      vec4 texelNew = texture2D( tNew, vUv );
 
-      texelOld *= damp;
-      texelOld.r *= when_gt(texelOld.r, 0.2);
-      texelOld.g *= when_gt(texelOld.g, 0.2);
-      texelOld.b *= when_gt(texelOld.b, 0.2);
-      texelOld.a *= when_gt(texelOld.a, 0.2);
+      texelOld *= damp * when_gt( texelOld, 0.1 );
 
-      gl_FragColor = texelOld + texelNew;
+      gl_FragColor = max( texelNew, texelOld );
     }`
 };
 

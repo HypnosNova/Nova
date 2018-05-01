@@ -19,21 +19,17 @@ let AfterimageShader = {
 
     varying vec2 vUv;
 
-    float when_gt(float x, float y) {
-      return max(sign(x - y), 0.0);
+    vec4 when_gt( vec4 texel, float y ) {
+      return max( sign( texel - y ), 0. );
     }
 
     void main() {
-      vec4 texelOld = texture2D(tOld, vUv);
-      vec4 texelNew = texture2D(tNew, vUv);
+      vec4 texelOld = texture2D( tOld, vUv );
+      vec4 texelNew = texture2D( tNew, vUv );
 
-      texelOld *= damp;
-      texelOld.r *= when_gt(texelOld.r, 0.2);
-      texelOld.g *= when_gt(texelOld.g, 0.2);
-      texelOld.b *= when_gt(texelOld.b, 0.2);
-      texelOld.a *= when_gt(texelOld.a, 0.2);
+      texelOld *= damp * when_gt( texelOld, 0.1 );
 
-      gl_FragColor = texelOld + texelNew;
+      gl_FragColor = max( texelNew, texelOld );
     }`
 };
 

@@ -3133,6 +3133,150 @@
 	}
 
 	/**
+	 * @author mattatz / http://mattatz.github.io
+	 *
+	 * Based on 
+	 * Charlotte Hoare MSc Project / http://nccastaff.bournemouth.ac.uk/jmacey/MastersProjects/MSc12/Hoare/index.html
+	 * and 
+	 * Su et al. Real-Time rendering of watercolor effects for virtual environments. / http://dl.acm.org/citation.cfm?id=2131253
+	 */
+
+	let WatercolorShader = {
+
+		uniforms: {
+			"tDiffuse": { type: "t", value: null }, // diffuse texture
+			"tPaper": { type: "t", value: null }, // paper texture
+			"texel": { type: "v2", value: new THREE.Vector2( 1.0 / 512, 1.0 / 512 ) },
+			"scale": { type: "f", value: 0.03 }, // wobble scale
+			"threshold": { type: "f", value: 0.7 }, // edge threshold
+			"darkening": { type: "f", value: 1.75 }, // edge darkening
+			"pigment": { type: "f", value: 1.2 }, // pigment dispersion
+		},
+
+		vertexShader: [
+			"varying vec2 vUv;",
+			"void main() {",
+			"vUv = uv;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"}"
+		].join( "\n" ),
+
+		fragmentShader: [
+			"uniform sampler2D tDiffuse;",
+			"uniform sampler2D tPaper;",
+
+			"uniform vec2 texel;",
+			"uniform float scale;",
+			"uniform float threshold;",
+			"uniform float darkening;",
+			"uniform float pigment;",
+
+			"varying vec2 vUv;",
+
+			"float sobel(sampler2D tex, vec2 uv) {",
+
+			"vec3 hr = vec3(0., 0., 0.);",
+			"hr += texture2D(tex, (uv + vec2(-1.0, -1.0) * texel)).rgb *  1.0;",
+			"hr += texture2D(tex, (uv + vec2( 0.0, -1.0) * texel)).rgb *  0.0;",
+			"hr += texture2D(tex, (uv + vec2( 1.0, -1.0) * texel)).rgb * -1.0;",
+			"hr += texture2D(tex, (uv + vec2(-1.0,  0.0) * texel)).rgb *  2.0;",
+			"hr += texture2D(tex, (uv + vec2( 0.0,  0.0) * texel)).rgb *  0.0;",
+			"hr += texture2D(tex, (uv + vec2( 1.0,  0.0) * texel)).rgb * -2.0;",
+			"hr += texture2D(tex, (uv + vec2(-1.0,  1.0) * texel)).rgb *  1.0;",
+			"hr += texture2D(tex, (uv + vec2( 0.0,  1.0) * texel)).rgb *  0.0;",
+			"hr += texture2D(tex, (uv + vec2( 1.0,  1.0) * texel)).rgb * -1.0;",
+
+			"vec3 vt = vec3(0., 0., 0.);",
+			"vt += texture2D(tex, (uv + vec2(-1.0, -1.0) * texel)).rgb *  1.0;",
+			"vt += texture2D(tex, (uv + vec2( 0.0, -1.0) * texel)).rgb *  2.0;",
+			"vt += texture2D(tex, (uv + vec2( 1.0, -1.0) * texel)).rgb *  1.0;",
+			"vt += texture2D(tex, (uv + vec2(-1.0,  0.0) * texel)).rgb *  0.0;",
+			"vt += texture2D(tex, (uv + vec2( 0.0,  0.0) * texel)).rgb *  0.0;",
+			"vt += texture2D(tex, (uv + vec2( 1.0,  0.0) * texel)).rgb *  0.0;",
+			"vt += texture2D(tex, (uv + vec2(-1.0,  1.0) * texel)).rgb * -1.0;",
+			"vt += texture2D(tex, (uv + vec2( 0.0,  1.0) * texel)).rgb * -2.0;",
+			"vt += texture2D(tex, (uv + vec2( 1.0,  1.0) * texel)).rgb * -1.0;",
+
+			"return sqrt(dot(hr, hr) + dot(vt, vt));",
+			"}",
+
+			"vec2 wobble(sampler2D tex, vec2 uv) {",
+			"return uv + (texture2D(tex, uv).xy - 0.5) * scale;",
+			"}",
+
+			"vec4 edgeDarkening(sampler2D tex, vec2 uv) {",
+			"vec4 c = texture2D(tex, uv);",
+			"return c * (1.0 - (1.0 - c) * (darkening - 1.0));",
+			"}",
+
+			"float granulation(sampler2D tex, vec2 uv, float beta) {",
+			"vec4 c = texture2D(tex, uv);",
+			"float intensity = (c.r + c.g + c.b) / 3.0;",
+			"return 1.0 + beta * (intensity - 0.5);",
+			"}",
+
+			"void main() {",
+			"vec2 uv = vUv;",
+			"uv = wobble(tPaper, uv);",
+
+			"float pd = granulation(tPaper, vUv, pigment);", // pigment dispersion
+
+			"float edge = sobel(tDiffuse, uv);",
+			"if (edge > threshold) {",
+			"gl_FragColor = pd * edgeDarkening(tDiffuse, uv);",
+			"} else {",
+			"gl_FragColor = pd * texture2D(tDiffuse, uv);",
+			"}",
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	/**
+	 * @author mattatz / http://mattatz.github.io
+	 */
+	class WatercolorPass extends Pass {
+		constructor( tPaper, effectComposer, renderToScreen ) {
+			super( effectComposer, renderToScreen );
+			let shader = WatercolorShader;
+			this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+
+			tPaper.wrapS = tPaper.wrapT = THREE.RepeatWrapping;
+			this.uniforms[ "tPaper" ].value = tPaper;
+
+			this.material = new THREE.ShaderMaterial( {
+				uniforms: this.uniforms,
+				vertexShader: shader.vertexShader,
+				fragmentShader: shader.fragmentShader
+			} );
+
+			this.enabled = true;
+			this.renderToScreen = renderToScreen;
+			this.needsSwap = true;
+
+			this.camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 );
+			this.scene = new THREE.Scene();
+
+			this.quad = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), null );
+			this.scene.add( this.quad );
+		}
+
+		render( renderer, writeBuffer, readBuffer, delta, maskActive ) {
+			this.uniforms[ "tDiffuse" ].value = readBuffer;
+			this.uniforms[ "texel" ].value = new THREE.Vector2( 1.0 / readBuffer.width,
+				1.0 / readBuffer.height );
+
+			this.quad.material = this.material;
+			if ( this.renderToScreen ) {
+				renderer.render( this.scene, this.camera );
+			} else {
+				renderer.render( this.scene, this.camera, writeBuffer, false );
+			}
+		}
+	}
+
+	/**
 	 * @author alteredq / http://alteredqualia.com/
 	 * @author davidedc / http://www.sketchpatch.net/
 	 *
@@ -4341,11 +4485,13 @@
 	exports.ShaderPass = ShaderPass;
 	exports.GlitchPass = GlitchPass;
 	exports.OutlinePass = OutlinePass;
+	exports.WatercolorPass = WatercolorPass;
 	exports.AfterimageShader = AfterimageShader;
 	exports.CopyShader = CopyShader;
 	exports.DotScreenShader = DotScreenShader;
 	exports.FXAAShader = FXAAShader;
 	exports.GlitchShader = GlitchShader;
+	exports.WatercolorShader = WatercolorShader;
 	exports.Util = Util;
 
 	Object.defineProperty(exports, '__esModule', { value: true });

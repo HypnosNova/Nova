@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Watercolor effect</title>
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script src="js/gui/dat.gui.min.js"></script>
+
+    <script>
+      let app = new NOVA.App();
+      app.world.renderLoop.removeAll();
+      app.world.camera.position.z = 50;
+
+      init();
+
+      function init() {
+        let geometry = new THREE.BoxGeometry( 20, 20, 20 );
+        let material = new THREE.MeshNormalMaterial();
+        let mesh = new THREE.Mesh( geometry, material );
+        app.world.scene.add( mesh );
+
+        let composer = new NOVA.EffectComposer( app.world );
+
+        let paper = new THREE.TextureLoader()
+          .load( "assets/images/paper.png" );
+
+        let watercolorPass = new NOVA.WatercolorPass( paper, composer, true );
+
+        let effectController = {
+          scale: 0.03,
+          threshold: 0.7,
+          darkening: 1.75,
+          pigment: 1.2
+        };
+
+        let matChanger = () => {
+          watercolorPass.uniforms[ "scale" ].value = effectController.scale;
+          watercolorPass.uniforms[ "threshold" ].value = effectController.threshold;
+          watercolorPass.uniforms[ "darkening" ].value = effectController.darkening;
+          watercolorPass.uniforms[ "pigment" ].value = effectController.pigment;
+        };
+
+        let gui = new dat.GUI();
+        gui.add( effectController, "scale", 0.0, 0.2, 0.001 )
+          .onChange( matChanger );
+        gui.add( effectController, "threshold", 0.0, 1.0, 0.025 )
+          .onChange( matChanger );
+        gui.add( effectController, "darkening", 0.0, 3.0, 0.025 )
+          .onChange( matChanger );
+        gui.add( effectController, "pigment", 0.0, 3.0, 0.025 )
+          .onChange( matChanger );
+        gui.close();
+
+        app.logicLoop.add( () => {
+          composer.render();
+
+          mesh.rotation.x += 0.02;
+        } );
+      }
+    </script>
+  </body>
+
+</html>

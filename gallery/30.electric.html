@@ -230,37 +230,37 @@
       const pMat = new THREE.ShaderMaterial({
 
         vertexShader: NOISE + `
-  uniform float time;
-varying vec2 vUV;
-varying vec3 vPosition;
-uniform vec2 mouse;
+        uniform float time;
+        varying vec2 vUV;
+        varying vec3 vPosition;
+        uniform vec2 mouse;
 
-float heightConvolve(in vec3 pos) {
-return ((cnoise(vec3(pos.xy*5.,time*4.))/20.+(1.-(cnoise(vec3(mouse/10.+pos.xy/2.,time/10.)))))/2.*
-smoothstep(4., 1., abs(pos.x)) *smoothstep(4., 1., abs(pos.y)));
-}
+        float heightConvolve(in vec3 pos) {
+          return ((cnoise(vec3(pos.xy*5.,time*4.))/20.+(1.-(cnoise(vec3(mouse/10.+pos.xy/2.,time/10.)))))/2.*
+            smoothstep(4., 1., abs(pos.x)) *smoothstep(4., 1., abs(pos.y)));
+        }
 
-void main() {
-vUV = uv;
-  vPosition.xyz = (modelMatrix*vec4(position,1.)).xyz;
+        void main() {
+          vUV = uv;
+          vPosition.xyz = (modelMatrix*vec4(position,1.)).xyz;
 
-  gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.);
-}`,
+          gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.);
+        }`,
 
         fragmentShader: NOISE + `
-  varying vec3 vPosition;
-uniform vec3 center;
-uniform float distance;
-uniform float time;
-varying vec2 vUV;
-  void main() {
+          varying vec3 vPosition;
+          uniform vec3 center;
+          uniform float distance;
+          uniform float time;
+          varying vec2 vUV;
+          void main() {
 
-vec3 color = vec3(smoothstep(0.1, 0.0, mod(abs(0.3*cnoise(vPosition*2.)+distance-length(vPosition-center)),7.)));
+            vec3 color = vec3(smoothstep(0.1, 0.0, mod(abs(0.3*cnoise(vPosition*2.)+distance-length(vPosition-center)),7.)));
   
-    gl_FragColor = vec4(color,1.);
+            gl_FragColor = vec4(color,1.);
 
-  }
-`,
+          }
+        `,
         uniforms: {
           mouse: { value: new THREE.Vector2() },
           center: { value: new THREE.Vector3() },

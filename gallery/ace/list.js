@@ -35,17 +35,18 @@ const list = {
       ["Virtual event", "26.particle_event"]
     ],
     "Hammer": [
-      ["Tap event", "4.event"],
-      ["Swipe event", "14.swipe"]
+      ["Swipe event", "14.swipe"],
+      ["Tap event", "4.event"]
     ]
   },
   "Postprocessing": {
     "Normal": [
-      ["Dot effect", "16.dot_effect"],
-      ["Glitch effect", "17.glitch_effect"],
       ["Afterimage effect", "29.afterimage_effect"],
+      ["Dot effect", "16.dot_effect"],
       ["FXAA effect", "18.fxaa_effect"],
-      ["Outline effect", "19.outline_effect"]
+      ["Glitch effect", "17.glitch_effect"],
+      ["Outline effect", "19.outline_effect"],
+      ["Watercolor effect","31.watercolor_effect"]
     ]
   },
   "BAS": {
@@ -56,8 +57,9 @@ const list = {
   },
   "Others": {
     "Shader": [
-      ["Nova", "999.nova"],
-      ["Halloween clock", "997.halloween_clock"]
+      ["Electric", "30.electric"],
+      ["Halloween clock", "997.halloween_clock"],
+      ["Nova", "999.nova"]
     ],
     "Other": [
       ["Noise flower", "25.flower"],

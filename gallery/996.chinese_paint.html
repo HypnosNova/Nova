@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0">
+
+    <title>Chinese paint</title>
+
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script src="js/gui/dat.gui.min.js"></script>
+    <script type="text/javascript">
+      let app = new NOVA.App( {
+        renderer: {
+          clearColor: 0xffffff,
+          alpha: true
+        }
+      } );
+
+      app.iterations = 3;
+      var effectController = {
+        iterations: 3,
+        alpha: 1.0,
+        evaporation: 0.0002,
+        brushSize: 0.01,
+        reset: () => {
+          if ( !app.originMaterial ) return;
+          app.mesh.material = app.originMaterial;
+          app.renderer.render( app.world.scene, app.world.camera, app.fpp.getReadBuffer() );
+        }
+      };
+
+      let vshader = `
+        #define GLSLIFY 1
+        varying vec2 vUv;
+        
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }`;
+
+      let fshaderOrigin = `
+        #define GLSLIFY 1
+        varying vec2 vUv;
+        uniform sampler2D paperTex;
+        
+        void main() {
+          float v = texture2D(paperTex, vUv).r;
+          gl_FragColor = vec4(0.0, 0.0, v, v);
+        }`;
+
+      let fshaderUpdate = `
+        #define GLSLIFY 1
+        varying vec2 vUv;
+        
+        uniform sampler2D waterTex;
+        uniform vec2 texelSize;
+        
+        uniform float alpha;
+        uniform float evaporation;
+        uniform vec4 brush; // xy : position, z : size, w : ratio of screen
+        uniform vec2 prev;
+        
+        float waterDelta(vec4 k, vec4 o) {
+          float ld = (k.w + k.x) - (o.w + o.x); // level difference
+          float transfer = (k.w + k.x) - max(o.w, k.w + k.z); // transferable water particles
+          return max( 0.0, 0.3 * alpha * min(ld, transfer) );
+        }
+        
+        float waterFlow(vec2 uv) {
+          vec4 o = texture2D(waterTex, uv);
+          vec4 l = texture2D(waterTex, uv + vec2(-texelSize.x, 0));
+          vec4 t = texture2D(waterTex, uv + vec2( 0, -texelSize.y));
+          vec4 r = texture2D(waterTex, uv + vec2( texelSize.x, 0));
+          vec4 b = texture2D(waterTex, uv + vec2( 0,  texelSize.y));
+          float nw = o.r;
+          nw += (waterDelta(l, o) - waterDelta(o, l));
+          nw += (waterDelta(t, o) - waterDelta(o, t));
+          nw += (waterDelta(r, o) - waterDelta(o, r));
+          nw += (waterDelta(b, o) - waterDelta(o, b));
+          return max(nw, 0.0);
+        }
+        
+        float evaporate(float wo) {
+          return max(wo - evaporation, 0.0);
+        }
+        
+        float paint(vec2 uv) {
+          const float count = 30.0;
+          vec2 dir = brush.xy - prev.xy;
+          float l = length(dir);
+          if(l <= 0.0) {
+            vec2 to = uv - brush.xy;
+            to.x *= brush.w;
+            return smoothstep(0.0, brush.z, brush.z - length(to));
+          }
+          
+          float ld = l / count;
+          vec2 norm = normalize(dir);
+          float md = 100.0;
+          for(float i = 0.0; i < count; i++) {
+            vec2 p = prev.xy + norm * ld * i;
+            vec2 to = uv - p;
+            to.x *= brush.w;
+            float d = length(to);
+            if(d < md) {
+              md = d;
+            }
+          }
+          
+          const float minD = 0.01;
+          const float maxD = 0.5;
+          float size = brush.z * (1.0 - pow(smoothstep(minD, maxD, l), 0.1));
+          return smoothstep(0.0, size, size - md);
+        }
+        
+        void main() {
+          vec4 col = texture2D(waterTex, vUv);
+          col.x = evaporate(waterFlow(vUv));
+          
+          float dw = paint(vUv);
+          col.x = min(col.x + dw, 1.0);
+          gl_FragColor = col;
+        }`;
+
+      let fshaderVisualize = `
+        #define GLSLIFY 1
+        varying vec2 vUv;
+        
+        uniform sampler2D waterTex;
+        
+        void main() {
+          float v = texture2D(waterTex, vUv).r;
+          gl_FragColor = vec4(vec3(1.0 - v), 1.0);
+        }`;
+
+      function createBuffer( width, height, opt ) {
+        opt = opt || {};
+        return new THREE.WebGLRenderTarget( width, height, _.defaultsDeep( opt, {
+          wrapS: THREE.ClampToEdgeWrapping,
+          wrapT: THREE.ClampToEdgeWrapping,
+          minFilter: THREE.NearestFilter,
+          magFilter: THREE.NearestFilter,
+          format: THREE.RGBAFormat,
+          type: THREE.FloatType,
+          stencilBuffer: false
+        } ) );
+      }
+
+      class FboPingPong {
+        constructor( width, height, opt ) {
+          this.readBufferIndex = 0;
+          this.writeBufferIndex = 1;
+          this.buffers = [
+            createBuffer( width, height, opt ),
+            createBuffer( width, height, opt )
+          ];
+        }
+
+        getReadBuffer() {
+          return this.buffers[ this.readBufferIndex ];
+        }
+
+        getWriteBuffer() {
+          return this.buffers[ this.writeBufferIndex ];
+        }
+
+        swap() {
+          let tmp = this.buffers[ this.writeBufferIndex ];
+          this.buffers[ this.writeBufferIndex ] = this.buffers[ this.readBufferIndex ];
+          this.buffers[ this.readBufferIndex ] = tmp;
+        }
+      }
+
+      init();
+      initGUI();
+
+      function init() {
+
+        var size = 1024;
+        var type = THREE.FloatType;
+        var opt = {
+          type: type,
+          format: THREE.RGBAFormat,
+          wrapS: THREE.RepeatWrapping,
+          wrapT: THREE.RepeatWrapping,
+          minFilter: THREE.LinearFilter,
+          magFilter: THREE.LinearFilter
+        };
+
+        app.fpp = new FboPingPong( size, size, opt );
+
+        var loader = new THREE.TextureLoader();
+        loader.load( 'assets/images/paper.png', ( paper ) => {
+          paper.minFilter = paper.magFilter = THREE.NearestFilter;
+
+          app.originMaterial = new THREE.ShaderMaterial( {
+            vertexShader: vshader,
+            fragmentShader: fshaderOrigin,
+            uniforms: {
+              paperTex: { type: 't', value: paper }
+            }
+          } );
+
+          app.updateMaterial = new THREE.ShaderMaterial( {
+            vertexShader: vshader,
+            fragmentShader: fshaderUpdate,
+            uniforms: {
+              waterTex: { type: 't', value: app.fpp.getWriteBuffer() },
+              texelSize: { type: 'v2', value: new THREE.Vector2( 1 / size, 1 / size ) },
+              alpha: { type: 'f', value: 1.0 },
+              evaporation: { type: 'f', value: 0.0002 },
+              brush: { type: 'v4', value: new THREE.Vector4( -1, -1, 0.01, window.innerWidth / window.innerHeight ) },
+              prev: { type: 'v2', value: new THREE.Vector2( -1, -1 ) }
+            }
+          } );
+
+          app.visualizeMaterial = new THREE.ShaderMaterial( {
+            vertexShader: vshader,
+            fragmentShader: fshaderVisualize,
+            uniforms: {
+              waterTex: { type: 't', value: app.fpp.getWriteBuffer() }
+            }
+          } );
+
+          app.mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry( 2, 2 ),
+            null
+          );
+
+          app.world.scene.add( app.mesh );
+
+          app.mesh.material = app.originMaterial;
+          app.renderer.render( app.world.scene, app.world.camera, app.fpp.getReadBuffer() );
+
+          app.logicLoop.add( () => {
+            app.mesh.material = app.updateMaterial;
+
+            for ( let i = 0; i < effectController.iterations; i++ ) {
+              app.updateMaterial.uniforms.waterTex.value = app.fpp.getReadBuffer();
+              app.renderer.render( app.world.scene, app.world.camera, app.fpp.getWriteBuffer() );
+              app.fpp.swap();
+            }
+
+            app.mesh.material = app.visualizeMaterial;
+          } );
+
+          var mouse = new THREE.Vector2( 0, 0 );
+          var isDragging = false;
+
+          var updateMousePosition = function( e ) {
+            e.preventDefault();
+
+            if ( !app.updateMaterial ) return;
+
+            app.updateMaterial.uniforms.prev.value.x = mouse.x;
+            app.updateMaterial.uniforms.prev.value.y = mouse.y;
+
+            mouse.x = ( e.pageX / window.innerWidth );
+            mouse.y = 1 - ( e.pageY / window.innerHeight );
+
+            app.updateMaterial.uniforms.brush.value.x = mouse.x;
+            app.updateMaterial.uniforms.brush.value.y = mouse.y;
+
+            app.updateMaterial.uniforms.brush.value.z = isDragging ? effectController.brushSize : 0;
+          };
+
+          var enableBrush = function( e ) {
+            isDragging = true;
+
+            updateMousePosition( e );
+          };
+
+          var disableBrush = function( e ) {
+            isDragging = false;
+
+            if ( !app.updateMaterial ) return;
+
+            app.updateMaterial.uniforms.brush.value.z = 0;
+          };
+
+          var dom = app.renderer.domElement;
+
+          dom.addEventListener( 'mousedown', enableBrush );
+          dom.addEventListener( 'mousemove', updateMousePosition );
+          dom.addEventListener( 'mouseup', disableBrush );
+
+          window.addEventListener( 'resize', () => {
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+
+            app.renderer.setSize( w, h );
+
+            if ( app.updateMaterial ) {
+              app.updateMaterial.uniforms.brush.value.w = w / h;
+            }
+          } );
+        } );
+      }
+
+      function initGUI() {
+
+        var matChanger = function() {
+          if ( !app.updateMaterial ) return;
+
+          app.updateMaterial.uniforms.alpha.value = effectController.alpha;
+          app.updateMaterial.uniforms.evaporation.value = effectController.evaporation;
+          app.updateMaterial.uniforms.brush.value.z = effectController.brushSize;
+        };
+
+        var gui = new dat.GUI();
+        gui.add( effectController, 'alpha', 0.0, 1.0, 0.01 )
+          .onChange( matChanger );
+        gui.add( effectController, 'evaporation', 0.0, 0.001, 0.0001 )
+          .onChange( matChanger );
+        gui.add( effectController, 'brushSize', 0.001, 0.1, 0.001 )
+          .onChange( matChanger );
+        gui.add( effectController, 'iterations', 1, 8, 1 )
+          .onChange( matChanger );
+        gui.add( effectController, 'reset' );
+        gui.close();
+      }
+    </script>
+  </body>
+
+</html>

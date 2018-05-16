@@ -31,6 +31,7 @@ export { ShaderPass } from './postprocessing/ShaderPass.js';
 export { GlitchPass } from './postprocessing/GlitchPass.js';
 export { OutlinePass } from './postprocessing/OutlinePass.js';
 export { WatercolorPass } from './postprocessing/WatercolorPass.js';
+export { TestPass } from './postprocessing/TestPass.js';
 
 export { AfterimageShader } from './postprocessing/shader/AfterimageShader.js';
 export { CopyShader } from './postprocessing/shader/CopyShader.js';
@@ -38,6 +39,7 @@ export { DotScreenShader } from './postprocessing/shader/DotScreenShader.js';
 export { FXAAShader } from './postprocessing/shader/FXAAShader.js';
 export { GlitchShader } from './postprocessing/shader/GlitchShader.js';
 export { WatercolorShader } from './postprocessing/shader/WatercolorShader.js';
+export { TestShader } from './postprocessing/shader/TestShader.js';
 
 export { Util } from './util/Util.js';
 

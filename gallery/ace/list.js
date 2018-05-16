@@ -6,6 +6,7 @@ const list = {
 			[ "Screenshot", "7.screenshot" ],
 			[ "Toggle fullscreen", "15.fullscreen" ],
 			[ "Bind value", "20.bind" ],
+			[ "Bind uniform", "33.bind_uniform" ],
 			[ "Bind more values", "21.bind_advance" ],
 			[ "Video uv", "23.video_uv" ],
 		],

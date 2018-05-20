@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <title>Add a model</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   </head>
+
   <body>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
@@ -14,28 +16,33 @@
     <script src="../build/nova.js"></script>
     <script>
       let app = new NOVA.App();
-      app.renderer.setClearColor(0xffffff);
-      app.world.camera.position.z = 50;
-      new THREE.OrbitControls(app.world.camera);
+      app.renderer.setClearColor( 0xffffff );
+      app.world.camera.position.set( 0, 100, -100 );
+      new THREE.OrbitControls( app.world.camera );
 
-      var ambient = new THREE.AmbientLight(0xffffff);
-      app.world.scene.add(ambient);
-      var directionalLight = new THREE.DirectionalLight(0xffeedd);
-      directionalLight.position.set(0, 0, 1)
+      let ambient = new THREE.AmbientLight( 0x666666 );
+      app.world.scene.add( ambient );
+      let directionalLight = new THREE.DirectionalLight( 0xffeedd );
+      directionalLight.position.set( 0, 0, 1 )
         .normalize();
-      app.world.scene.add(directionalLight);
+      directionalLight = new THREE.DirectionalLight( 0xffeedd );
+      directionalLight.position.set( 0, 1, -1 )
+        .normalize();
+      app.world.scene.add( directionalLight );
 
-      var mtlLoader = new THREE.MTLLoader();
-      mtlLoader.setPath('assets/model/');
-      mtlLoader.load('GermanShephardLowPoly.mtl', function(materials) {
+      let mtlLoader = new THREE.MTLLoader();
+      mtlLoader.setPath( 'assets/model/rose/' );
+      mtlLoader.load( 'rose.mtl', function( materials ) {
         materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials(materials);
-        objLoader.setPath('assets/model/');
-        objLoader.load('GermanShephardLowPoly.obj', function(object) {
-          app.world.scene.add(object);
-        });
-      });
+        let objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials( materials );
+        objLoader.setPath( 'assets/model/rose/' );
+        objLoader.load( 'rose.obj', function( object ) {
+          object.position.set( 0, -50, 0 )
+          app.world.scene.add( object );
+        } );
+      } );
     </script>
   </body>
+
 </html>

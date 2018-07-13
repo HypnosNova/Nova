@@ -13,6 +13,7 @@ let DefaultSettings = {
     antialias: true, //是否开启抗锯齿
     alpha: false, // 渲染器是否保存alpha缓冲
     logarithmicDepthBuffer: false, // 逻辑深度缓冲
+    preserveDrawingBuffer: false
   },
   normalEventList: ['click', 'mousedown', 'mouseup', 'touchstart',
     'touchend', 'touchmove', 'mousemove'

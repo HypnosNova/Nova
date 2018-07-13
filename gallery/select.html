@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Add a model</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <style>
+    .selectBox {
+      border: 1px solid #55aaff;
+      background-color: rgba(75, 160, 255, 0.3);
+      position: fixed;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+  <script src="../lib/three.min.js"></script>
+  <script src="js/controls/OrbitControls.js"></script>
+  <script src="../build/nova.js"></script>
+  <script src="selectionBox.js"></script>
+  <script src="selectionHelper.js"></script>
+  <script>
+    let app = new NOVA.App({
+      renderer: {
+        logarithmicDepthBuffer: true, // 逻辑深度缓冲
+      }
+    });
+    app.renderer.setClearColor(0xffffff);
+    app.world.camera.position.set(500, 500, 500);
+    app.world.camera.lookAt(app.world.scene.position);
+
+    for (let i = 0; i < 40; i++) {
+      var geometry = new THREE.BoxBufferGeometry(8, 8, 8);
+      var material = new THREE.MeshBasicMaterial({
+        color: 0x00ff00
+      });
+      var cube = new THREE.Mesh(geometry, material);
+      app.world.scene.add(cube);
+
+      cube.position.set(Math.random() * 200 - 100, Math.random() * 200 - 100, Math.random() * 200 - 100);
+    }
+
+    var selectionBox = new SelectionBox(app.world.camera, app.world.scene);
+    var helper = new SelectionHelper(selectionBox, app.renderer, "selectBox");
+
+    document.addEventListener("mousedown", function (e) {
+      for (let item of selectionBox.collection) {
+        item.material.color = new THREE.Color(0x00ff00);
+      }
+      selectionBox.startPoint.set(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1,
+        0.5);
+    });
+
+    document.addEventListener("mousemove", function (e) {
+      if (helper.isDown) {
+        for (let item of selectionBox.collection) {
+          item.material.color = new THREE.Color(0x00ff00);
+        }
+        selectionBox.endPoint.set(
+          (event.clientX / window.innerWidth) * 2 - 1,
+          -(event.clientY / window.innerHeight) * 2 + 1,
+          0.5);
+        var allSelected = selectionBox.select();
+        for (let item of allSelected) {
+          item.material.color = new THREE.Color(0x0000ff);
+        }
+      }
+    });
+
+    document.addEventListener("mouseup", function (e) {
+      selectionBox.endPoint.set(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1,
+        0.5);
+      var allSelected = selectionBox.select();
+      for (let item of allSelected) {
+        item.material.color = new THREE.Color(0x0000ff);
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>

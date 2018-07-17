@@ -1,6 +1,8 @@
 import { CopyShader } from './shader/CopyShader.js';
 import { ShaderPass } from './ShaderPass.js';
 import { RenderPass } from './RenderPass.js';
+import { MaskPass } from './MaskPass';
+import { ClearMaskPass } from './ClearMaskPass';
 
 class EffectComposer {
   constructor(world, options = {}, renderTarget) {
@@ -75,10 +77,10 @@ class EffectComposer {
         this.swapBuffers();
       }
 
-      if (THREE.MaskPass !== undefined) {
-        if (pass instanceof THREE.MaskPass) {
+      if (MaskPass !== undefined) {
+        if (pass instanceof MaskPass) {
           maskActive = true;
-        } else if (pass instanceof THREE.ClearMaskPass) {
+        } else if (pass instanceof ClearMaskPass) {
           maskActive = false;
         }
       }

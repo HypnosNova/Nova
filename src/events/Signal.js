@@ -1,3 +1,4 @@
+import { NotFunctionError } from './../error/NotFunctionError';
 /**
  * 用于事件处理
  * 
@@ -17,7 +18,7 @@ class Signal {
   }
 
   remove(func) {
-    return _.remove(this.functionArr, function(n) {
+    return _.remove(this.functionArr, function (n) {
       return n === func;
     });
   }

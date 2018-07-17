@@ -979,6 +979,8 @@ function _getTypeNumber(sText, nCorrectLevel) {
       case QRErrorCorrectLevel.H:
         nLimit = QRCodeLimitLength[i][3];
         break;
+      default: 
+        nLimit = QRCodeLimitLength[i][1];
     }
 
     if (length <= nLimit) {

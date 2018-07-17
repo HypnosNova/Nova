@@ -19,6 +19,7 @@
 	    antialias: true, //是否开启抗锯齿
 	    alpha: false, // 渲染器是否保存alpha缓冲
 	    logarithmicDepthBuffer: false, // 逻辑深度缓冲
+	    preserveDrawingBuffer: false
 	  },
 	  normalEventList: ['click', 'mousedown', 'mouseup', 'touchstart',
 	    'touchend', 'touchmove', 'mousemove'
@@ -26,13 +27,13 @@
 	  hammerEventList: 'press tap pressup pan swipe', //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
 	};
 
-	let NotFunctionError$1 = class extends Error {
+	class NotFunctionError$1 extends Error {
 	  constructor( message ) {
 	    super( message );
 	    this.name = 'NotFunctionError';
 	    this.message = message || 'The object is not a function.';
 	  }
-	};
+	}
 
 	class LoopManager {
 	  constructor(cycleLevel = 1) {
@@ -305,58 +306,59 @@
 	}
 
 	class App {
-		constructor( settings = {} ) {
-			this.options = _.defaultsDeep( settings, DefaultSettings );
-			if ( this.options.setCommonCSS ) {
+		constructor(settings = {}) {
+			this.options = _.defaultsDeep(settings, DefaultSettings);
+			if (this.options.setCommonCSS) {
 				this.setCommonCSS();
 			}
 			this.parent = this.options.parent;
-			this.renderer = new THREE.WebGLRenderer( {
+			this.renderer = new THREE.WebGLRenderer({
 				antialias: this.options.renderer.antialias,
 				precision: this.options.renderer.precision,
 				alpha: this.options.renderer.alpha,
-				logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer
-			} );
-			this.renderer.setClearColor( this.options.renderer.clearColor,
-				this.options.renderer.clearAlpha );
-			this.world = new World( this );
+				logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer,
+				preserveDrawingBuffer: this.options.renderer.preserveDrawingBuffer
+			});
+			this.renderer.setClearColor(this.options.renderer.clearColor,
+				this.options.renderer.clearAlpha);
+			this.world = new World(this);
 			this.animationFrame;
 			this.state = APP_STOP;
 			this.logicLoop = new LoopManager();
 			this.renderLoop = new LoopManager();
-			window.addEventListener( 'resize', () => {
+			window.addEventListener('resize', () => {
 				this.resize();
-			} );
-			if ( this.options.autoStart ) {
+			});
+			if (this.options.autoStart) {
 				this.start();
 			}
-			if ( this.options.VRSupport ) {
-				this.VR = new VR( this );
+			if (this.options.VRSupport) {
+				this.VR = new VR(this);
 			}
 		}
 
 		resize() {
 			let width = this.getWorldWidth();
 			let height = this.getWorldHeight();
-			this.world.resize( width, height );
-			this.renderer.setSize( width, height );
-			this.renderer.setPixelRatio( this.options.renderer.pixelRatio );
+			this.world.resize(width, height);
+			this.renderer.setSize(width, height);
+			this.renderer.setPixelRatio(this.options.renderer.pixelRatio);
 		}
 
-		update( time ) {
-			if ( this.state === APP_RUNNING ) {
-				this.logicLoop.update( time );
-				this.world.update( time );
-				this.renderLoop.update( time );
+		update(time) {
+			if (this.state === APP_RUNNING) {
+				this.logicLoop.update(time);
+				this.world.update(time);
+				this.renderLoop.update(time);
 			}
-			this.animationFrame = requestAnimationFrame( () => {
+			this.animationFrame = requestAnimationFrame(() => {
 				this.update();
-			} );
+			});
 		}
 
 		setCommonCSS() {
 			document.write(
-				'<style>*{margin:0;padding:0} body{overflow:hidden}</style>' );
+				'<style>*{margin:0;padding:0} body{overflow:hidden}</style>');
 		}
 
 		getWorldWidth() {
@@ -370,22 +372,22 @@
 		}
 
 		start() {
-			if ( this.state === APP_STOP ) {
+			if (this.state === APP_STOP) {
 				this.state = APP_RUNNING;
-				this.parent.appendChild( this.renderer.domElement );
+				this.parent.appendChild(this.renderer.domElement);
 				this.resize();
 				this.update();
 			}
 		}
 
 		resume() {
-			if ( this.state === APP_PAUSE ) {
+			if (this.state === APP_PAUSE) {
 				this.state = APP_RUNNING;
 			}
 		}
 
 		pause() {
-			if ( this.state === APP_RUNNING ) {
+			if (this.state === APP_RUNNING) {
 				this.state = APP_PAUSE;
 			}
 		}
@@ -397,13 +399,13 @@
 		openFullScreen() {
 			let container = this.parent;
 			this.isFullScreen = true;
-			if ( container.requestFullscreen ) {
+			if (container.requestFullscreen) {
 				container.requestFullscreen();
-			} else if ( container.msRequestFullscreen ) {
+			} else if (container.msRequestFullscreen) {
 				container.msRequestFullscreen();
-			} else if ( container.mozRequestFullScreen ) {
+			} else if (container.mozRequestFullScreen) {
 				container.mozRequestFullScreen();
-			} else if ( container.webkitRequestFullscreen ) {
+			} else if (container.webkitRequestFullscreen) {
 				container.webkitRequestFullscreen();
 			} else {
 				this.isFullScreen = false;
@@ -414,24 +416,24 @@
 		closeFullScreen() {
 			let container = document;
 			this.isFullScreen = false;
-			if ( container.exitFullscreen ) {
+			if (container.exitFullscreen) {
 				container.exitFullscreen();
-			} else if ( container.mozCancelFullScreen ) {
+			} else if (container.mozCancelFullScreen) {
 				container.mozCancelFullScreen();
-			} else if ( container.webkitExitFullScreen ) {
+			} else if (container.webkitExitFullScreen) {
 				container.webkitExitFullScreen();
-			} else if ( container.msExitFullscreen ) {
+			} else if (container.msExitFullscreen) {
 				container.msExitFullscreen();
-			} else if ( container.webkitCancelFullScreen ) {
+			} else if (container.webkitCancelFullScreen) {
 				container.webkitCancelFullScreen();
-			} else if ( container.webkitExitFullScreen ) {
+			} else if (container.webkitExitFullScreen) {
 				container.webkitCancelFullScreen();
 			}
 			return this.isFullScreen;
 		}
 
 		toggleFullScreen() {
-			if ( this.isFullScreen ) {
+			if (this.isFullScreen) {
 				this.closeFullScreen();
 			} else {
 				this.openFullScreen();
@@ -439,23 +441,23 @@
 		}
 
 		screenshot() {
-			let w = window.open( '', '' );
-			w.document.title = "Nova Screenshot";
 			let img = new Image();
-			this.renderer.render( this.world.scene, this.world.camera );
-			img.src = app.renderer.domElement.toDataURL();
-			w.document.body.appendChild( img );
+			this.renderer.render(this.world.scene, this.world.camera);
+			img.src = this.renderer.domElement.toDataURL();
+			let w = window.open('', '');
+			w.document.title = "Nova Screenshot";
+			w.document.body.appendChild(img);
 		}
 
-		sceneCoordinateToCanvasCoordinate( obj, camera = this.world.camera ) {
+		sceneCoordinateToCanvasCoordinate(obj, camera = this.world.camera) {
 			let worldVector = obj.position.clone();
-			let vector = worldVector.project( camera );
+			let vector = worldVector.project(camera);
 
 			let halfWidth = this.getWorldWidth() / 2;
 			let halfHeight = this.getWorldHeight() / 2;
 
-			return new THREE.Vector2( Math.round( vector.x * halfWidth + halfWidth ),
-				Math.round( -vector.y * halfHeight + halfHeight ) );
+			return new THREE.Vector2(Math.round(vector.x * halfWidth + halfWidth),
+				Math.round(-vector.y * halfHeight + halfHeight));
 		}
 	}
 
@@ -1896,7 +1898,7 @@
 	    this.css = _.defaultsDeep(css || {}, this.css);
 	    this.canvas = document.createElement("canvas");
 	    var spriteMaterial = new THREE.SpriteMaterial({
-	      map: canvas,
+	      map: this.canvas,
 	      color: 0xffffff
 	    });
 	    this.element = new THREE.Sprite(spriteMaterial);

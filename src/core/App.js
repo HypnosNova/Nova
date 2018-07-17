@@ -142,7 +142,7 @@ class App {
 	screenshot() {
 		let img = new Image();
 		this.renderer.render(this.world.scene, this.world.camera);
-		img.src = app.renderer.domElement.toDataURL();
+		img.src = this.renderer.domElement.toDataURL();
 		let w = window.open('', '');
 		w.document.title = "Nova Screenshot";
 		w.document.body.appendChild(img);

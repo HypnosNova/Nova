@@ -21,7 +21,7 @@ let DefaultSettings = {
   hammerEventList: 'press tap pressup pan swipe', //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
 };
 
-class NotFunctionError$1 extends Error {
+class NotFunctionError extends Error {
   constructor( message ) {
     super( message );
     this.name = 'NotFunctionError';
@@ -52,7 +52,7 @@ class LoopManager {
 
   add(func, key) {
     if (typeof func !== 'function') {
-      throw new NotFunctionError$1();
+      throw new NotFunctionError();
     } else {
       if (key) {
         this.functionMap.set(key, func);
@@ -498,8 +498,8 @@ class FBOWorld {
     this.height = height;
     this.app = app;
     this.scene = new THREE.Scene();
-    this.logicLoop = new NOVA.LoopManager();
-    this.renderLoop = new NOVA.LoopManager();
+    this.logicLoop = new LoopManager();
+    this.renderLoop = new LoopManager();
     this.camera = camera || new THREE.PerspectiveCamera(45, this.width /
       this.height, 0.01, 5000);
     this.receivers = this.scene.children;
@@ -1796,7 +1796,7 @@ class Signal {
   }
 
   remove(func) {
-    return _.remove(this.functionArr, function(n) {
+    return _.remove(this.functionArr, function (n) {
       return n === func;
     });
   }
@@ -4576,5 +4576,5 @@ let Util = {
 
 //export * from './thirdparty/three.module.js';
 
-export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError$1 as NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, AfterimagePass, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, WatercolorPass, TestPass, AfterimageShader, CopyShader, DotScreenShader, FXAAShader, GlitchShader, WatercolorShader, TestShader, Util };
+export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, AfterimagePass, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, WatercolorPass, TestPass, AfterimageShader, CopyShader, DotScreenShader, FXAAShader, GlitchShader, WatercolorShader, TestShader, Util };
 //# sourceMappingURL=nova.module.js.map

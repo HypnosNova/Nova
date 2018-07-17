@@ -1,11 +1,13 @@
+import { LoopManager } from './LoopManager';
+
 class FBOWorld {
   constructor(app, camera, width, height) {
     this.width = width;
     this.height = height;
     this.app = app;
     this.scene = new THREE.Scene();
-    this.logicLoop = new NOVA.LoopManager();
-    this.renderLoop = new NOVA.LoopManager();
+    this.logicLoop = new LoopManager();
+    this.renderLoop = new LoopManager();
     this.camera = camera || new THREE.PerspectiveCamera(45, this.width /
       this.height, 0.01, 5000);
     this.receivers = this.scene.children;
@@ -46,6 +48,6 @@ class FBOWorld {
   }
 }
 
-export{
-	FBOWorld
+export {
+  FBOWorld
 }

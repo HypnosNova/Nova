@@ -27,7 +27,7 @@
 	  hammerEventList: 'press tap pressup pan swipe', //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
 	};
 
-	class NotFunctionError$1 extends Error {
+	class NotFunctionError extends Error {
 	  constructor( message ) {
 	    super( message );
 	    this.name = 'NotFunctionError';
@@ -58,7 +58,7 @@
 
 	  add(func, key) {
 	    if (typeof func !== 'function') {
-	      throw new NotFunctionError$1();
+	      throw new NotFunctionError();
 	    } else {
 	      if (key) {
 	        this.functionMap.set(key, func);
@@ -504,8 +504,8 @@
 	    this.height = height;
 	    this.app = app;
 	    this.scene = new THREE.Scene();
-	    this.logicLoop = new NOVA.LoopManager();
-	    this.renderLoop = new NOVA.LoopManager();
+	    this.logicLoop = new LoopManager();
+	    this.renderLoop = new LoopManager();
 	    this.camera = camera || new THREE.PerspectiveCamera(45, this.width /
 	      this.height, 0.01, 5000);
 	    this.receivers = this.scene.children;
@@ -1802,7 +1802,7 @@
 	  }
 
 	  remove(func) {
-	    return _.remove(this.functionArr, function(n) {
+	    return _.remove(this.functionArr, function (n) {
 	      return n === func;
 	    });
 	  }
@@ -4593,7 +4593,7 @@ vec2 random(vec2 p){
 	exports.View = View;
 	exports.VR = VR;
 	exports.World = World;
-	exports.NotFunctionError = NotFunctionError$1;
+	exports.NotFunctionError = NotFunctionError;
 	exports.EventManager = EventManager;
 	exports.Events = Events;
 	exports.Signal = Signal;

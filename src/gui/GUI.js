@@ -65,7 +65,7 @@ class Div extends GUI {
     this.css = _.defaultsDeep(css || {}, this.css);
     this.canvas = document.createElement("canvas");
     var spriteMaterial = new THREE.SpriteMaterial({
-      map: canvas,
+      map: this.canvas,
       color: 0xffffff
     });
     this.element = new THREE.Sprite(spriteMaterial);

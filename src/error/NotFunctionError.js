@@ -1,4 +1,4 @@
-let NotFunctionError = class extends Error {
+class NotFunctionError extends Error {
   constructor( message ) {
     super( message );
     this.name = 'NotFunctionError';

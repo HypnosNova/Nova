@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Empty Framework</title>
+  </head>
+
+  <body>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script src="../gallery/js/postprocessing/EffectComposer.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../gallery/js/postprocessing/ShaderPass.js" type="text/javascript" charset="utf-8"></script>
+    <script src="TestShader.js" type="text/javascript" charset="utf-8"></script>
+    <script src="TestPass.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+      let app = new NOVA.App();
+
+      //          app.world.renderLoop.removeAll();
+      app.world.camera.position.z = 2;
+
+      let geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+      let material = new THREE.MeshNormalMaterial();
+      let mesh = new THREE.Mesh( geometry, material );
+      app.world.scene.add( mesh );
+
+      let composer = new NOVA.EffectComposer( app.world );
+      //    new TestPass( composer, true );
+      const pass = new THREE.ShaderPass( TestShader );
+      pass.renderToScreen = true;
+      composer.addPass( pass );
+
+      app.renderLoop.add( () => {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+        composer.render();
+      } );
+    </script>
+  </body>
+
+</html>

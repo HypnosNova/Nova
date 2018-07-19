@@ -129,6 +129,7 @@ class Txt extends THREE.Mesh {
   }
 
   update() {
+  	this.material.map.dispose();
     this.canvas.width = this.css.width;
     this.canvas.height = this.css.height;
     let ctx = this.canvas.getContext("2d");
@@ -143,7 +144,7 @@ class Txt extends THREE.Mesh {
       .width;
     ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
       .fontSize / 4);
-    var texture = new THREE.CanvasTexture(this.canvas);
+    let texture = new THREE.CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;

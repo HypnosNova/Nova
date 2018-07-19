@@ -148,7 +148,7 @@ class App {
 	}
 
 	sceneCoordinateToCanvasCoordinate( obj, camera = this.world.camera ) {
-		let worldVector = obj.position.clone();
+		let worldVector = obj.clone();
 		let vector = worldVector.project( camera );
 
 		let halfWidth = this.getWorldWidth() / 2;

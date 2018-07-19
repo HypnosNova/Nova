@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Add a box in the scene</title>
+    <style type="text/css">
+      .v {
+        position: fixed;
+        color: white;
+        padding: 5px;
+        border: 2px solid white;
+      }
+    </style>
+  </head>
+  <body>
+    <p class='v'>Vertice 1</p>
+    <p class='v'>Vertice 2</p>
+    <p class='v'>Vertice 3</p>
+    <p class='v'>Vertice 4</p>
+    <p class='v'>Vertice 5</p>
+    <p class='v'>Vertice 6</p>
+    <p class='v'>Vertice 7</p>
+    <p class='v'>Vertice 8</p>
+    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+    <script src="../lib/three.min.js"></script>
+    <script src="../build/nova.js"></script>
+    <script>
+      let app = new NOVA.App();
+      let doms = document.getElementsByClassName( 'v' );
+
+      let scene = app.world.scene;
+      let camera = app.world.camera;
+      camera.position.set( 1, 1, 1 );
+      camera.lookAt( scene.position );
+
+      let geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+      let material = new THREE.MeshNormalMaterial();
+      let mesh = new THREE.Mesh( geometry, material );
+      scene.add( mesh );
+
+      app.logicLoop.add( () => {
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.01;
+        mesh.rotation.z += 0.01;
+        mesh.updateMatrixWorld();
+
+        for ( let i = 0; i < doms.length; i++ ) {
+          let vector = mesh.geometry.vertices[ i ].clone();
+          vector.applyMatrix4( mesh.matrixWorld );
+          vector = app.sceneCoordinateToCanvasCoordinate( vector );
+
+          doms[ i ].style.top = vector.y + "px";
+          doms[ i ].style.left = vector.x + "px";
+        }
+
+      } );
+    </script>
+  </body>
+</html>

@@ -448,7 +448,7 @@
 		}
 
 		sceneCoordinateToCanvasCoordinate( obj, camera = this.world.camera ) {
-			let worldVector = obj.position.clone();
+			let worldVector = obj.clone();
 			let vector = worldVector.project( camera );
 
 			let halfWidth = this.getWorldWidth() / 2;
@@ -1960,6 +1960,7 @@
 	  }
 
 	  update() {
+	  	this.material.map.dispose();
 	    this.canvas.width = this.css.width;
 	    this.canvas.height = this.css.height;
 	    let ctx = this.canvas.getContext("2d");
@@ -1974,7 +1975,7 @@
 	      .width;
 	    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
 	      .fontSize / 4);
-	    var texture = new THREE.CanvasTexture(this.canvas);
+	    let texture = new THREE.CanvasTexture(this.canvas);
 	    texture.generateMipmaps = false;
 	    texture.minFilter = THREE.LinearFilter;
 	    texture.magFilter = THREE.LinearFilter;

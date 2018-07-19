@@ -8,6 +8,7 @@
   </head>
 
   <body>
+    <div id="ld" style="position: fixed;font-size: 42px;color: #ffdd44;top: 50%;left: 50%;transform:translate(-50%,-50%)">Loading</div>
     <script src="../lib/tween.js"></script>
     <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
     <script src="../lib/three.min.js"></script>
@@ -159,6 +160,7 @@
         objLoader.setMaterials( materials );
         objLoader.setPath( 'assets/model/rose/' );
         objLoader.load( 'rose.obj', function( obj ) {
+          document.body.removeChild( document.getElementById( 'ld' ) );
           let pa = [ 2000, 3000, 2000, 2000, 6000 ];
 
           for ( let i = 0; i < 5; i++ ) {
@@ -176,7 +178,6 @@
 
             obj.children[ i ].material.opacity = 0;
             obj.children[ i ].material.transparent = true;
-            console.log(obj.children[ i ].material)
           }
 
           setTimeout( () => {

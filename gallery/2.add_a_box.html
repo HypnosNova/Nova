@@ -10,16 +10,16 @@
     <script src="../lib/three.min.js"></script>
     <script src="../build/nova.js"></script>
     <script>
-      var app = new NOVA.App();
+      let app = new NOVA.App();
 
-      var scene = app.world.scene;
-      var camera = app.world.camera;
+      let scene = app.world.scene;
+      let camera = app.world.camera;
       camera.position.set(1, 1, 1);
       camera.lookAt(scene.position);
 
-      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-      material = new THREE.MeshNormalMaterial();
-      mesh = new THREE.Mesh(geometry, material);
+      let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      let material = new THREE.MeshNormalMaterial();
+      let mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
     </script>
   </body>

@@ -141,15 +141,16 @@
 				this.isDeep );
 			let intersect;
 			for ( let i = 0; i < intersects.length; i++ ) {
-				if ( intersects[ i ].object.isPenetrated ) {
+				if ( intersects[ i ].object.isPenetrated ||
+					!intersects[ i ].object.events ||
+					!intersects[ i ].object.events[ event.type ] ) {
 					continue;
 				} else {
 					intersect = intersects[ i ];
 					break;
 				}
 			}
-			if ( intersect && intersect.object.events && intersect.object.events[ event
-					.type ] ) {
+			if ( intersect ) {
 				intersect.object.events[ event.type ].run( event, intersect );
 			}
 			return intersect;

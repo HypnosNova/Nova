@@ -1,9 +1,3 @@
-import * as THREE from 'three';
-import _ from 'lodash';
-import Hammer from 'hammerjs';
-import WebVRPolyfill from "webvr-polyfill";
-import VREffect from 'three-vreffect-module';
-
 //适合大部分WebGL的APP设置
 let DefaultSettings = {
   parent: document.body, //APP所在DOM容器
@@ -157,53 +151,53 @@ class EventManager {
 }
 
 class World {
-  constructor(app, camera, clearColor) {
-    this.app = app;
-    this.scene = new THREE.Scene();
-    this.logicLoop = new LoopManager();
-    this.renderLoop = new LoopManager();
-    this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
-      app.getWorldHeight(), 0.01, 5000);
-    this.receivers = this.scene.children;
-    this.eventManager = new EventManager(this);
-    this.renderTargetParameters = {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      format: THREE.RGBFormat,
-      stencilBuffer: false
-    };
-    this.isRTT = false;
-    this.clearColor = clearColor || 0;
-    this.fbo = new THREE.WebGLRenderTarget(this.app.getWorldWidth(),
-      this.app.getWorldHeight(), this.renderTargetParameters);
-    this.defaultRenderID = Symbol();
-    this.renderLoop.add(() => {
-      if (this.isRTT) {
-        this.app.renderer.render(this.scene, this.camera, this.fbo, true);
-      } else {
-        this.app.renderer.render(this.scene, this.camera);
-      }
-    }, this.defaultRenderID);
-    this.defaultUpdateID = Symbol();
-  }
+	constructor(app, camera, clearColor) {
+		this.app = app;
+		this.scene = new THREE.Scene();
+		this.logicLoop = new LoopManager();
+		this.renderLoop = new LoopManager();
+		this.camera = camera || new THREE.PerspectiveCamera(45, app.getWorldWidth() /
+			app.getWorldHeight(), 0.01, 5000);
+		this.receivers = this.scene.children;
+		this.eventManager = new EventManager(this);
+		this.renderTargetParameters = {
+			minFilter: THREE.LinearFilter,
+			magFilter: THREE.LinearFilter,
+			format: THREE.RGBFormat,
+			stencilBuffer: false
+		};
+		this.isRTT = false;
+		this.clearColor = clearColor || 0;
+		this.fbo = new THREE.WebGLRenderTarget(this.app.getWorldWidth(),
+			this.app.getWorldHeight(), this.renderTargetParameters);
+		this.defaultRenderID = Symbol();
+		this.renderLoop.add(() => {
+			if (this.isRTT) {
+				this.app.renderer.render(this.scene, this.camera, this.fbo, true);
+			} else {
+				this.app.renderer.render(this.scene, this.camera);
+			}
+		}, this.defaultRenderID);
+		this.defaultUpdateID = Symbol();
+	}
 
-  update(time) {
-    this.logicLoop.update(time);
-    this.renderLoop.update(time);
-  }
+	update(time) {
+		this.logicLoop.update(time);
+		this.renderLoop.update(time);
+	}
 
-  resize(width, height) {
-    if (this.camera.type === 'PerspectiveCamera') {
-      this.camera.aspect = width / height;
-      this.camera.updateProjectionMatrix();
-    } else {
-      this.camera.left = -width / 2;
-      this.camera.right = width / 2;
-      this.camera.top = height / 2;
-      this.camera.bottom = -height / 2;
-      this.camera.updateProjectionMatrix();
-    }
-  }
+	resize(width, height) {
+		if (this.camera.type === 'PerspectiveCamera') {
+			this.camera.aspect = width / height;
+			this.camera.updateProjectionMatrix();
+		} else {
+			this.camera.left = -width / 2;
+			this.camera.right = width / 2;
+			this.camera.top = height / 2;
+			this.camera.bottom = -height / 2;
+			this.camera.updateProjectionMatrix();
+		}
+	}
 }
 
 const APP_STOP = 0;
@@ -450,9 +444,8 @@ class App {
 	}
 
 	sceneCoordinateToCanvasCoordinate(obj, camera = this.world.camera) {
-		let worldVector = obj.position.clone();
+		let worldVector = obj instanceof THREE.Vector3 ? obj.clone() : obj.position.clone();
 		let vector = worldVector.project(camera);
-
 		let halfWidth = this.getWorldWidth() / 2;
 		let halfHeight = this.getWorldHeight() / 2;
 
@@ -547,31 +540,40 @@ class FBOWorld {
 }
 
 class Monitor {
-  constructor(world, option) {
-    this.option = option;
-    this.fullWidth = world.app.getWorldWidth();
-    this.fullHeight = world.app.getWorldHeight();
-    this.renderer = new THREE.WebGLRenderer();
-    this.world = world;
-    this.canvas = this.renderer.domElement;
-    this.renderer.setSize(this.fullWidth * option.width, this.fullHeight *
-      option.height);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-  }
+	constructor(world, option) {
+		this.option = option;
+		this.fullWidth = world.app.getWorldWidth();
+		this.fullHeight = world.app.getWorldHeight();
+		this.renderer = new THREE.WebGLRenderer();
+		this.world = world;
+		this.canvas = this.renderer.domElement;
+		this.renderer.setSize(this.fullWidth * option.width, this.fullHeight *
+			option.height);
+		this.renderer.setPixelRatio(window.devicePixelRatio);
+	}
 
-  setViewOffset() {
-    let viewX = this.fullWidth * this.option.left;
-    let viewY = this.fullHeight * this.option.top;
-    let viewWidth = this.fullWidth * this.option.width;
-    let viewHeight = this.fullHeight * this.option.height;
-    this.world.camera.setViewOffset(this.fullWidth, this.fullHeight, viewX,
-      viewY, viewWidth, viewHeight);
-  }
+	resize(option) {
+		this.option = option;
+		this.fullWidth = this.world.app.getWorldWidth();
+		this.fullHeight = this.world.app.getWorldHeight();
+		this.renderer.setSize(this.fullWidth * option.width, this.fullHeight *
+			option.height);
+		this.setViewOffset();
+	}
 
-  render() {
-    this.setViewOffset();
-    this.renderer.render(this.world.scene, this.world.camera);
-  }
+	setViewOffset() {
+		let viewX = this.fullWidth * this.option.left;
+		let viewY = this.fullHeight * this.option.top;
+		let viewWidth = this.fullWidth * this.option.width;
+		let viewHeight = this.fullHeight * this.option.height;
+		this.world.camera.setViewOffset(this.fullWidth, this.fullHeight, viewX,
+			viewY, viewWidth, viewHeight);
+	}
+
+	render() {
+		this.setViewOffset();
+		this.renderer.render(this.world.scene, this.world.camera);
+	}
 }
 
 const QRMode = {
@@ -1555,6 +1557,8 @@ function _getTypeNumber(sText, nCorrectLevel) {
       case QRErrorCorrectLevel.H:
         nLimit = QRCodeLimitLength[i][3];
         break;
+      default: 
+        nLimit = QRCodeLimitLength[i][1];
     }
 
     if (length <= nLimit) {
@@ -1833,6 +1837,65 @@ class Events {
   }
 }
 
+class FBOEventMapper {
+	constructor(fboWorld, mesh, faceIndexArr) {
+		this.world = fboWorld;
+		this.disable = false;
+		this.isDeep = true;
+		this.receivers = fboWorld.receivers;
+		this.raycaster = new THREE.Raycaster();
+		this.mesh = mesh;
+		this.faceIndexArr = faceIndexArr || [];
+		let normalEventList = fboWorld.app.options.normalEventList;
+	}
+
+	dispatch(event, intersect) {
+		if (intersect.object === this.mesh) {
+			if (this.faceIndexArr && this.faceIndexArr.length === 0) {
+				this.raycastCheck(event, intersect);
+			} else if (!this.faceIndexArr) {
+				this.raycastCheck(event, intersect);
+			} else {
+				if (this.faceIndexArr.includes(intersect.faceIndex)) {
+					this.raycastCheck(event, intersect);
+				}
+			}
+		}
+	}
+
+	toNovaEvent(event) {
+		return {
+			changedPointers: [event],
+			center: new THREE.Vector2(event.clientX, event.clientY),
+			type: event.type,
+			target: event.target
+		};
+	}
+
+	raycastCheck(event, intersect) {
+		let uv = intersect.uv;
+		let vec2 = new THREE.Vector2(uv.x * 2 - 1, uv.y * 2 - 1);
+		this.raycaster.setFromCamera(vec2, this.world.camera);
+		intersect = undefined;
+
+		let intersects = this.raycaster.intersectObjects(this.world.receivers, this.isDeep);
+		for (let i = 0; i < intersects.length; i++) {
+			if (intersects[i].object.isPenetrated) {
+				continue;
+			} else {
+				intersect = intersects[i];
+				break;
+			}
+		}
+
+		if (intersect && intersect.object.events && intersect.object.events[event
+			.type]) {
+			intersect.object.events[event.type].run(event, intersect);
+		}
+		return intersect;
+	}
+}
+
 class GUI extends THREE.Group {
   constructor() {
     super();
@@ -1964,6 +2027,7 @@ class Txt extends THREE.Mesh {
   }
 
   update() {
+  	this.material.map.dispose();
     this.canvas.width = this.css.width;
     this.canvas.height = this.css.height;
     let ctx = this.canvas.getContext("2d");
@@ -1978,7 +2042,7 @@ class Txt extends THREE.Mesh {
       .width;
     ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
       .fontSize / 4);
-    var texture = new THREE.CanvasTexture(this.canvas);
+    let texture = new THREE.CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
@@ -2643,7 +2707,7 @@ class GlitchPass extends Pass {
     this.uniforms['seed'].value = Math.random();
     this.uniforms['byp'].value = 0;
 
-    if (this.curF % this.randX == 0 || this.goWild == true) {
+    if (this.curF % this.randX === 0 || this.goWild === true) {
       this.uniforms['amount'].value = Math.random() / 30;
       this.uniforms['angle'].value = THREE.Math.randFloat(-Math.PI, Math.PI);
       this.uniforms['seed_x'].value = THREE.Math.randFloat(-1, 1);
@@ -2659,7 +2723,7 @@ class GlitchPass extends Pass {
       this.uniforms['distortion_y'].value = THREE.Math.randFloat(0, 1);
       this.uniforms['seed_x'].value = THREE.Math.randFloat(-0.3, 0.3);
       this.uniforms['seed_y'].value = THREE.Math.randFloat(-0.3, 0.3);
-    } else if (this.goWild == false) {
+    } else if (this.goWild === false) {
       this.uniforms['byp'].value = 1;
     }
 
@@ -4665,5 +4729,5 @@ let Util = {
 
 //export * from './thirdparty/three.module.js';
 
-export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError, EventManager, Events, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, AfterimagePass, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, WatercolorPass, TestPass, AfterimageShader, CopyShader, DotScreenShader, FXAAShader, GlitchShader, WatercolorShader, TestShader, Util };
+export { DefaultSettings, App, Bind, FBOWorld, LoopManager, Monitor, QRCode, Transitioner, View, VR, World, NotFunctionError, EventManager, Events, FBOEventMapper, Signal, GUI, Body, Txt, Div, LoaderFactory, EffectComposer, AfterimagePass, Pass, DotScreenPass, RenderPass, ShaderPass, GlitchPass, OutlinePass, WatercolorPass, TestPass, AfterimageShader, CopyShader, DotScreenShader, FXAAShader, GlitchShader, WatercolorShader, TestShader, Util };
 //# sourceMappingURL=nova.module.js.map

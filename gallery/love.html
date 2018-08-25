@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>520</title>
+</head>
+
+<body>
+	<div id="ld" style="position: fixed;font-size: 42px;color: #ffdd44;top: 50%;left: 50%;transform:translate(-50%,-50%)">Loading</div>
+	<script src="../lib/tween.js"></script>
+	<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+	<script src="../lib/three.min.js"></script>
+	<script src="js/loaders/OBJLoader.js"></script>
+	<script src="js/loaders/MTLLoader.js"></script>
+	<script src="js/controls/OrbitControls.js"></script>
+	<script src="../build/nova.js"></script>
+	<script src='js/utils/GeometryUtils.js'></script>
+	<script src="../lib/bas.min.js"></script>
+	<script>
+		class ParticleAnimation extends THREE.Mesh {
+			constructor(singleGeometry, shapeArr1, shapeArr2, duration = 1.0, durationRange = 1.0) {
+				let amount = shapeArr1.length;
+				let geometry = new BAS.PrefabBufferGeometry(singleGeometry, amount);
+				let delayDuration = geometry.createAttribute('delayDuration', 2);
+
+				let i, j, offset;
+				for (i = 0, offset = 0; i < amount; i++) {
+					let delay = Math.random() * durationRange;
+					for (j = 0; j < singleGeometry.vertices.length; j++) {
+						delayDuration.array[offset] = delay;
+						delayDuration.array[offset + 1] = duration;
+						offset += 2;
+					}
+				}
+				//--------------------首尾位置数组-----------------------
+				var startPositions = geometry.createAttribute('startPositions', 3);
+				var endPositions = geometry.createAttribute('endPositions', 3);
+				var start = new THREE.Vector3();
+				var end = new THREE.Vector3();
+				var range = 200;
+				var prefabData = [];
+
+				for (i = 0; i < amount; i++) {
+					start.x = shapeArr2[i].x * 40;
+					start.y = shapeArr2[i].y * 40;
+					start.z = shapeArr2[i].z * 40;
+
+					end.x = shapeArr1[i].x * 40;
+					end.y = shapeArr1[i].y * 40;
+					end.z = shapeArr1[i].z * 40;
+
+					geometry.setPrefabData(startPositions, i, start.toArray(
+						prefabData));
+					geometry.setPrefabData(endPositions, i, end.toArray(prefabData));
+				}
+				//-----------------------角度数组---------------------------
+				var axis = new THREE.Vector3();
+				var angle;
+				geometry.createAttribute('aAxisAngle', 4, function (data, i, total) {
+					// get a random axis
+					axis.x = THREE.Math.randFloatSpread(2);
+					axis.y = THREE.Math.randFloatSpread(2);
+					axis.z = THREE.Math.randFloatSpread(2);
+					// axis has to be normalized, or else things get weird
+					axis.normalize();
+					// the total angle of rotation around the axis
+					angle = Math.PI * THREE.Math.randFloat(4.0, 8.0);
+
+					// copy the data to the array
+					axis.toArray(data);
+					data[3] = angle;
+				});
+				//----------------------------------------------------------
+				let material = new BAS.PhongAnimationMaterial({
+					flatShading: true,
+					uniforms: {
+						uTime: { value: 0 }
+					},
+					uniformValues: {
+						metalness: 0.5,
+						roughness: 0.5
+					},
+					vertexFunctions: [
+						BAS.ShaderChunk['ease_cubic_in_out'],
+						BAS.ShaderChunk['ease_quad_out'],
+						BAS.ShaderChunk['quaternion_rotation']
+					],
+					vertexParameters: [`
+              uniform float uTime;
+              attribute vec2 delayDuration;
+              attribute vec3 startPositions;
+              attribute vec3 endPositions;
+              attribute vec4 aAxisAngle;
+            ` ],
+					vertexInit: [`
+              float tProgress = clamp(uTime - delayDuration.x, 0.0, delayDuration.y) / delayDuration.y;
+              tProgress = easeCubicInOut(tProgress);
+              vec4 tQuat = quatFromAxisAngle(aAxisAngle.xyz, aAxisAngle.w * tProgress);
+            ` ],
+					vertexNormal: [],
+					vertexPosition: [`
+              float scl = easeQuadOut(tProgress, 0.5, 1.0, 2.0);
+              transformed *= scl;
+              transformed = rotateVector(tQuat, transformed);
+              transformed += mix(startPositions, endPositions, tProgress);
+            ` ]
+				});
+
+				super(geometry, material);
+				this.totalDuration = duration + durationRange;
+				this.frustumCulled = false;
+			}
+
+			animate(options) {
+				options = options || {};
+				options.time = this.totalDuration;
+				return new TWEEN.Tween(this)
+					.to({ time: this.totalDuration }, options.duration || 1000)
+					.easing(options.ease || TWEEN.Easing.Linear.None)
+					.yoyo(options.yoyo || true)
+					.repeat(options.repeat || Infinity)
+					.delay(options.delay || 1000)
+					.start();
+			}
+		}
+		Object.defineProperty(ParticleAnimation.prototype, 'time', {
+			get: function () {
+				return this.material.uniforms['uTime'].value;
+			},
+			set: function (v) {
+				this.material.uniforms['uTime'].value = v;
+			}
+		});
+
+		let app = new NOVA.App({
+			renderer: {
+				logarithmicDepthBuffer: true
+			}
+		});
+		let x = 0,
+			y = 0;
+		let heartShape = new THREE.Shape();
+		heartShape.moveTo(x + 5, y + 5);
+		heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+		heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+		heartShape.bezierCurveTo(x - 6, y + 11, x - 2, y + 17.6, x + 5, y + 19);
+		heartShape.bezierCurveTo(x + 12, y + 17.6, x + 16, y + 11, x + 16, y + 7);
+		heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+		heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+
+		let geometry = new THREE.ShapeGeometry(heartShape);
+
+		let mtlLoader = new THREE.MTLLoader();
+		mtlLoader.setPath('assets/model/rose/');
+		mtlLoader.load('rose.mtl', function (materials) {
+			materials.preload();
+			let objLoader = new THREE.OBJLoader();
+			objLoader.setMaterials(materials);
+			objLoader.setPath('assets/model/rose/');
+			objLoader.load('rose.obj', function (obj) {
+				document.body.removeChild(document.getElementById('ld'));
+				let pa = [6000, 10000, 8000, 6000, 80000];
+
+				for (let i = 0; i < 5; i++) {
+					let geo = obj.children[i].geometry;
+					arr = THREE.GeometryUtils.randomPointsInBufferGeometry(geo, pa[i]);
+					let arrp = [];
+					for (let ii = 0; ii < pa[i]; ii++) {
+						arrp.push({
+							x: Math.random() * 400 - 200,
+							y: Math.random() * 400 - 200,
+							z: Math.random() * 400 - 200
+						});
+					}
+					init(arr, arrp);
+
+					obj.children[i].material.opacity = 0;
+					obj.children[i].material.transparent = true;
+				}
+
+				setTimeout(() => {
+					obj.scale.set(40, 40, 40);
+					obj.position.y = -2000;
+					app.world.scene.add(obj);
+					app.logicLoop.add(() => {
+						for (let i = 0; i < 5; i++) {
+							obj.children[i].material.opacity += 0.02;
+
+						}
+					});
+				}, 8000);
+			});
+		});
+
+		function init(arr1, arr2) {
+			let animation = new ParticleAnimation(geometry, arr1, arr2);
+			animation.position.y
+			animation.animate({
+				duration: 8000,
+				ease: TWEEN.Easing.Quadratic.Out,
+				repeat: 1,
+				delay: 2000,
+				yoyo: true
+			});
+			app.world.scene.add(animation);
+			animation.position.y -= 2000;
+		}
+
+		app.renderer.setClearColor(0x333333);
+		app.world.camera.position.set(0, 5000, 7000);
+		app.world.camera.far = 20000;
+		app.world.camera.updateProjectionMatrix();
+		new THREE.OrbitControls(app.world.camera);
+
+		let ambient = new THREE.AmbientLight(0x994400);
+		app.world.scene.add(ambient);
+		let directionalLight = new THREE.DirectionalLight(0xffffff);
+		directionalLight.position.set(0, 0, 1);
+		app.world.scene.add(directionalLight);
+		directionalLight = new THREE.DirectionalLight(0xffffff);
+		directionalLight.position.set(0, 1, -1);
+		app.world.scene.add(directionalLight);
+
+		app.logicLoop.add(() => {
+			TWEEN.update();
+		}, "TWEEN");
+	</script>
+</body>
+
+</html>

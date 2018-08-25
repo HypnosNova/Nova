@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>Bind</title>
+	<style>
+		button {
+			position: fixed;
+		}
+	</style>
+</head>
+
+<body>
+	<button>AAAA</button>
+	<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+	<script src="../lib/three.min.js"></script>
+	<script src="../build/nova.js"></script>
+	<script src="../build/plugins/Screenshoter.js"></script>
+	<script>
+		let app = new NOVA.App();
+		app.world.camera.position.set(30, 30, 30);
+		app.world.camera.lookAt(app.world.scene.position);
+
+		let geometry = new THREE.BoxGeometry(1, 1, 1);
+		let material = new THREE.MeshNormalMaterial();
+		let mesh = new THREE.Mesh(geometry, material);
+
+		let meshArr = [];
+		let bind = new NOVA.Bind({
+			y: 0
+		});
+
+		for (let i = 0; i < 20; i++) {
+			for (let j = 0; j < 20; j++) {
+				let meshTmp = mesh.clone();
+				meshTmp.position.set((i - 10) * 1.1, 0, (j - 10) * 1.1);
+				app.world.scene.add(meshTmp);
+				bind.add(meshTmp.scale, {
+					y: (y) => {
+						return 2.2 + Math.sin(y + (i + j) * 0.2) * 2;
+					}
+				});
+				bind.add(meshTmp.position, {
+					y: (y) => {
+						return Math.sin(y + (i + j) * 0.2);
+					}
+				});
+			}
+		}
+
+		app.logicLoop.add(() => {
+			bind.y += 0.03;
+		});
+
+		let btn = document.getElementsByTagName("button")[0];
+		let screenshoter = new Screenshoter(app.world);
+		btn.addEventListener("click", () => {
+			let img = screenshoter.renderScreenShot(window.innerWidth, window.innerHeight, "jpg", true);
+			let w = window.open("", "");
+			w.document.title = "Nova Screenshot";
+			w.document.body.appendChild(img);
+		});
+	</script>
+</body>
+
+</html>

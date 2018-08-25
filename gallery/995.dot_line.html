@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>Empty Framework</title>
+</head>
+
+<body>
+	<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+	<script src="../lib/three.min.js"></script>
+	<script src="../build/nova.js"></script>
+	<script src="js/controls/TrackballControls.js"></script>
+	<script src="js/gui/dat.gui.min.js"></script>
+	<script>
+
+		let app = new NOVA.App();
+
+		var galaxy, strokes, dots, dotStrokes, dotsMaterial, strokesMaterial, shoter, controls, userData,dotTexture;
+
+		var ww = window.innerWidth,
+			wh = window.innerHeight;
+
+		var positions = [];
+		for (var x = 0; x < 5000; x++) {
+			var pos = {
+				x: Math.random(),
+				y: Math.random(),
+				z: Math.random(),
+				lat: 2 * Math.PI * Math.random(),
+				long: Math.acos(2 * Math.random() - 1)
+			};
+			pos.u = Math.cos(pos.long);
+			pos.sqrt = Math.sqrt(1 - (pos.u * pos.u));
+			positions.push(pos);
+		}
+
+		function Options() {
+			this.radius = 200;
+			this.connections = 3;
+			this.distance = 30;
+			this.linesOpacity = 0.3;
+			this.height = 20;
+			this.dots = true;
+			this.amount = 3000;
+			this.dotsSize = 6;
+			this.dotsOpacity = 0.3;
+			this.strokesColor = "#ffffff";
+			this.dotsColor = "#ffffff";
+			this.backgroundColor = "#000000";
+			this.Download = function () { };
+		}
+
+
+		function init() {
+
+			userData = new Options();
+			var gui = new dat.GUI();
+			var globeFolder = gui.addFolder('Globe');
+			var strokesFolder = gui.addFolder('Strokes');
+			var dotsFolder = gui.addFolder('Dots');
+			globeFolder.add(userData, 'radius', 10, 500).onChange(createStrokes);
+			globeFolder.add(userData, 'amount', 10, 5000).onChange(createStrokes);
+			globeFolder.addColor(userData, 'backgroundColor').onChange(createStrokes);
+			strokesFolder.add(userData, 'connections', 0, 8).step(1).onChange(createStrokes);
+			strokesFolder.add(userData, 'distance', 1, 50).step(1).onChange(createStrokes);
+			strokesFolder.add(userData, 'linesOpacity', 0.1, 1).step(0.01).onChange(createStrokes);
+			strokesFolder.add(userData, 'height', 0, 100).onChange(createStrokes);
+			strokesFolder.addColor(userData, 'strokesColor').onChange(createStrokes);
+			dotsFolder.add(userData, 'dots').onChange(createStrokes);
+			dotsFolder.add(userData, 'dotsSize', 0.1, 20).onChange(createStrokes);
+			dotsFolder.add(userData, 'dotsOpacity', 0.1, 1).step(0.01).onChange(createStrokes);
+			dotsFolder.addColor(userData, 'dotsColor').onChange(createStrokes);
+
+			app.world.scene.fog = new THREE.Fog(0x000000, 800, 2500);
+			app.world.camera.position.set(0, 100, 600);
+
+			galaxy = new THREE.Object3D();
+			app.world.scene.add(galaxy);
+
+			controls = new THREE.TrackballControls(app.world.camera, app.renderer.domElement);
+
+			var loader = new THREE.TextureLoader();
+			loader.crossOrigin = "";
+			var loader2 = new THREE.TextureLoader();
+			loader2.crossOrigin = "";
+			dotTexture = loader2.load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/127738/dotTexture.png");
+
+			dotsMaterial = new THREE.PointsMaterial({
+				size: userData.dotsSize,
+				map: dotTexture,
+				transparent: true,
+				opacity: userData.dotsOpacity,
+				alphaTest: 0.1
+			});
+
+			strokesMaterial = new THREE.LineBasicMaterial({
+				color: 0xffffff,
+				transparent: true,
+				opacity: userData.linesOpacity
+			});
+			strokes = new THREE.LineSegments(new THREE.Geometry(), strokesMaterial);
+			galaxy.add(strokes);
+			dotStrokes = new THREE.Points(new THREE.Geometry(), dotsMaterial);
+			galaxy.add(dotStrokes);
+
+			createStrokes();
+		}
+
+		var particlesRandom = [];
+
+		function createStrokes() {
+			var dots = new THREE.Geometry();
+			// Create vertices
+			for (var i = 0; i < userData.amount; i++) {
+				var pos = {
+					x: (positions[i].x * userData.height + userData.radius) * positions[i].sqrt * Math.cos(positions[i].lat),
+					y: (positions[i].y * userData.height + userData.radius) * positions[i].sqrt * Math.sin(positions[i].lat),
+					z: (positions[i].z * userData.height + userData.radius) * positions[i].u
+				};
+				var vector = new THREE.Vector3(pos.x, pos.y, pos.z);
+				vector.amount = 0;
+				dots.vertices.push(vector);
+			}
+
+			// Create segments
+			var segments = new THREE.Geometry();
+			for (var i = dots.vertices.length - 1; i >= 0; i--) {
+				var vector = dots.vertices[i];
+				for (var j = dots.vertices.length - 1; j >= 0; j--) {
+					if (vector.amount < userData.connections && i !== j && vector.distanceTo(dots.vertices[j]) < userData.distance) {
+						segments.vertices.push(vector);
+						segments.vertices.push(dots.vertices[j]);
+						vector.amount++;
+						dots.vertices[j].amount++;
+					}
+				}
+			}
+
+			strokesMaterial.opacity = userData.linesOpacity;
+			strokesMaterial.color = new THREE.Color(userData.strokesColor);
+			strokes.geometry = segments;
+
+			if (userData.dots) {
+				dotsMaterial.size = userData.dotsSize;
+				dotsMaterial.opacity = userData.dotsOpacity;
+				dotsMaterial.color = new THREE.Color(userData.dotsColor);
+				dotStrokes.geometry = dots;
+				dotStrokes.geometry.verticesNeedUpdate = true;
+			} else {
+				dotsMaterial.opacity = 0;
+			}
+		}
+
+		function downloadImage(e) {
+			shoter.renderAndShot("jpg", true);
+		}
+
+		app.logicLoop.add(() => {
+			controls.update();
+		});
+
+		init();
+	</script>
+</body>
+
+</html>

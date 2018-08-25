@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>Logic loop</title>
+</head>
+
+<body>
+	<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+	<script src="../lib/three.min.js"></script>
+	<script src="js/controls/TrackballControls.js"></script>
+	<script src="../build/nova.js"></script>
+	<script>
+
+		let app = new NOVA.App();
+
+		class MyFBOWorld extends NOVA.FBOWorld {
+			constructor(app) {
+				super(app, undefined, 1000, 1000);
+				this.scene.background = new THREE.Color(0xffff00);
+				this.scene.background = new THREE.Color(0xffff00);
+				let geometry = new THREE.TorusKnotBufferGeometry(10, 3, 100, 16);
+				let material = new THREE.MeshNormalMaterial();
+				let mesh = new THREE.Mesh(geometry, material);
+				this.scene.add(mesh);
+				this.camera.position.set(0, 0, 70);
+				this.camera.lookAt(mesh.position);
+
+				this.logicLoop.add(() => {
+					mesh.rotation.y += 0.01;
+				});
+			}
+		}
+
+		let fboWorld = new MyFBOWorld(app);
+
+		let geometry = new THREE.BoxBufferGeometry(20, 20, 20);//THREE.TorusKnotBufferGeometry(10, 3, 100, 16);
+		let material = new THREE.MeshBasicMaterial({
+			map: fboWorld.fbo.texture
+		});
+		let mesh = new THREE.Mesh(geometry, material);
+		app.world.scene.add(mesh);
+		app.world.camera.position.set(0, 0, 70);
+		app.world.camera.lookAt(mesh.position);
+
+		app.logicLoop.add(() => {
+			mesh.rotation.x += 0.01;
+			mesh.rotation.y += 0.01;
+			mesh.rotation.z += 0.01;
+			fboWorld.update()
+		});
+
+	</script>
+</body>
+
+</html>

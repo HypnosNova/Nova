@@ -15,6 +15,7 @@ export { NotFunctionError } from './error/NotFunctionError.js';
 
 export { EventManager } from './events/EventManager.js';
 export { Events } from './events/Events.js';
+export { FBOEventMapper } from './events/FBOEventMapper.js';
 export { Signal } from './events/Signal.js';
 
 export { GUI, Body, Txt, Div } from './gui/GUI.js';

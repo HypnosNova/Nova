@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Add a box in the scene</title>
-  </head>
-  <body>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
-    <script src="../lib/three.min.js"></script>
-    <script src="../build/nova.js"></script>
-    <script>
-      let app = new NOVA.App();
 
-      let scene = app.world.scene;
-      let camera = app.world.camera;
-      camera.position.set(1, 1, 1);
-      camera.lookAt(scene.position);
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Add a box in the scene</title>
+	</head>
 
-      let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-      let material = new THREE.MeshNormalMaterial();
-      let mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
-    </script>
-  </body>
+	<body>
+		<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+		<script src="../lib/three.min.js"></script>
+		<script src="../build/nova.js"></script>
+		<script>
+			let app = new NOVA.App();
+
+			let scene = app.world.scene;
+			let camera = app.world.camera;
+			camera.position.set( 1, 1, 1 );
+			camera.lookAt( scene.position );
+
+			let geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+			let material = new THREE.MeshNormalMaterial();
+			let mesh = new THREE.Mesh( geometry, material );
+			scene.add( mesh );
+		</script>
+	</body>
+
 </html>

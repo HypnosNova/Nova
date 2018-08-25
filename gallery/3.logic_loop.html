@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Logic loop</title>
-  </head>
-  <body>
-    <script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
-    <script src="../lib/three.min.js"></script>
-    <script src="../build/nova.js"></script>
-    <script>
-      var app = new NOVA.App();
 
-      app.world.camera.position.z = 2;
-      geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-      material = new THREE.MeshNormalMaterial();
-      mesh = new THREE.Mesh(geometry, material);
-      app.world.scene.add(mesh);
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Logic loop</title>
+	</head>
 
-      app.logicLoop.add(function() {
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y += 0.02;
-      });
-    </script>
-  </body>
+	<body>
+		<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+		<script src="../lib/three.min.js"></script>
+		<script src="../build/nova.js"></script>
+		<script>
+			var app = new NOVA.App();
+
+			app.world.camera.position.z = 2;
+			geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+			material = new THREE.MeshNormalMaterial();
+			mesh = new THREE.Mesh( geometry, material );
+			app.world.scene.add( mesh );
+
+			app.world.logicLoop.add( function() {
+				mesh.rotation.x += 0.01;
+				mesh.rotation.y += 0.02;
+			} );
+		</script>
+	</body>
 
 </html>

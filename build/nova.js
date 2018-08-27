@@ -306,7 +306,7 @@
 	const APP_STOP = 0;
 	const APP_RUNNING = 1;
 	const APP_PAUSE = 2;
-	const VERSION = '0.0.1';
+	const VERSION = '0.1.2';
 
 	console.log( "Nova framework for Three.js, version: %c " + VERSION, "color:blue" );
 
@@ -2588,7 +2588,7 @@
 
 	}
 
-	class GUI extends THREE.Group {
+	class GUI extends three.Group {
 	  constructor() {
 	    super();
 	    this.css = {
@@ -2607,12 +2607,12 @@
 	    this.distanceFromCamera = 50;
 	    this.css = _.defaultsDeep(css || {}, this.css);
 	    this.canvas = document.createElement("canvas");
-	    var spriteMaterial = new THREE.SpriteMaterial({
+	    var spriteMaterial = new three.SpriteMaterial({
 	      map: this.canvas,
 	      color: 0xffffff
 	    });
-	    this.element = new THREE.Sprite(spriteMaterial);
-	    this.vector = new THREE.Vector3();
+	    this.element = new three.Sprite(spriteMaterial);
+	    this.vector = new three.Vector3();
 	    this.update();
 	    this.add(this.element);
 	  }
@@ -2634,11 +2634,11 @@
 	    let ctx = this.canvas.getContext("2d");
 	    ctx.fillStyle = this.css.backgroundColor;
 	    ctx.fillRect(0, 0, this.css.width, this.css.height);
-	    var texture = new THREE.CanvasTexture(this.canvas);
+	    var texture = new three.CanvasTexture(this.canvas);
 	    texture.generateMipmaps = false;
-	    texture.minFilter = THREE.LinearFilter;
-	    texture.magFilter = THREE.LinearFilter;
-	    var spriteMaterial = new THREE.SpriteMaterial({
+	    texture.minFilter = three.LinearFilter;
+	    texture.magFilter = three.LinearFilter;
+	    var spriteMaterial = new three.SpriteMaterial({
 	      map: texture,
 	      color: 0xffffff
 	    });
@@ -2652,14 +2652,14 @@
 	  constructor(world, css) {
 	    super();
 	    this.world = world;
-	    this.css = _.defaultsDeep(css || {}, this.css);
+	    this.css = lodash.defaultsDeep(css || {}, this.css);
 	    this.canvas = document.createElement("canvas");
-	    var spriteMaterial = new THREE.SpriteMaterial({
+	    var spriteMaterial = new three.SpriteMaterial({
 	      map: this.canvas,
 	      color: 0xffffff
 	    });
-	    this.element = new THREE.Sprite(spriteMaterial);
-	    this.vector = new THREE.Vector3();
+	    this.element = new three.Sprite(spriteMaterial);
+	    this.vector = new three.Vector3();
 	    this.update();
 	    this.add(this.element);
 	  }
@@ -2670,11 +2670,11 @@
 	    let ctx = this.canvas.getContext("2d");
 	    ctx.fillStyle = this.css.backgroundColor;
 	    ctx.fillRect(0, 0, this.css.width, this.css.height);
-	    var texture = new THREE.CanvasTexture(this.canvas);
+	    var texture = new three.CanvasTexture(this.canvas);
 	    texture.generateMipmaps = false;
-	    texture.minFilter = THREE.LinearFilter;
-	    texture.magFilter = THREE.LinearFilter;
-	    var spriteMaterial = new THREE.SpriteMaterial({
+	    texture.minFilter = three.LinearFilter;
+	    texture.magFilter = three.LinearFilter;
+	    var spriteMaterial = new three.SpriteMaterial({
 	      map: texture,
 	      color: 0xffffff
 	    });
@@ -2684,7 +2684,7 @@
 	  }
 	}
 
-	class Txt extends THREE.Mesh {
+	class Txt extends three.Mesh {
 	  constructor(text, css) {
 	    css = _.defaultsDeep(css || {}, {
 	      fontStyle: "normal",
@@ -2705,12 +2705,12 @@
 	      }
 	    });
 	    let canvas = document.createElement("canvas");
-	    var material = new THREE.MeshBasicMaterial({
+	    var material = new three.MeshBasicMaterial({
 	      transparent: true,
 	      needsUpdate: false,
 	      color: 0xffffff
 	    });
-	    super(new THREE.PlaneBufferGeometry(css.width / 8, css.height / 8),
+	    super(new three.PlaneBufferGeometry(css.width / 8, css.height / 8),
 	      material);
 	    this.text = text;
 	    this.canvas = canvas;
@@ -2734,7 +2734,7 @@
 	      .width;
 	    ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
 	      .fontSize / 4);
-	    let texture = new THREE.CanvasTexture(this.canvas);
+	    let texture = new three.CanvasTexture(this.canvas);
 	    texture.generateMipmaps = false;
 	    texture.minFilter = THREE.LinearFilter;
 	    texture.magFilter = THREE.LinearFilter;

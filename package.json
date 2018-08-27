@@ -1,6 +1,6 @@
 {
-	"name": "nova",
-	"version": "0.1.0",
+	"name": "nova-three",
+	"version": "0.1.2",
 	"description": "JavaScript 3D framework based on Three.js",
 	"main": "build/nova.js",
 	"repository": "hypnosnova/nova.js",
@@ -42,10 +42,9 @@
 	],
 	"author": "HypnosNova",
 	"license": "MIT",
-	"devDependencies": {
+	"dependencies": {
 		"@types/hammerjs": "^2.0.35",
 		"concurrently": "^3.5.0",
-		"electron": "^2.0.8",
 		"eslint": "^5.4.0",
 		"eslint-config-google": "^0.9.1",
 		"eslint-config-mdcs": "^4.2.3",

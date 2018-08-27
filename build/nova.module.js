@@ -1,4 +1,4 @@
-import { Raycaster, Vector2, Scene, PerspectiveCamera, WebGLRenderTarget, Vector3, WebGLRenderer, ShaderMaterial, OrthographicCamera, PlaneBufferGeometry, Mesh, LoadingManager, ImageLoader, TextureLoader, AudioListener, LinearFilter, NearestFilter, RGBAFormat, UniformsUtils, MeshBasicMaterial, FloatType, RGBFormat, DataTexture, Math as Math$1, AdditiveBlending, Matrix4, Color, MeshDepthMaterial, DoubleSide, RGBADepthPacking, NoBlending, Sprite, Line } from 'three';
+import { Raycaster, Vector2, Scene, PerspectiveCamera, WebGLRenderTarget, Vector3, WebGLRenderer, ShaderMaterial, OrthographicCamera, PlaneBufferGeometry, Mesh, Group, Sprite, SpriteMaterial, CanvasTexture, LinearFilter, MeshBasicMaterial, LoadingManager, ImageLoader, TextureLoader, AudioListener, NearestFilter, RGBAFormat, UniformsUtils, FloatType, RGBFormat, DataTexture, Math as Math$1, AdditiveBlending, Matrix4, Color, MeshDepthMaterial, DoubleSide, RGBADepthPacking, NoBlending, Line } from 'three';
 import { defaultsDeep, defaults, remove } from 'lodash';
 
 //适合大部分WebGL的APP设置
@@ -303,7 +303,7 @@ class World {
 const APP_STOP = 0;
 const APP_RUNNING = 1;
 const APP_PAUSE = 2;
-const VERSION = '0.0.1';
+const VERSION = '0.1.2';
 
 console.log( "Nova framework for Three.js, version: %c " + VERSION, "color:blue" );
 
@@ -2585,7 +2585,7 @@ class FBOEventMapper {
 
 }
 
-class GUI extends THREE.Group {
+class GUI extends Group {
   constructor() {
     super();
     this.css = {
@@ -2604,12 +2604,12 @@ class Body extends GUI {
     this.distanceFromCamera = 50;
     this.css = _.defaultsDeep(css || {}, this.css);
     this.canvas = document.createElement("canvas");
-    var spriteMaterial = new THREE.SpriteMaterial({
+    var spriteMaterial = new SpriteMaterial({
       map: this.canvas,
       color: 0xffffff
     });
-    this.element = new THREE.Sprite(spriteMaterial);
-    this.vector = new THREE.Vector3();
+    this.element = new Sprite(spriteMaterial);
+    this.vector = new Vector3();
     this.update();
     this.add(this.element);
   }
@@ -2631,11 +2631,11 @@ class Body extends GUI {
     let ctx = this.canvas.getContext("2d");
     ctx.fillStyle = this.css.backgroundColor;
     ctx.fillRect(0, 0, this.css.width, this.css.height);
-    var texture = new THREE.CanvasTexture(this.canvas);
+    var texture = new CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    var spriteMaterial = new THREE.SpriteMaterial({
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
+    var spriteMaterial = new SpriteMaterial({
       map: texture,
       color: 0xffffff
     });
@@ -2649,14 +2649,14 @@ class Div extends GUI {
   constructor(world, css) {
     super();
     this.world = world;
-    this.css = _.defaultsDeep(css || {}, this.css);
+    this.css = defaultsDeep(css || {}, this.css);
     this.canvas = document.createElement("canvas");
-    var spriteMaterial = new THREE.SpriteMaterial({
+    var spriteMaterial = new SpriteMaterial({
       map: this.canvas,
       color: 0xffffff
     });
-    this.element = new THREE.Sprite(spriteMaterial);
-    this.vector = new THREE.Vector3();
+    this.element = new Sprite(spriteMaterial);
+    this.vector = new Vector3();
     this.update();
     this.add(this.element);
   }
@@ -2667,11 +2667,11 @@ class Div extends GUI {
     let ctx = this.canvas.getContext("2d");
     ctx.fillStyle = this.css.backgroundColor;
     ctx.fillRect(0, 0, this.css.width, this.css.height);
-    var texture = new THREE.CanvasTexture(this.canvas);
+    var texture = new CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    var spriteMaterial = new THREE.SpriteMaterial({
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
+    var spriteMaterial = new SpriteMaterial({
       map: texture,
       color: 0xffffff
     });
@@ -2681,7 +2681,7 @@ class Div extends GUI {
   }
 }
 
-class Txt extends THREE.Mesh {
+class Txt extends Mesh {
   constructor(text, css) {
     css = _.defaultsDeep(css || {}, {
       fontStyle: "normal",
@@ -2702,12 +2702,12 @@ class Txt extends THREE.Mesh {
       }
     });
     let canvas = document.createElement("canvas");
-    var material = new THREE.MeshBasicMaterial({
+    var material = new MeshBasicMaterial({
       transparent: true,
       needsUpdate: false,
       color: 0xffffff
     });
-    super(new THREE.PlaneBufferGeometry(css.width / 8, css.height / 8),
+    super(new PlaneBufferGeometry(css.width / 8, css.height / 8),
       material);
     this.text = text;
     this.canvas = canvas;
@@ -2731,7 +2731,7 @@ class Txt extends THREE.Mesh {
       .width;
     ctx.fillText(this.text, this.css.width / 2, this.css.height / 2 + this.css
       .fontSize / 4);
-    let texture = new THREE.CanvasTexture(this.canvas);
+    let texture = new CanvasTexture(this.canvas);
     texture.generateMipmaps = false;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;

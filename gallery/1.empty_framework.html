@@ -9,10 +9,11 @@
 
 	<body>
 		<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
-		<script src="../lib/three.min.js"></script>
-		<script src="../build/nova.js"></script>
-		<script>
-			let app = new NOVA.App();
+		<script type="module">
+			import * as three from "../lib/three.module.js";
+			import * as NOVA from "../build/nova.module.js";
+			// let app = new NOVA.App();
+			console.log(three)
 		</script>
 	</body>
 

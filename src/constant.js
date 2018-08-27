@@ -5,12 +5,12 @@ const WORLD_RUNNING = 1;
 const WORLD_PAUSE = 2;
 const VERSION = '0.0.1';
 
-console.log("Nova framework for Three.js, version: %c " + VERSION, "color:blue");
+console.log( "Nova framework for Three.js, version: %c " + VERSION, "color:blue" );
 
 export {
-  APP_STOP,
-  APP_RUNNING,
-  APP_PAUSE,
-  WORLD_RUNNING,
-  WORLD_PAUSE
+	APP_STOP,
+	APP_RUNNING,
+	APP_PAUSE,
+	WORLD_RUNNING,
+	WORLD_PAUSE
 };

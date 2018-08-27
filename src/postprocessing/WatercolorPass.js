@@ -3,17 +3,20 @@
  */
 import { Pass } from './Pass.js';
 import { WatercolorShader } from './shader/WatercolorShader.js';
+import { PlaneBufferGeometry, ShaderMaterial, Mesh, Vector2, UniformsUtils, OrthographicCamera, Scene } from "three";
 
 class WatercolorPass extends Pass {
+
 	constructor( tPaper, effectComposer, renderToScreen ) {
+
 		super( effectComposer, renderToScreen );
 		let shader = WatercolorShader;
-		this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+		this.uniforms = UniformsUtils.clone( shader.uniforms );
 
 		tPaper.wrapS = tPaper.wrapT = THREE.RepeatWrapping;
 		this.uniforms[ "tPaper" ].value = tPaper;
 
-		this.material = new THREE.ShaderMaterial( {
+		this.material = new ShaderMaterial( {
 			uniforms: this.uniforms,
 			vertexShader: shader.vertexShader,
 			fragmentShader: shader.fragmentShader
@@ -23,25 +26,33 @@ class WatercolorPass extends Pass {
 		this.renderToScreen = renderToScreen;
 		this.needsSwap = true;
 
-		this.camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 );
-		this.scene = new THREE.Scene();
+		this.camera = new OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
+		this.scene = new Scene();
 
-		this.quad = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), null );
+		this.quad = new Mesh( new PlaneBufferGeometry( 2, 2 ), undefined );
 		this.scene.add( this.quad );
+
 	}
 
-	render( renderer, writeBuffer, readBuffer, delta, maskActive ) {
+	render( renderer, writeBuffer, readBuffer ) {
+
 		this.uniforms[ "tDiffuse" ].value = readBuffer;
-		this.uniforms[ "texel" ].value = new THREE.Vector2( 1.0 / readBuffer.width,
+		this.uniforms[ "texel" ].value = new Vector2( 1.0 / readBuffer.width,
 			1.0 / readBuffer.height );
 
 		this.quad.material = this.material;
 		if ( this.renderToScreen ) {
+
 			renderer.render( this.scene, this.camera );
+
 		} else {
+
 			renderer.render( this.scene, this.camera, writeBuffer, false );
+
 		}
+
 	}
+
 }
 
 export {

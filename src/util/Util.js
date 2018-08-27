@@ -4,12 +4,12 @@ import { rndString } from './rndString';
 import { geoToCartesian } from './geoToCartesian';
 
 let Util = {
-  extend,
-  rndInt,
-  rndString,
-  geoToCartesian
+	extend,
+	rndInt,
+	rndString,
+	geoToCartesian
 };
 
 export {
-  Util
+	Util
 };

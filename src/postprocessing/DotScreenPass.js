@@ -1,41 +1,53 @@
 import { Pass } from './Pass.js';
 import { DotScreenShader } from './shader/DotScreenShader.js';
+import { Scene, OrthographicCamera, PlaneBufferGeometry, Mesh, ShaderMaterial } from "three";
+
 
 class DotScreenPass extends Pass {
-  constructor(center, angle, scale, effectComposer, renderToScreen = false) {
-    super(effectComposer, renderToScreen);
-    this.uniforms = THREE.UniformsUtils.clone(DotScreenShader.uniforms);
-    if (center !== undefined) this.uniforms["center"].value.copy(center);
-    if (angle !== undefined) this.uniforms["angle"].value = angle;
-    if (scale !== undefined) this.uniforms["scale"].value = scale;
 
-    this.material = new THREE.ShaderMaterial({
-      uniforms: this.uniforms,
-      vertexShader: DotScreenShader.vertexShader,
-      fragmentShader: DotScreenShader.fragmentShader
-    });
+	constructor( center, angle, scale, effectComposer, renderToScreen = false ) {
 
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    this.scene = new THREE.Scene();
-    this.quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), null);
-    this.quad.frustumCulled = false; // Avoid getting clipped
-    this.scene.add(this.quad);
-  }
+		super( effectComposer, renderToScreen );
+		this.uniforms = THREE.UniformsUtils.clone( DotScreenShader.uniforms );
+		if ( center !== undefined ) this.uniforms[ "center" ].value.copy( center );
+		if ( angle !== undefined ) this.uniforms[ "angle" ].value = angle;
+		if ( scale !== undefined ) this.uniforms[ "scale" ].value = scale;
 
-  render(renderer, writeBuffer, readBuffer, delta, maskActive) {
-    this.uniforms["tDiffuse"].value = readBuffer.texture;
-    this.uniforms["tSize"].value.set(readBuffer.width, readBuffer.height);
+		this.material = new ShaderMaterial( {
+			uniforms: this.uniforms,
+			vertexShader: DotScreenShader.vertexShader,
+			fragmentShader: DotScreenShader.fragmentShader
+		} );
 
-    this.quad.material = this.material;
+		this.camera = new OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
+		this.scene = new Scene();
+		this.quad = new Mesh( new PlaneBufferGeometry( 2, 2 ), undefined );
+		this.quad.frustumCulled = false; // Avoid getting clipped
+		this.scene.add( this.quad );
 
-    if (this.renderToScreen) {
-      renderer.render(this.scene, this.camera);
-    } else {
-      renderer.render(this.scene, this.camera, writeBuffer, this.clear);
-    }
-  }
+	}
+
+	render( renderer, writeBuffer, readBuffer ) {
+
+		this.uniforms[ "tDiffuse" ].value = readBuffer.texture;
+		this.uniforms[ "tSize" ].value.set( readBuffer.width, readBuffer.height );
+
+		this.quad.material = this.material;
+
+		if ( this.renderToScreen ) {
+
+			renderer.render( this.scene, this.camera );
+
+		} else {
+
+			renderer.render( this.scene, this.camera, writeBuffer, this.clear );
+
+		}
+
+	}
+
 }
 
 export {
-  DotScreenPass
+	DotScreenPass
 };

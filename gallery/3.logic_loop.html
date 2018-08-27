@@ -15,7 +15,7 @@
 			var app = new NOVA.App();
 
 			app.world.camera.position.z = 2;
-			geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+			geometry = new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 );
 			material = new THREE.MeshNormalMaterial();
 			mesh = new THREE.Mesh( geometry, material );
 			app.world.scene.add( mesh );

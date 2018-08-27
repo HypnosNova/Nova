@@ -19,13 +19,13 @@ class VR {
 			return;
 
 		}
-		if ( ! THREE.VREffect ) {
+		if ( ! window.THREE.VREffect ) {
 
 			console.warn( "未引入VREffect.js，无法创建VR模式。" );
 			return;
 
 		}
-		this.vrEffect = new THREE.VREffect( this.app.renderer );
+		this.vrEffect = new window.THREE.VREffect( this.app.renderer );
 		this.vrEffect.setSize( this.app.renderer.domElement.clientWidth,
 			this.app.renderer.domElement.clientHeight, false );
 		this.vrEffect.isOpened = false;

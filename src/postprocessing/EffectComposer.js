@@ -4,7 +4,7 @@ import { RenderPass } from './RenderPass.js';
 import { MaskPass } from './MaskPass';
 import { ClearMaskPass } from './ClearMaskPass';
 import { defaults } from "lodash";
-import { WebGLRenderTarget } from "three";
+import { WebGLRenderTarget, LinearFilter, RGBAFormat } from "three";
 
 class EffectComposer {
 
@@ -22,9 +22,9 @@ class EffectComposer {
 		if ( renderTarget === undefined ) {
 
 			let parameters = {
-				minFilter: THREE.LinearFilter,
-				magFilter: THREE.LinearFilter,
-				format: THREE.RGBAFormat,
+				minFilter: LinearFilter,
+				magFilter: LinearFilter,
+				format: RGBAFormat,
 				stencilBuffer: false
 			};
 			let size = this.renderer.getDrawingBufferSize();

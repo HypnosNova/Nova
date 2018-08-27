@@ -1,18 +1,20 @@
 /**
  * @author mattatz / http://mattatz.github.io
  *
- * Based on 
+ * Based on
  * Charlotte Hoare MSc Project / http://nccastaff.bournemouth.ac.uk/jmacey/MastersProjects/MSc12/Hoare/index.html
- * and 
+ * and
  * Su et al. Real-Time rendering of watercolor effects for virtual environments. / http://dl.acm.org/citation.cfm?id=2131253
  */
+
+import { Vector2 } from "three";
 
 let WatercolorShader = {
 
 	uniforms: {
 		"tDiffuse": { type: "t", value: null }, // diffuse texture
 		"tPaper": { type: "t", value: null }, // paper texture
-		"texel": { type: "v2", value: new THREE.Vector2( 1.0 / 512, 1.0 / 512 ) },
+		"texel": { type: "v2", value: new Vector2( 1.0 / 512, 1.0 / 512 ) },
 		"scale": { type: "f", value: 0.03 }, // wobble scale
 		"threshold": { type: "f", value: 0.7 }, // edge threshold
 		"darkening": { type: "f", value: 1.75 }, // edge darkening

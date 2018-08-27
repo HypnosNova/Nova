@@ -1,8 +1,10 @@
-class Icon extends THREE.Mesh {
+import { Mesh, Shape, ShapeBufferGeometry } from "three";
+
+class Icon extends Mesh {
 
 	constructor( material, width = 64, height = 64, radius = 16 ) {
 
-		let roundedRectShape = new THREE.Shape();
+		let roundedRectShape = new Shape();
 		( function ( ctx, x, y, width, height, radius ) {
 
 			ctx.moveTo( x, y + radius );
@@ -18,7 +20,7 @@ class Icon extends THREE.Mesh {
 
 		} )( roundedRectShape, 0, 0, width, height, radius );
 
-		let roundRectGeometry = new THREE.ShapeBufferGeometry( roundedRectShape );
+		let roundRectGeometry = new ShapeBufferGeometry( roundedRectShape );
 		roundRectGeometry.center();
 		super( roundRectGeometry, material );
 

@@ -1,6 +1,6 @@
 import { Pass } from './Pass.js';
 import { DotScreenShader } from './shader/DotScreenShader.js';
-import { Scene, OrthographicCamera, PlaneBufferGeometry, Mesh, ShaderMaterial } from "three";
+import { Scene, OrthographicCamera, PlaneBufferGeometry, Mesh, ShaderMaterial, UniformsUtils } from "three";
 
 
 class DotScreenPass extends Pass {
@@ -8,7 +8,7 @@ class DotScreenPass extends Pass {
 	constructor( center, angle, scale, effectComposer, renderToScreen = false ) {
 
 		super( effectComposer, renderToScreen );
-		this.uniforms = THREE.UniformsUtils.clone( DotScreenShader.uniforms );
+		this.uniforms = UniformsUtils.clone( DotScreenShader.uniforms );
 		if ( center !== undefined ) this.uniforms[ "center" ].value.copy( center );
 		if ( angle !== undefined ) this.uniforms[ "angle" ].value = angle;
 		if ( scale !== undefined ) this.uniforms[ "scale" ].value = scale;

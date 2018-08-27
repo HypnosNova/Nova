@@ -1,3 +1,5 @@
+import { Raycaster, Vector2 } from "three";
+
 class FBOEventMapper {
 
 	constructor( fboWorld, mesh, faceIndexArr ) {
@@ -6,7 +8,7 @@ class FBOEventMapper {
 		this.disable = false;
 		this.isDeep = true;
 		this.receivers = fboWorld.receivers;
-		this.raycaster = new THREE.Raycaster();
+		this.raycaster = new Raycaster();
 		this.mesh = mesh;
 		this.faceIndexArr = faceIndexArr || [];
 
@@ -42,7 +44,7 @@ class FBOEventMapper {
 
 		return {
 			changedPointers: [ event ],
-			center: new THREE.Vector2( event.clientX, event.clientY ),
+			center: new Vector2( event.clientX, event.clientY ),
 			type: event.type,
 			target: event.target
 		};
@@ -52,7 +54,7 @@ class FBOEventMapper {
 	raycastCheck( event, intersect ) {
 
 		let uv = intersect.uv;
-		let vec2 = new THREE.Vector2( uv.x * 2 - 1, uv.y * 2 - 1 );
+		let vec2 = new Vector2( uv.x * 2 - 1, uv.y * 2 - 1 );
 		this.raycaster.setFromCamera( vec2, this.world.camera );
 		intersect = undefined;
 

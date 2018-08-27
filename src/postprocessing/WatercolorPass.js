@@ -3,7 +3,7 @@
  */
 import { Pass } from './Pass.js';
 import { WatercolorShader } from './shader/WatercolorShader.js';
-import { PlaneBufferGeometry, ShaderMaterial, Mesh, Vector2, UniformsUtils, OrthographicCamera, Scene } from "three";
+import { PlaneBufferGeometry, ShaderMaterial, Mesh, Vector2, UniformsUtils, OrthographicCamera, Scene, RepeatWrapping } from "three";
 
 class WatercolorPass extends Pass {
 
@@ -13,7 +13,7 @@ class WatercolorPass extends Pass {
 		let shader = WatercolorShader;
 		this.uniforms = UniformsUtils.clone( shader.uniforms );
 
-		tPaper.wrapS = tPaper.wrapT = THREE.RepeatWrapping;
+		tPaper.wrapS = tPaper.wrapT = RepeatWrapping;
 		this.uniforms[ "tPaper" ].value = tPaper;
 
 		this.material = new ShaderMaterial( {

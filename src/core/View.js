@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderTarget } from "three";
+import { PerspectiveCamera, WebGLRenderTarget, LinearFilter, RGBFormat } from "three";
 
 class View {
 
@@ -18,9 +18,9 @@ class View {
 		this.camera = camera || PerspectiveCamera( 45, this.worldWidth /
       this.worldHeight, 0.01, 1000 );
 		this.renderTargetParameters = {
-			minFilter: THREE.LinearFilter,
-			magFilter: THREE.LinearFilter,
-			format: THREE.RGBFormat,
+			minFilter: LinearFilter,
+			magFilter: LinearFilter,
+			format: RGBFormat,
 			stencilBuffer: false
 		};
 		this.isRTT = false;

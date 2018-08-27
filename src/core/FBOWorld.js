@@ -1,5 +1,5 @@
 import { LoopManager } from './LoopManager';
-
+import { Scene, PerspectiveCamera, LinearFilter, WebGLRenderTarget, RGBFormat } from "three";
 
 class FBOWorld {
 
@@ -8,21 +8,21 @@ class FBOWorld {
 		this.width = width;
 		this.height = height;
 		this.app = app;
-		this.scene = new THREE.Scene();
+		this.scene = new Scene();
 		this.logicLoop = new LoopManager();
 		this.renderLoop = new LoopManager();
-		this.camera = camera || new THREE.PerspectiveCamera( 45, this.width /
+		this.camera = camera || new PerspectiveCamera( 45, this.width /
       this.height, 0.01, 5000 );
 		this.receivers = this.scene.children;
 
 		this.renderTargetParameters = {
-			minFilter: THREE.LinearFilter,
-			magFilter: THREE.LinearFilter,
-			format: THREE.RGBFormat,
+			minFilter: LinearFilter,
+			magFilter: LinearFilter,
+			format: RGBFormat,
 			stencilBuffer: false
 		};
 		this.clearColor = 0;
-		this.fbo = new THREE.WebGLRenderTarget( this.width,
+		this.fbo = new WebGLRenderTarget( this.width,
 			this.height, this.renderTargetParameters );
 		this.defaultRenderID = Symbol();
 		this.defaultUpdateID = Symbol();

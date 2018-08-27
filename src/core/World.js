@@ -1,6 +1,6 @@
 import { LoopManager } from './LoopManager.js';
 import { EventManager } from './../events/EventManager';
-import { Scene, PerspectiveCamera, WebGLRenderTarget } from "three";
+import { Scene, PerspectiveCamera, WebGLRenderTarget, LinearFilter, RGBFormat } from "three";
 
 class World {
 
@@ -15,9 +15,9 @@ class World {
 		this.receivers = this.scene.children;
 		this.eventManager = new EventManager( this );
 		this.renderTargetParameters = {
-			minFilter: THREE.LinearFilter,
-			magFilter: THREE.LinearFilter,
-			format: THREE.RGBFormat,
+			minFilter: LinearFilter,
+			magFilter: LinearFilter,
+			format: RGBFormat,
 			stencilBuffer: false
 		};
 		this.isRTT = false;

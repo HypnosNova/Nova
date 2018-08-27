@@ -1,11 +1,15 @@
 class NotFunctionError extends Error {
-  constructor( message ) {
-    super( message );
-    this.name = 'NotFunctionError';
-    this.message = message || 'The object is not a function.';
-  }
-};
+
+	constructor( message ) {
+
+		super( message );
+		this.name = 'NotFunctionError';
+		this.message = message || 'The object is not a function.';
+
+	}
+
+}
 
 export {
-  NotFunctionError
+	NotFunctionError
 };

@@ -47,23 +47,31 @@ class EventManager {
 		let vec2 = new THREE.Vector2( event.center.x / this.world.app.getWorldWidth() *
 			2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2 );
 		this.raycaster.setFromCamera( vec2, this.world.camera );
-		let intersects = this.raycaster.intersectObjects( this.world.receivers,
-			this.isDeep );
+		let receiverMap;
+		if ( this.world.receivers instanceof Array ) {
+			receiverMap = new Map();
+			receiverMap.set( Symbol(), this.world.receivers );
+		} else if ( this.world.receivers instanceof Map ) {
+			receiverMap = this.world.receivers;
+		}
 		let intersect;
-		for ( let i = 0; i < intersects.length; i++ ) {
-			if ( intersects[ i ].object.isPenetrated ||
-				!intersects[ i ].object.events ||
-				!intersects[ i ].object.events[ event.type ] ) {
-				continue;
-			} else {
-				intersect = intersects[ i ];
-				break;
+		for ( let receivers of receiverMap.values() ) {
+			let intersects = this.raycaster.intersectObjects( receivers, this.isDeep );
+			for ( let i = 0; i < intersects.length; i++ ) {
+				if ( intersects[ i ].object.isPenetrated ||
+					!intersects[ i ].object.events ||
+					!intersects[ i ].object.events[ event.type ] ) {
+					continue;
+				} else {
+					intersect = intersects[ i ];
+					break;
+				}
 			}
+			if ( intersect ) {
+				intersect.object.events[ event.type ].run( event, intersect );
+			}
+			return intersect;
 		}
-		if ( intersect ) {
-			intersect.object.events[ event.type ].run( event, intersect );
-		}
-		return intersect;
 	}
 }
 

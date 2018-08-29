@@ -1,5 +1,5 @@
-import { AdditiveBlending, AudioListener, CanvasTexture, Color, DataTexture, DoubleSide, FloatType, Group, ImageLoader, Line, LinearFilter, LoadingManager, Math as Math$1, Matrix4, Mesh, MeshBasicMaterial, MeshDepthMaterial, NearestFilter, NoBlending, OrthographicCamera, PerspectiveCamera, PlaneBufferGeometry, RGBADepthPacking, RGBAFormat, RGBFormat, Raycaster, RepeatWrapping, Scene, ShaderMaterial, Sprite, SpriteMaterial, TextureLoader, UniformsUtils, Vector2, Vector3, WebGLRenderTarget, WebGLRenderer } from 'three';
-import { defaults, defaultsDeep, remove } from 'lodash';
+import { Raycaster, Vector2, Scene, PerspectiveCamera, WebGLRenderTarget, LinearFilter, RGBFormat, Vector3, WebGLRenderer, ShaderMaterial, OrthographicCamera, PlaneBufferGeometry, Mesh, Group, Sprite, SpriteMaterial, CanvasTexture, MeshBasicMaterial, LoadingManager, ImageLoader, TextureLoader, AudioListener, UniformsUtils, RGBAFormat, NearestFilter, FloatType, DataTexture, Math as Math$1, AdditiveBlending, Matrix4, Color, MeshDepthMaterial, DoubleSide, RGBADepthPacking, NoBlending, Line, RepeatWrapping } from 'three';
+import { defaultsDeep, defaults, remove } from 'lodash';
 
 //适合大部分WebGL的APP设置
 let DefaultSettings = {
@@ -381,7 +381,7 @@ class VR {
 			return config;
 
 		} )();
-		this.polyfill = new WebVRPolyfill( config );
+		this.polyfill = new window.WebVRPolyfill( config );
 
 	}
 
@@ -462,7 +462,7 @@ class App {
 		this.renderer.setClearColor( this.options.renderer.clearColor,
 			this.options.renderer.clearAlpha );
 		this.world = new World( this );
-		this.animationFrame;
+		// this.animationFrame;
 		this.state = APP_STOP;
 		this.logicLoop = new LoopManager();
 		this.renderLoop = new LoopManager();
@@ -503,11 +503,14 @@ class App {
 			this.renderLoop.update( time );
 
 		}
-		this.animationFrame = requestAnimationFrame( () => {
+		// this.animationFrame =
+		requestAnimationFrame(
+			() => {
 
-			this.update();
+				this.update();
 
-		} );
+			}
+		);
 
 	}
 
@@ -2608,7 +2611,7 @@ class Body extends GUI {
 		super();
 		this.world = world;
 		this.distanceFromCamera = 50;
-		this.css = _.defaultsDeep( css || {}, this.css );
+		this.css = defaultsDeep( css || {}, this.css );
 		this.canvas = document.createElement( "canvas" );
 		var spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
@@ -2703,7 +2706,7 @@ class Txt extends Mesh {
 
 	constructor( text, css ) {
 
-		css = _.defaultsDeep( css || {}, {
+		css = defaultsDeep( css || {}, {
 			fontStyle: "normal",
 			fontVariant: "normal",
 			fontSize: 12,
@@ -4289,6 +4292,7 @@ let WatercolorShader = {
 /**
  * @author mattatz / http://mattatz.github.io
  */
+
 class WatercolorPass extends Pass {
 
 	constructor( tPaper, effectComposer, renderToScreen ) {
@@ -5673,7 +5677,6 @@ let Util = {
 };
 
 /* eslint-disable */
-
 
 //export * from './thirdparty/three.module.js';
 

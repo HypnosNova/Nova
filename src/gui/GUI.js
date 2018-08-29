@@ -24,7 +24,7 @@ class Body extends GUI {
 		super();
 		this.world = world;
 		this.distanceFromCamera = 50;
-		this.css = _.defaultsDeep( css || {}, this.css );
+		this.css = defaultsDeep( css || {}, this.css );
 		this.canvas = document.createElement( "canvas" );
 		var spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
@@ -119,7 +119,7 @@ class Txt extends Mesh {
 
 	constructor( text, css ) {
 
-		css = _.defaultsDeep( css || {}, {
+		css = defaultsDeep( css || {}, {
 			fontStyle: "normal",
 			fontVariant: "normal",
 			fontSize: 12,

@@ -384,7 +384,7 @@
 				return config;
 
 			} )();
-			this.polyfill = new WebVRPolyfill( config );
+			this.polyfill = new window.WebVRPolyfill( config );
 
 		}
 
@@ -465,7 +465,7 @@
 			this.renderer.setClearColor( this.options.renderer.clearColor,
 				this.options.renderer.clearAlpha );
 			this.world = new World( this );
-			this.animationFrame;
+			// this.animationFrame;
 			this.state = APP_STOP;
 			this.logicLoop = new LoopManager();
 			this.renderLoop = new LoopManager();
@@ -506,11 +506,14 @@
 				this.renderLoop.update( time );
 
 			}
-			this.animationFrame = requestAnimationFrame( () => {
+			// this.animationFrame =
+			requestAnimationFrame(
+				() => {
 
-				this.update();
+					this.update();
 
-			} );
+				}
+			);
 
 		}
 
@@ -2611,7 +2614,7 @@
 			super();
 			this.world = world;
 			this.distanceFromCamera = 50;
-			this.css = _.defaultsDeep( css || {}, this.css );
+			this.css = lodash.defaultsDeep( css || {}, this.css );
 			this.canvas = document.createElement( "canvas" );
 			var spriteMaterial = new three.SpriteMaterial( {
 				map: this.canvas,
@@ -2706,7 +2709,7 @@
 
 		constructor( text, css ) {
 
-			css = _.defaultsDeep( css || {}, {
+			css = lodash.defaultsDeep( css || {}, {
 				fontStyle: "normal",
 				fontVariant: "normal",
 				fontSize: 12,
@@ -4292,6 +4295,7 @@
 	/**
 	 * @author mattatz / http://mattatz.github.io
 	 */
+
 	class WatercolorPass extends Pass {
 
 		constructor( tPaper, effectComposer, renderToScreen ) {
@@ -5676,7 +5680,6 @@ vec2 random(vec2 p){
 	};
 
 	/* eslint-disable */
-
 
 	//export * from './thirdparty/three.module.js';
 

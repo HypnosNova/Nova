@@ -465,7 +465,7 @@
 			this.renderer.setClearColor( this.options.renderer.clearColor,
 				this.options.renderer.clearAlpha );
 			this.world = new World( this );
-			// this.animationFrame;
+
 			this.state = APP_STOP;
 			this.logicLoop = new LoopManager();
 			this.renderLoop = new LoopManager();
@@ -506,7 +506,7 @@
 				this.renderLoop.update( time );
 
 			}
-			// this.animationFrame =
+
 			requestAnimationFrame(
 				() => {
 

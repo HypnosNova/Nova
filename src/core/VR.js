@@ -99,7 +99,7 @@ class VR {
 				}
 				return "no";
 
-			}, ( vrDisplays ) => {
+			}, () => {
 
 				return "no";
 

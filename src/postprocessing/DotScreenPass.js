@@ -2,7 +2,6 @@ import { Pass } from './Pass.js';
 import { DotScreenShader } from './shader/DotScreenShader.js';
 import { Scene, OrthographicCamera, PlaneBufferGeometry, Mesh, ShaderMaterial, UniformsUtils } from "three";
 
-
 class DotScreenPass extends Pass {
 
 	constructor( center, angle, scale, effectComposer, renderToScreen = false ) {

@@ -1,62 +1,61 @@
 {
-	"name": "nova-three",
-	"version": "0.1.3",
-	"description": "JavaScript 3D framework based on Three.js",
-	"main": "build/nova.js",
-	"repository": "hypnosnova/nova.js",
-	"jsnext:main": "build/nova.module.js",
-	"module": "build/nova.module.js",
-	"files": [
-		"package.json",
-		"bower.json",
-		"LICENSE",
-		"README.md",
-		"build/nova.js",
-		"build/nova.min.js",
-		"build/nova.module.js",
-		"src",
-		"examples/js",
-		"examples/fonts"
-	],
-	"directories": {
-		"doc": "docs",
-		"example": "examples",
-		"test": "test"
-	},
-	"eslintConfig": {
-		"extends": "mdcs"
-	},
-	"scripts": {
-		"build": "rollup -c",
-		"build-uglify": "rollup -c && uglifyjs build/nova.js -cm --preamble \"// threejs.org/license\" > build/nova.min.js",
-		"dev": "concurrently --names \"ROLLUP,HTTP\" -c \"bgBlue.bold,bgGreen.bold\" \"rollup -c -w -m inline\" \"serve --port 8080\"",
-		"start": "npm run dev",
-		"lint": "eslint src"
-	},
-	"keywords": [
-		"three",
-		"three.js",
-		"nova",
-		"3d",
-		"webgl"
-	],
-	"author": "HypnosNova",
-	"license": "MIT",
-	"dependencies": {
-		"@types/hammerjs": "^2.0.35",
-		"concurrently": "^3.5.0",
-		"eslint": "^5.4.0",
-		"eslint-config-google": "^0.9.1",
-		"eslint-config-mdcs": "^4.2.3",
-		"google-closure-compiler": "^20180805.0.0",
-		"hammer": "^0.0.5",
-		"hammerjs": "^2.0.8",
-		"lodash": "^4.17.10",
-		"qunitjs": "^2.4.0",
-		"rollup": "^0.65.0",
-		"rollup-watch": "^4.3.1",
-		"serve": "^10.0.0",
-		"uglify-js": "^3.4.8",
-		"three": "^0.95.0"
-	}
+  "name": "nova-three",
+  "version": "0.1.7",
+  "description": "JavaScript 3D framework based on Three.js",
+  "main": "build/nova.js",
+  "repository": "hypnosnova/nova.js",
+  "jsnext:main": "build/nova.module.js",
+  "module": "build/nova.module.js",
+  "files": [
+    "package.json",
+    "bower.json",
+    "LICENSE",
+    "README.md",
+    "build/nova.js",
+    "build/nova.min.js",
+    "build/nova.module.js",
+    "src"
+  ],
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "eslintConfig": {
+    "extends": "mdcs"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "build-es": "rollup -c rollup.es.config.js",
+    "build-min": "rollup -c rollup.min.config.js"
+  },
+  "keywords": [
+    "three",
+    "three.js",
+    "nova",
+    "3d",
+    "webgl"
+  ],
+  "author": "HypnosNova",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^3.5.0",
+    "eslint": "^5.4.0",
+    "eslint-config-mdcs": "^4.2.3",
+    "lodash": "^4.17.10",
+    "serve": "^10.0.0",
+    "three": "^0.95.0",
+    "uglify-js": "^3.4.8"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "rollup": "^0.65.0",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-eslint": "^5.0.0",
+    "rollup-plugin-uglify": "^5.0.2",
+    "to-fast-properties": "^2.0.0"
+  }
 }

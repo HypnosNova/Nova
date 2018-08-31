@@ -24,7 +24,7 @@ class Body extends GUI {
 		super();
 		this.world = world;
 		this.distanceFromCamera = 50;
-		this.css = _.defaultsDeep( css || {}, this.css );
+		this.css = defaultsDeep( css || {}, this.css );
 		this.canvas = document.createElement( "canvas" );
 		var spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
@@ -119,7 +119,7 @@ class Txt extends Mesh {
 
 	constructor( text, css ) {
 
-		css = _.defaultsDeep( css || {}, {
+		css = defaultsDeep( css || {}, {
 			fontStyle: "normal",
 			fontVariant: "normal",
 			fontSize: 12,
@@ -154,7 +154,7 @@ class Txt extends Mesh {
 
 	update() {
 
-  	this.material.map.dispose();
+		this.material.map.dispose();
 		this.canvas.width = this.css.width;
 		this.canvas.height = this.css.height;
 		let ctx = this.canvas.getContext( "2d" );
@@ -162,11 +162,9 @@ class Txt extends Mesh {
 		ctx.fillRect( 0, 0, this.css.width, this.css.height );
 		ctx.textAlign = this.css.textAlign;
 		ctx.font = this.css.fontStyle + " " + this.css.fontVariant + " " + this
-			.css.fontWeight +
-      " " + this.css.fontSize + "px " + this.css.fontFamily;
+			.css.fontWeight + " " + this.css.fontSize + "px " + this.css.fontFamily;
 		ctx.fillStyle = this.css.color;
-		let width = ctx.measureText( this.text )
-			.width;
+		// let width = ctx.measureText( this.text ).width;
 		ctx.fillText( this.text, this.css.width / 2, this.css.height / 2 + this.css
 			.fontSize / 4 );
 		let texture = new CanvasTexture( this.canvas );

@@ -1,18 +1,18 @@
 let AfterimageShader = {
-  uniforms: {
-    "damp": { value: 0.96 },
-    "tOld": { value: null },
-    "tNew": { value: null }
-  },
+	uniforms: {
+		"damp": { value: 0.96 },
+		"tOld": { value: null },
+		"tNew": { value: null }
+	},
 
-  vertexShader: `
+	vertexShader: `
     varying vec2 vUv;
     void main() {
       vUv = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }`,
 
-  fragmentShader: `
+	fragmentShader: `
     uniform sampler2D tOld;
     uniform sampler2D tNew;
     uniform float damp;
@@ -34,5 +34,5 @@ let AfterimageShader = {
 };
 
 export {
-  AfterimageShader
+	AfterimageShader
 };

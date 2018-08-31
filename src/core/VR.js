@@ -72,7 +72,7 @@ class VR {
 			return config;
 
 		} )();
-		this.polyfill = new WebVRPolyfill( config );
+		this.polyfill = new window.WebVRPolyfill( config );
 
 	}
 
@@ -99,7 +99,7 @@ class VR {
 				}
 				return "no";
 
-			}, ( vrDisplays ) => {
+			}, () => {
 
 				return "no";
 

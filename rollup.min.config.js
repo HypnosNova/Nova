@@ -1,6 +1,9 @@
-import glsl from './rollup-plugin-glsl';
+
+
 import babel from 'rollup-plugin-babel';
 import { eslint } from 'rollup-plugin-eslint';
+import { uglify } from 'rollup-plugin-uglify';
+import glsl from './rollup-plugin-glsl';
 
 export default {
 	input: "src/Nova.js",
@@ -13,7 +16,9 @@ export default {
 				"external-helpers"
 			],
 			presets: [[ 'es2015', { modules: false } ]]
-		} )
+		} ),
+		//
+		uglify()
 	],
 	external: [ "three", "lodash", "hammer" ],
 	output: [ {
@@ -21,15 +26,7 @@ export default {
 		indent: "\t",
 		format: "umd",
 		name: "NOVA",
-		file: "build/nova.js",
-		globals: {
-			three: "THREE",
-			lodash: "_"
-		}
-	}, {
-		format: "es",
-		name: "NOVA",
-		file: "build/nova.module.js",
+		file: "build/nova.min.js",
 		globals: {
 			three: "THREE",
 			lodash: "_"

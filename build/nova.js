@@ -12,6 +12,7 @@
 		autoResize: true, //自动拉伸自适应不同屏幕分辨率
 		VRSupport: false, //是否加载VR支持模块
 		renderer: {
+			canvas: undefined,
 			clearColor: 0x000000, //渲染器的默认清除颜色
 			clearAlpha: 1, //渲染器的默认清除颜色的透明度
 			pixelRatio: window.devicePixelRatio || 1, //用于移动平台的清晰度
@@ -416,7 +417,7 @@
 	var APP_STOP = 0;
 	var APP_RUNNING = 1;
 	var APP_PAUSE = 2;
-	var VERSION = '0.1.3';
+	var VERSION = '0.1.8b';
 
 	console.log("Nova framework for Three.js, version: %c " + VERSION, "color:blue");
 
@@ -551,19 +552,21 @@
 
 
 					this.options = lodash.defaultsDeep(settings, DefaultSettings);
+					var renderOption = this.options.renderer;
 					if (this.options.setCommonCSS) {
 
 							this.setCommonCSS();
 					}
-					this.parent = this.options.parent;
+					this.parent = renderOption.canvas ? renderOption.canvas.parentElement : this.options.parent;
 					this.renderer = new three.WebGLRenderer({
-							antialias: this.options.renderer.antialias,
-							precision: this.options.renderer.precision,
-							alpha: this.options.renderer.alpha,
-							logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer,
-							preserveDrawingBuffer: this.options.renderer.preserveDrawingBuffer
+							canvas: renderOption.canvas,
+							antialias: renderOption.antialias,
+							precision: renderOption.precision,
+							alpha: renderOption.alpha,
+							logarithmicDepthBuffer: renderOption.logarithmicDepthBuffer,
+							preserveDrawingBuffer: renderOption.preserveDrawingBuffer
 					});
-					this.renderer.setClearColor(this.options.renderer.clearColor, this.options.renderer.clearAlpha);
+					this.renderer.setClearColor(renderOption.clearColor, renderOption.clearAlpha);
 					this.world = new World(this);
 
 					this.state = APP_STOP;

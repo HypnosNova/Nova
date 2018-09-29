@@ -11,21 +11,22 @@ class App {
 	constructor( settings = {} ) {
 
 		this.options = defaultsDeep( settings, DefaultSettings );
+		let renderOption = this.options.renderer;
 		if ( this.options.setCommonCSS ) {
 
 			this.setCommonCSS();
 
 		}
-		this.parent = this.options.parent;
+		this.parent = renderOption.canvas ? renderOption.canvas.parentElement : this.options.parent;
 		this.renderer = new WebGLRenderer( {
-			antialias: this.options.renderer.antialias,
-			precision: this.options.renderer.precision,
-			alpha: this.options.renderer.alpha,
-			logarithmicDepthBuffer: this.options.renderer.logarithmicDepthBuffer,
-			preserveDrawingBuffer: this.options.renderer.preserveDrawingBuffer
+			canvas: renderOption.canvas,
+			antialias: renderOption.antialias,
+			precision: renderOption.precision,
+			alpha: renderOption.alpha,
+			logarithmicDepthBuffer: renderOption.logarithmicDepthBuffer,
+			preserveDrawingBuffer: renderOption.preserveDrawingBuffer
 		} );
-		this.renderer.setClearColor( this.options.renderer.clearColor,
-			this.options.renderer.clearAlpha );
+		this.renderer.setClearColor( renderOption.clearColor, renderOption.clearAlpha );
 		this.world = new World( this );
 
 		this.state = APP_STOP;

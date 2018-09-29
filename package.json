@@ -1,6 +1,6 @@
 {
   "name": "nova-three",
-  "version": "0.1.7",
+  "version": "0.1.8b",
   "description": "JavaScript 3D framework based on Three.js",
   "main": "build/nova.js",
   "repository": "hypnosnova/nova.js",

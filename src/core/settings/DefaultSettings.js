@@ -6,6 +6,7 @@ let DefaultSettings = {
 	autoResize: true, //自动拉伸自适应不同屏幕分辨率
 	VRSupport: false, //是否加载VR支持模块
 	renderer: {
+		canvas: undefined,
 		clearColor: 0x000000, //渲染器的默认清除颜色
 		clearAlpha: 1, //渲染器的默认清除颜色的透明度
 		pixelRatio: window.devicePixelRatio || 1, //用于移动平台的清晰度

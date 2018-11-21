@@ -1,6 +1,6 @@
 import { Mesh, Shape, ShapeBufferGeometry } from "three";
 
-class Icon extends Mesh {
+export default class Icon extends Mesh {
 
 	constructor( material, width = 64, height = 64, radius = 16 ) {
 
@@ -27,7 +27,3 @@ class Icon extends Mesh {
 	}
 
 }
-
-export {
-	Icon
-};

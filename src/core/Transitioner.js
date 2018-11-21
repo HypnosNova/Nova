@@ -1,20 +1,20 @@
-import { World } from './World';
+import World from './World';
 import { ShaderMaterial, OrthographicCamera, PlaneBufferGeometry, Mesh } from "three";
-import { defaults } from "lodash";
 
-class Transitioner {
+export default class Transitioner {
 
 	constructor( app, world, texture, options = {} ) {
 
-		this.options = defaults( options, {
-			'useTexture': true,
-			'transition': 0,
-			'speed': 10,
-			'texture': 5,
-			'loopTexture': true,
-			'isAnimate': true,
-			'threshold': 0.3
-		} );
+		this.options = {
+			useTexture: true,
+			transition: 0,
+			speed: 10,
+			texture: 5,
+			loopTexture: true,
+			isAnimate: true,
+			threshold: 0.3,
+			...options
+		};
 		this.app = app;
 		this.targetWorld = world;
 		this.maskTexture = texture;
@@ -110,7 +110,7 @@ class Transitioner {
 
 	}
 
-	update() {
+	update = () => {
 
 		let value = Math.min( this.options.transition, 1 );
 		value = Math.max( value, 0 );
@@ -128,7 +128,3 @@ class Transitioner {
 	}
 
 }
-
-export {
-	Transitioner
-};

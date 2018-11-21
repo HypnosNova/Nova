@@ -3,21 +3,21 @@ import { ShaderPass } from './ShaderPass.js';
 import { RenderPass } from './RenderPass.js';
 import { MaskPass } from './MaskPass';
 import { ClearMaskPass } from './ClearMaskPass';
-import { defaults } from "lodash";
 import { WebGLRenderTarget, LinearFilter, RGBAFormat } from "three";
 
-class EffectComposer {
+export default class EffectComposer {
 
 	constructor( world, options = {}, renderTarget ) {
 
-		options = defaults( options, {
+		options = {
 			renderer: undefined,
 			camera: undefined,
 			scene: undefined,
 			overrideMaterial: undefined,
 			clearColor: undefined,
-			clearAlpha: 0
-		} );
+			clearAlpha: 0,
+			...options
+		};
 		this.renderer = options.renderer || world.app.renderer;
 		if ( renderTarget === undefined ) {
 
@@ -145,7 +145,3 @@ class EffectComposer {
 	}
 
 }
-
-export {
-	EffectComposer
-};

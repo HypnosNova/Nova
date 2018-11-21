@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>Empty Framework</title>
+	</head>
+
+	<body>
+		<script src="https://cdn.bootcss.com/lodash.js/4.17.5/lodash.min.js"></script>
+		<script src="../lib/three.min.js"></script>
+		<script src="../build/nova.js"></script>
+		<script src="../lib/bas.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../lib/tween.js" type="text/javascript" charset="utf-8"></script>
+		<script src="exploreAnimateObj.js" type="text/javascript" charset="utf-8"></script>
+		<script>
+			let app = new NOVA.App();
+			app.world.camera.position.set( 0, 0, 250 );
+			var settings = {
+				letterTimeOffset: 0.075
+			};
+
+			var mesh1 = createManyAnimationMesh( [ new THREE.BoxGeometry( 30, 30, 30, 3, 3, 3 ), new THREE.BoxGeometry( 30, 30, 30, 3, 3, 3 ), new THREE.BoxGeometry( 30, 30, 30, 3, 3, 3 ) ], [ {
+				x: 0,
+				y: 0,
+				z: 0
+			}, {
+				x: 0,
+				y: 30,
+				z: 0
+			}, {
+				x: -30,
+				y: 0,
+				z: 0
+			} ], {
+				timeOffset: 0.3
+			} );
+			app.world.scene.add( mesh1 );
+
+			var light = new THREE.DirectionalLight( 0xffffff, 1.0 );
+			light.position.set( 0.2, 0.5, 1 );
+			app.world.scene.add( light );
+			var light = new THREE.AmbientLight( 0x404040 );
+			app.world.scene.add( light );
+
+			new TWEEN.Tween( mesh1 ).to( {
+				time: mesh1.animationDuration
+			}, 8000 ).start().yoyo( true ).repeat( Infinity );
+
+			app.logicLoop.add( () => {
+				TWEEN.update();
+			} );
+			
+			console.log(THREE.BAS.PhongAnimationMaterial)
+		</script>
+	</body>
+
+</html>

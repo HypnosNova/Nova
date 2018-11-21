@@ -1,4 +1,4 @@
-class VR {
+export default class VR {
 
 	constructor( app ) {
 
@@ -131,7 +131,3 @@ class VR {
 	}
 
 }
-
-export {
-	VR
-};

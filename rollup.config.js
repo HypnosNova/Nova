@@ -1,21 +1,27 @@
 import glsl from './rollup-plugin-glsl';
 import babel from 'rollup-plugin-babel';
-import { eslint } from 'rollup-plugin-eslint';
+import {
+	eslint
+} from 'rollup-plugin-eslint';
+import commonjs from 'rollup-plugin-commonjs';
+import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
 	input: "src/Nova.js",
 	plugins: [
+		nodeResolve( {
+			jsnext: true,
+			main: true
+		} ),
+		commonjs( {
+			include: 'node_modules/**',
+		} ),
 		glsl(),
 		eslint(),
 		babel( {
-			babelrc: false,
-			"plugins": [
-				"external-helpers"
-			],
-			presets: [[ 'es2015', { modules: false } ]]
+			babelrc: true
 		} )
 	],
-	external: [ "three", "lodash", "hammer" ],
 	output: [ {
 		sourcemap: true,
 		indent: "\t",
@@ -23,16 +29,14 @@ export default {
 		name: "NOVA",
 		file: "build/nova.js",
 		globals: {
-			three: "THREE",
-			lodash: "_"
+			three: "THREE"
 		}
 	}, {
 		format: "es",
 		name: "NOVA",
 		file: "build/nova.module.js",
 		globals: {
-			three: "THREE",
-			lodash: "_"
+			three: "THREE"
 		}
 	} ]
 };

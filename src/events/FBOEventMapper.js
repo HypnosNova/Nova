@@ -1,6 +1,6 @@
 import { Raycaster, Vector2 } from "three";
 
-class FBOEventMapper {
+export default class FBOEventMapper {
 
 	constructor( fboWorld, mesh, faceIndexArr ) {
 
@@ -85,7 +85,3 @@ class FBOEventMapper {
 	}
 
 }
-
-export {
-	FBOEventMapper
-};

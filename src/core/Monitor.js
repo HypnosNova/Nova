@@ -1,6 +1,6 @@
 import { WebGLRenderer } from "three";
 
-class Monitor {
+export default class Monitor {
 
 	constructor( world, option ) {
 
@@ -46,7 +46,3 @@ class Monitor {
 	}
 
 }
-
-export {
-	Monitor
-};

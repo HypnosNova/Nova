@@ -1,6 +1,6 @@
-import { NotFunctionError } from './../error/NotFunctionError.js';
+import NotFunctionError from './../error/NotFunctionError.js';
 
-class LoopManager {
+export default class LoopManager {
 
 	constructor( cycleLevel = 1 ) {
 
@@ -14,7 +14,7 @@ class LoopManager {
 
 	}
 
-	update( time ) {
+	update = ( time ) => {
 
 		this.times ++;
 		if ( this.disable || ( this.times % this.cycleLevel ) !== 0 ) {
@@ -30,13 +30,19 @@ class LoopManager {
 
 	}
 
-	add( func, key ) {
+	add = ( func, key ) => {
 
 		if ( typeof func !== 'function' ) {
 
 			throw new NotFunctionError();
 
 		} else {
+
+			if ( func.prototype ) {
+
+				console.warn( func, "The function is not an arrrow function. It'll be unsafe when using 'this' in it." );
+
+			}
 
 			if ( key ) {
 
@@ -54,13 +60,13 @@ class LoopManager {
 
 	}
 
-	removeAll() {
+	removeAll = () => {
 
 		this.functionMap.clear();
 
 	}
 
-	remove( funcOrKey ) {
+	remove = ( funcOrKey ) => {
 
 		if ( typeof funcOrKey === 'function' ) {
 
@@ -84,7 +90,3 @@ class LoopManager {
 	}
 
 }
-
-export {
-	LoopManager
-};

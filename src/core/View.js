@@ -1,6 +1,6 @@
 import { PerspectiveCamera, WebGLRenderTarget, LinearFilter, RGBFormat } from "three";
 
-class View {
+export default class View {
 
 	constructor( world, camera, {
 		clearColor = 0x000000,
@@ -15,8 +15,7 @@ class View {
 		this.worldWidth = world.app.getWorldWidth();
 		this.worldHeight = world.app.getWorldHeight();
 		this.renderer = world.app.renderer;
-		this.camera = camera || PerspectiveCamera( 45, this.worldWidth /
-      this.worldHeight, 0.01, 1000 );
+		this.camera = camera || PerspectiveCamera( 45, this.worldWidth / this.worldHeight, 0.01, 1000 );
 		this.renderTargetParameters = {
 			minFilter: LinearFilter,
 			magFilter: LinearFilter,
@@ -39,7 +38,7 @@ class View {
 
 	}
 
-	render() {
+	render = () => {
 
 		var left = Math.floor( this.worldWidth * this.left );
 		var top = Math.floor( this.worldHeight * this.top );
@@ -77,7 +76,3 @@ class View {
 	}
 
 }
-
-export {
-	View
-};

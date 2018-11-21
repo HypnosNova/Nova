@@ -1,6 +1,6 @@
 import { LoadingManager, ImageLoader, TextureLoader, AudioListener } from "three";
 
-class LoaderFactory {
+export default class LoaderFactory {
 
 	constructor() {
 
@@ -104,7 +104,3 @@ class LoaderFactory {
 	}
 
 }
-
-export {
-	LoaderFactory
-};

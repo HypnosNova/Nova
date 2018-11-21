@@ -1,10 +1,10 @@
-import { Signal } from './Signal';
+import Signal from './Signal';
 
 /**
  * 由于事件处理
  *
  * */
-class Events {
+export default class Events {
 
 	constructor( list ) {
 
@@ -21,7 +21,3 @@ class Events {
 	}
 
 }
-
-export {
-	Events
-};

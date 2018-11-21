@@ -1,4 +1,4 @@
-class Bind {
+export default class Bind {
 
 	constructor( obj ) {
 
@@ -12,19 +12,19 @@ class Bind {
 
 	}
 
-	add( obj, funcs = {} ) {
+	add = ( obj, funcs = {} ) => {
 
 		this.bindMap.set( obj, funcs );
 
 	}
 
-	remove( obj ) {
+	remove = ( obj ) => {
 
 		this.bindMap.delete( obj );
 
 	}
 
-	defineReactive( data, key, val ) {
+	defineReactive = ( data, key, val ) => {
 
 		Object.defineProperty( data, key, {
 			enumerable: true,
@@ -34,7 +34,7 @@ class Bind {
 				return val;
 
 			},
-			set: function ( newVal ) {
+			set: ( newVal ) => {
 
 				val = newVal;
 				let bindMap = data.bindMap;
@@ -54,6 +54,3 @@ class Bind {
 	}
 
 }
-export {
-	Bind
-};

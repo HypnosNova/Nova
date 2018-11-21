@@ -1,7 +1,7 @@
-import { LoopManager } from './LoopManager';
+import LoopManager from './LoopManager';
 import { Scene, PerspectiveCamera, LinearFilter, WebGLRenderTarget, RGBFormat } from "three";
 
-class FBOWorld {
+export default class FBOWorld {
 
 	constructor( app, camera, width, height ) {
 
@@ -11,8 +11,7 @@ class FBOWorld {
 		this.scene = new Scene();
 		this.logicLoop = new LoopManager();
 		this.renderLoop = new LoopManager();
-		this.camera = camera || new PerspectiveCamera( 45, this.width /
-      this.height, 0.01, 5000 );
+		this.camera = camera || new PerspectiveCamera( 45, this.width / this.height, 0.01, 5000 );
 		this.receivers = this.scene.children;
 
 		this.renderTargetParameters = {
@@ -35,14 +34,14 @@ class FBOWorld {
 
 	}
 
-	update( time ) {
+	update = ( time ) => {
 
 		this.logicLoop.update( time );
 		this.renderLoop.update( time );
 
 	}
 
-	resize() {
+	resize = () => {
 
 		if ( this.camera.type === 'PerspectiveCamera' ) {
 
@@ -62,7 +61,3 @@ class FBOWorld {
 	}
 
 }
-
-export {
-	FBOWorld
-};

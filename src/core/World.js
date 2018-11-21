@@ -1,8 +1,8 @@
-import { LoopManager } from './LoopManager.js';
-import { EventManager } from './../events/EventManager';
+import LoopManager from './LoopManager.js';
+import EventManager from './../events/EventManager';
 import { Scene, PerspectiveCamera, WebGLRenderTarget, LinearFilter, RGBFormat } from "three";
 
-class World {
+export default class World {
 
 	constructor( app, camera, clearColor ) {
 
@@ -42,14 +42,14 @@ class World {
 
 	}
 
-	update( time ) {
+	update = ( time ) => {
 
 		this.logicLoop.update( time );
 		this.renderLoop.update( time );
 
 	}
 
-	resize( width, height ) {
+	resize = ( width, height ) => {
 
 		if ( this.camera.type === 'PerspectiveCamera' ) {
 
@@ -69,7 +69,3 @@ class World {
 	}
 
 }
-
-export {
-	World
-};

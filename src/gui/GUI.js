@@ -1,5 +1,5 @@
 import { Group, Sprite, Vector3, SpriteMaterial, CanvasTexture, LinearFilter, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
-import { defaultsDeep } from "lodash";
+import defaultsDeep from "lodash/defaultsDeep";
 
 class GUI extends Group {
 
@@ -26,7 +26,7 @@ class Body extends GUI {
 		this.distanceFromCamera = 50;
 		this.css = defaultsDeep( css || {}, this.css );
 		this.canvas = document.createElement( "canvas" );
-		var spriteMaterial = new SpriteMaterial( {
+		let spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
 			color: 0xffffff
 		} );
@@ -37,20 +37,19 @@ class Body extends GUI {
 
 	}
 
-	lockToScreen() {
+	lockToScreen = () => {
 
 		var c = this.world.camera;
 		c.getWorldDirection( this.vector );
 		this.rotation.set( c.rotation.x, c.rotation.y, c.rotation.z );
 		this.position.set( c.position.x + this.vector.x * this.distanceFromCamera,
-			c.position.y +
-      this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z *
-      this.distanceFromCamera
+			c.position.y + this.vector.y * this.distanceFromCamera, c.position.z + this.vector.z *
+			this.distanceFromCamera
 		);
 
 	}
 
-	update() {
+	update = () => {
 
 		this.canvas.width = this.css.width;
 		this.canvas.height = this.css.height;
@@ -92,7 +91,7 @@ class Div extends GUI {
 
 	}
 
-	update() {
+	update = () => {
 
 		this.canvas.width = this.css.width;
 		this.canvas.height = this.css.height;
@@ -152,9 +151,9 @@ class Txt extends Mesh {
 
 	}
 
-	update() {
+	update = () => {
 
-		this.material.map.dispose();
+		this.material.map?.dispose();
 		this.canvas.width = this.css.width;
 		this.canvas.height = this.css.height;
 		let ctx = this.canvas.getContext( "2d" );

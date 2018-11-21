@@ -1,12 +1,12 @@
-import { World } from './World.js';
+import World from './World.js';
 import { APP_RUNNING, APP_STOP, APP_PAUSE } from './../constant.js';
-import { LoopManager } from './LoopManager.js';
-import { VR } from './VR.js';
-import { DefaultSettings } from './settings/DefaultSettings.js';
+import LoopManager from './LoopManager.js';
+import VR from './VR.js';
+import DefaultSettings from './settings/DefaultSettings.js';
 import { Vector2, Vector3, WebGLRenderer } from 'three';
-import { defaultsDeep } from "lodash";
+import defaultsDeep from "lodash-es/defaultsDeep";
 
-class App {
+export default class App {
 
 	constructor( settings = {} ) {
 
@@ -239,7 +239,3 @@ class App {
 	}
 
 }
-
-export {
-	App
-};

@@ -1,4 +1,4 @@
-class NotFunctionError extends Error {
+export default class NotFunctionError extends Error {
 
 	constructor( message ) {
 
@@ -9,7 +9,3 @@ class NotFunctionError extends Error {
 	}
 
 }
-
-export {
-	NotFunctionError
-};

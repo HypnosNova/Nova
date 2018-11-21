@@ -1,10 +1,10 @@
-import { NotFunctionError } from './../error/NotFunctionError';
-import { remove } from "lodash";
+import NotFunctionError from './../error/NotFunctionError';
+import remove from "lodash/remove";
 /**
  * 用于事件处理
  *
  * */
-class Signal {
+export default class Signal {
 
 	constructor( type ) {
 
@@ -49,7 +49,3 @@ class Signal {
 	}
 
 }
-
-export {
-	Signal
-};

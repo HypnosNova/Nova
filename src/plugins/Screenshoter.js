@@ -1,6 +1,6 @@
 import { WebGLRenderer } from "three";
 
-class Screenshoter {
+export default class Screenshoter {
 
 	constructor( world ) {
 
@@ -77,5 +77,3 @@ class Screenshoter {
 	}
 
 }
-
-export default Screenshoter;

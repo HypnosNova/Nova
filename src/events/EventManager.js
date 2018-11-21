@@ -1,6 +1,6 @@
 import { Raycaster, Vector2 } from "three";
 
-class EventManager {
+export default class EventManager {
 
 	constructor( world ) {
 
@@ -51,7 +51,7 @@ class EventManager {
 
 	}
 
-	toNovaEvent( event ) {
+	toNovaEvent = ( event ) => {
 
 		return {
 			changedPointers: [ event ],
@@ -62,7 +62,7 @@ class EventManager {
 
 	}
 
-	raycastCheck( event ) {
+	raycastCheck = ( event ) => {
 
 		let vec2 = new Vector2( event.center.x / this.world.app.getWorldWidth() *
 			2 - 1, 1 - event.center.y / this.world.app.getWorldHeight() * 2 );
@@ -110,7 +110,3 @@ class EventManager {
 	}
 
 }
-
-export {
-	EventManager
-};

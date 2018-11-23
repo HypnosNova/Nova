@@ -50,7 +50,7 @@ export default class App {
 
 	}
 
-	resize() {
+	resize = () => {
 
 		let width = this.getWorldWidth();
 		let height = this.getWorldHeight();
@@ -60,7 +60,7 @@ export default class App {
 
 	}
 
-	update( time ) {
+	update = ( time ) => {
 
 		if ( this.state === APP_RUNNING ) {
 
@@ -70,38 +70,32 @@ export default class App {
 
 		}
 
-		requestAnimationFrame(
-			() => {
-
-				this.update();
-
-			}
-		);
+		requestAnimationFrame( this.update );
 
 	}
 
-	setCommonCSS() {
+	setCommonCSS = () => {
 
 		document.write(
 			`<style>*{margin:0;padding:0} body{overflow:hidden}</style>` );
 
 	}
 
-	getWorldWidth() {
+	getWorldWidth = () => {
 
 		return this.parent === document.body ? window.innerWidth :
 			this.parent.offsetWidth;
 
 	}
 
-	getWorldHeight() {
+	getWorldHeight = () => {
 
 		return this.parent === document.body ? window.innerHeight :
 			this.parent.offsetHeight;
 
 	}
 
-	start() {
+	start = () => {
 
 		if ( this.state === APP_STOP ) {
 
@@ -112,9 +106,9 @@ export default class App {
 
 		}
 
-	}
+	};
 
-	resume() {
+	resume = () => {
 
 		if ( this.state === APP_PAUSE ) {
 
@@ -122,9 +116,9 @@ export default class App {
 
 		}
 
-	}
+	};
 
-	pause() {
+	pause = () => {
 
 		if ( this.state === APP_RUNNING ) {
 
@@ -134,13 +128,13 @@ export default class App {
 
 	}
 
-	destroy() {
+	destroy = () => {
 
 		this.world.destroy();
 
 	}
 
-	openFullScreen() {
+	openFullScreen = () => {
 
 		let container = this.parent;
 		this.isFullScreen = true;
@@ -169,7 +163,7 @@ export default class App {
 
 	}
 
-	closeFullScreen() {
+	closeFullScreen = () => {
 
 		let container = document;
 		this.isFullScreen = false;
@@ -202,7 +196,7 @@ export default class App {
 
 	}
 
-	toggleFullScreen() {
+	toggleFullScreen = () => {
 
 		if ( this.isFullScreen ) {
 
@@ -216,7 +210,7 @@ export default class App {
 
 	}
 
-	screenshot() {
+	screenshot = () => {
 
 		let img = new Image();
 		this.renderer.render( this.world.scene, this.world.camera );
@@ -227,7 +221,7 @@ export default class App {
 
 	}
 
-	sceneCoordinateToCanvasCoordinate( obj, camera = this.world.camera ) {
+	sceneCoordinateToCanvasCoordinate = ( obj, camera = this.world.camera ) => {
 
 		let worldVector = obj instanceof Vector3 ? obj.clone() : obj.position.clone();
 		let vector = worldVector.project( camera );

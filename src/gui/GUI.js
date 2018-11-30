@@ -19,12 +19,12 @@ class GUI extends Group {
 
 class Body extends GUI {
 
-	constructor( world, css ) {
+	constructor( world, css = {} ) {
 
 		super();
 		this.world = world;
 		this.distanceFromCamera = 50;
-		this.css = defaultsDeep( css || {}, this.css );
+		this.css = defaultsDeep( css, this.css );
 		this.canvas = document.createElement( "canvas" );
 		let spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
@@ -74,11 +74,11 @@ class Body extends GUI {
 
 class Div extends GUI {
 
-	constructor( world, css ) {
+	constructor( world, css = {} ) {
 
 		super();
 		this.world = world;
-		this.css = defaultsDeep( css || {}, this.css );
+		this.css = defaultsDeep( css, this.css );
 		this.canvas = document.createElement( "canvas" );
 		var spriteMaterial = new SpriteMaterial( {
 			map: this.canvas,
@@ -116,9 +116,9 @@ class Div extends GUI {
 
 class Txt extends Mesh {
 
-	constructor( text, css ) {
+	constructor( text, css = {}, multiLine = false ) {
 
-		css = defaultsDeep( css || {}, {
+		css = defaultsDeep( css, {
 			fontStyle: "normal",
 			fontVariant: "normal",
 			fontSize: 12,
@@ -130,6 +130,7 @@ class Txt extends Mesh {
 			opacity: 1,
 			width: 1,
 			height: 1,
+			lineHeight: 0,
 			scale: {
 				x: 0.25,
 				y: 0.25,
@@ -137,23 +138,30 @@ class Txt extends Mesh {
 			}
 		} );
 		let canvas = document.createElement( "canvas" );
-		var material = new MeshBasicMaterial( {
+		document.body.appendChild( canvas );
+		let material = new MeshBasicMaterial( {
 			transparent: true,
 			needsUpdate: false,
 			color: 0xffffff
 		} );
-		super( new PlaneBufferGeometry( css.width / 8, css.height / 8 ),
+		super( new PlaneBufferGeometry( css.width * css.scale.x, css.height * css.scale.x ),
 			material );
 		this.text = text;
 		this.canvas = canvas;
 		this.css = css;
+		this.multiLine = multiLine;
 		this.update();
 
 	}
 
 	update = () => {
 
-		this.material.map?.dispose();
+		if ( this.material.map ) {
+
+			this.material.map.dispose();
+
+		}
+
 		this.canvas.width = this.css.width;
 		this.canvas.height = this.css.height;
 		let ctx = this.canvas.getContext( "2d" );
@@ -164,8 +172,24 @@ class Txt extends Mesh {
 			.css.fontWeight + " " + this.css.fontSize + "px " + this.css.fontFamily;
 		ctx.fillStyle = this.css.color;
 		// let width = ctx.measureText( this.text ).width;
-		ctx.fillText( this.text, this.css.width / 2, this.css.height / 2 + this.css
-			.fontSize / 4 );
+
+		if ( this.multiLine ) {
+
+			const textArr = this.text.split( "\n" );
+			for ( let i = 0; i < textArr.length; i ++ ) {
+
+				ctx.fillText( textArr[ i ], this.css.width / 2, this.css.lineHeight / 2 + this.css
+					.fontSize / 4 + i * this.css.lineHeight );
+
+			}
+
+		} else {
+
+			ctx.fillText( this.text, this.css.width / 2, this.css.height / 2 + this.css
+				.fontSize / 4 );
+
+		}
+
 		let texture = new CanvasTexture( this.canvas );
 		texture.generateMipmaps = false;
 		texture.minFilter = LinearFilter;

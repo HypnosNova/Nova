@@ -84,9 +84,7 @@ export default class EventManager {
 			let intersects = this.raycaster.intersectObjects( receivers, this.isDeep );
 			for ( let i = 0; i < intersects.length; i ++ ) {
 
-				if ( intersects[ i ].object.isPenetrated ||
-					! intersects[ i ].object.events ||
-					! intersects[ i ].object.events[ event.type ] ) {
+				if ( intersects[ i ].object.isPenetrated ) {
 
 					continue;
 
@@ -100,7 +98,11 @@ export default class EventManager {
 			}
 			if ( intersect ) {
 
-				intersect.object.events[ event.type ].run( event, intersect );
+				if ( intersect.object.events || intersect.object.events[ event.type ] ) {
+
+					intersect.object.events[ event.type ].run( event, intersect );
+
+				}
 
 			}
 			return intersect;

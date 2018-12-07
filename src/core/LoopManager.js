@@ -40,7 +40,7 @@ export default class LoopManager {
 
 			if ( func.prototype ) {
 
-				console.warn( func, "The function is not an arrrow function. It'll be unsafe when using 'this' in it." );
+				console.warn( func, "The function is not an arrow function. It'll be unsafe when using 'this' in it." );
 
 			}
 

@@ -98,7 +98,7 @@ export default class EventManager {
 			}
 			if ( intersect ) {
 
-				if ( intersect.object.events || intersect.object.events[ event.type ] ) {
+				if ( intersect.object.events && intersect.object.events[ event.type ] ) {
 
 					intersect.object.events[ event.type ].run( event, intersect );
 

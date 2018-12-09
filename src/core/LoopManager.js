@@ -16,6 +16,12 @@ export default class LoopManager {
 
 	update = ( time ) => {
 
+		if ( this.before ) {
+
+			this.before();
+
+		}
+
 		this.times ++;
 		if ( this.disable || ( this.times % this.cycleLevel ) !== 0 ) {
 
@@ -27,6 +33,12 @@ export default class LoopManager {
 			value( time );
 
 		} );
+
+		if ( this.after ) {
+
+			this.after();
+
+		}
 
 	}
 

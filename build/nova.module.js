@@ -30,7 +30,7 @@ var DefaultSettings = {
     // 逻辑深度缓冲
     preserveDrawingBuffer: false
   },
-  normalEventList: ["click", "mousedown", "mouseup", "touchstart", "touchend", "touchmove", "mousemove"],
+  normalEventList: ["click", "mousedown", "mouseup", "touchstart", "touchend"],
   //默认开启的原生事件监听，不建议将所有的事件监听都写在里面，每一个事件监听都会增加一次射线法碰撞检测，如果不必要的事件过多会降低性能
   hammerEventList: "press tap pressup pan swipe" //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
 
@@ -272,6 +272,10 @@ var LoopManager = function LoopManager() {
   _classCallCheck(this, LoopManager);
 
   this.update = function (time) {
+    if (_this.before) {
+      _this.before();
+    }
+
     _this.times++;
 
     if (_this.disable || _this.times % _this.cycleLevel !== 0) {
@@ -281,6 +285,10 @@ var LoopManager = function LoopManager() {
     _this.functionMap.forEach(function (value) {
       value(time);
     });
+
+    if (_this.after) {
+      _this.after();
+    }
   };
 
   this.add = function (func, key) {
@@ -288,7 +296,7 @@ var LoopManager = function LoopManager() {
       throw new NotFunctionError();
     } else {
       if (func.prototype) {
-        console.warn(func, "The function is not an arrrow function. It'll be unsafe when using 'this' in it.");
+        console.warn(func, "The function is not an arrow function. It'll be unsafe when using 'this' in it.");
       }
 
       if (key) {
@@ -370,7 +378,7 @@ var EventManager = function EventManager(world) {
         var intersects = _this.raycaster.intersectObjects(receivers, _this.isDeep);
 
         for (var i = 0; i < intersects.length; i++) {
-          if (intersects[i].object.isPenetrated || !intersects[i].object.events || !intersects[i].object.events[event.type]) {
+          if (intersects[i].object.isPenetrated) {
             continue;
           } else {
             intersect = intersects[i];
@@ -379,7 +387,9 @@ var EventManager = function EventManager(world) {
         }
 
         if (intersect) {
-          intersect.object.events[event.type].run(event, intersect);
+          if (intersect.object.events && intersect.object.events[event.type]) {
+            intersect.object.events[event.type].run(event, intersect);
+          }
         }
 
         return intersect;
@@ -8564,8 +8574,10 @@ var Body =
 function (_GUI) {
   _inherits(Body, _GUI);
 
-  function Body(world, css) {
+  function Body(world) {
     var _this2;
+
+    var css = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     _classCallCheck(this, Body);
 
@@ -8606,7 +8618,7 @@ function (_GUI) {
 
     _this2.world = world;
     _this2.distanceFromCamera = 50;
-    _this2.css = defaultsDeep_1(css || {}, _this2.css);
+    _this2.css = defaultsDeep_1(css, _this2.css);
     _this2.canvas = document.createElement("canvas");
 
     var _spriteMaterial = new SpriteMaterial({
@@ -8632,8 +8644,10 @@ var Div =
 function (_GUI2) {
   _inherits(Div, _GUI2);
 
-  function Div(world, css) {
+  function Div(world) {
     var _this3;
+
+    var css = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     _classCallCheck(this, Div);
 
@@ -8664,7 +8678,7 @@ function (_GUI2) {
     };
 
     _this3.world = world;
-    _this3.css = defaultsDeep_1(css || {}, _this3.css);
+    _this3.css = defaultsDeep_1(css, _this3.css);
     _this3.canvas = document.createElement("canvas");
 
     var _spriteMaterial2 = new SpriteMaterial({
@@ -8690,12 +8704,15 @@ var Txt =
 function (_Mesh) {
   _inherits(Txt, _Mesh);
 
-  function Txt(text, css) {
+  function Txt(text) {
     var _this4;
+
+    var css = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var multiLine = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
     _classCallCheck(this, Txt);
 
-    css = defaultsDeep_1(css || {}, {
+    css = defaultsDeep_1(css, {
       fontStyle: "normal",
       fontVariant: "normal",
       fontSize: 12,
@@ -8707,6 +8724,7 @@ function (_Mesh) {
       opacity: 1,
       width: 1,
       height: 1,
+      lineHeight: 0,
       scale: {
         x: 0.25,
         y: 0.25,
@@ -8714,17 +8732,19 @@ function (_Mesh) {
       }
     });
     var canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
     var material = new MeshBasicMaterial({
       transparent: true,
       needsUpdate: false,
       color: 0xffffff
     });
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Txt).call(this, new PlaneBufferGeometry(css.width / 8, css.height / 8), material));
+    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Txt).call(this, new PlaneBufferGeometry(css.width * css.scale.x, css.height * css.scale.x), material));
 
     _this4.update = function () {
-      var _this4$material$map;
+      if (_this4.material.map) {
+        _this4.material.map.dispose();
+      }
 
-      (_this4$material$map = _this4.material.map) === null || _this4$material$map === void 0 ? void 0 : _this4$material$map.dispose();
       _this4.canvas.width = _this4.css.width;
       _this4.canvas.height = _this4.css.height;
 
@@ -8736,7 +8756,16 @@ function (_Mesh) {
       ctx.font = _this4.css.fontStyle + " " + _this4.css.fontVariant + " " + _this4.css.fontWeight + " " + _this4.css.fontSize + "px " + _this4.css.fontFamily;
       ctx.fillStyle = _this4.css.color; // let width = ctx.measureText( this.text ).width;
 
-      ctx.fillText(_this4.text, _this4.css.width / 2, _this4.css.height / 2 + _this4.css.fontSize / 4);
+      if (_this4.multiLine) {
+        var textArr = _this4.text.split("\n");
+
+        for (var i = 0; i < textArr.length; i++) {
+          ctx.fillText(textArr[i], _this4.css.width / 2, _this4.css.lineHeight / 2 + _this4.css.fontSize / 4 + i * _this4.css.lineHeight);
+        }
+      } else {
+        ctx.fillText(_this4.text, _this4.css.width / 2, _this4.css.height / 2 + _this4.css.fontSize / 4);
+      }
+
       var texture = new CanvasTexture(_this4.canvas);
       texture.generateMipmaps = false;
       texture.minFilter = LinearFilter;
@@ -8751,6 +8780,7 @@ function (_Mesh) {
     _this4.text = text;
     _this4.canvas = canvas;
     _this4.css = css;
+    _this4.multiLine = multiLine;
 
     _this4.update();
 

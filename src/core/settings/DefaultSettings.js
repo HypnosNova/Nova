@@ -16,8 +16,6 @@ export default {
 		logarithmicDepthBuffer: false, // 逻辑深度缓冲
 		preserveDrawingBuffer: false
 	},
-	normalEventList: [ "click", "mousedown", "mouseup", "touchstart",
-		"touchend", "touchmove", "mousemove"
-	], //默认开启的原生事件监听，不建议将所有的事件监听都写在里面，每一个事件监听都会增加一次射线法碰撞检测，如果不必要的事件过多会降低性能
+	normalEventList: [ "click", "mousedown", "mouseup", "touchstart", "touchend" ], //默认开启的原生事件监听，不建议将所有的事件监听都写在里面，每一个事件监听都会增加一次射线法碰撞检测，如果不必要的事件过多会降低性能
 	hammerEventList: "press tap pressup pan swipe", //默认hammer手势事件的监听，同normalEventList一样，用到什么加入什么，不要一大堆东西全塞进去
 };
